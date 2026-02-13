@@ -507,7 +507,9 @@ isPrimary={true}
 <ComparisonRow
 label={`If Started at ${inputs.currentAge}`}
 value={formatCurrency(comparisonData['Total Nominal'])}
-subLabel={`Potential Loss: ${formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}`}
+subLabel={(
+<span className="text-rose-600 font-bold">Potential Loss: {formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</span>
+)}
 />
 </div>
 ) : (
@@ -575,20 +577,24 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </Card>
 </div>
 {isDelayed && (
-<GlassCard className="p-6 md:p-8 border-rose-200/70 bg-gradient-to-br from-rose-50/80 via-white/85 to-amber-50/50">
-<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+<GlassCard className="p-4 md:p-5 border-rose-200/70 bg-gradient-to-br from-rose-50/90 via-rose-50/70 to-white/85">
+<div className="grid gap-4 md:grid-cols-[1.2fr_1fr] items-center">
 <div>
 <div className="text-[11px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
 <div className="text-3xl sm:text-4xl font-black text-rose-600 tracking-tight">
 {formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}
 </div>
-<div className="text-xs text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge} today.</div>
+<div className="text-[11px] text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge} today.</div>
 </div>
-<div className="bg-white/80 rounded-2xl p-4 border border-rose-100/60 shadow-sm">
-<div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Start Now Total</div>
-<div className="text-xl font-black text-slate-900">{formatCurrency(comparisonData['Total Nominal'])}</div>
-<div className="mt-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Delayed Start Total</div>
-<div className="text-xl font-black text-slate-900">{formatCurrency(finalData['Total Nominal'])}</div>
+<div className="flex flex-col sm:flex-row gap-3">
+<div className="flex-1 rounded-xl bg-white/85 p-3 border border-emerald-100/70 shadow-sm">
+<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Now</div>
+<div className="text-lg font-black text-slate-900">{formatCurrency(comparisonData['Total Nominal'])}</div>
+</div>
+<div className="flex-1 rounded-xl bg-white/85 p-3 border border-rose-100/70 shadow-sm">
+<div className="text-[10px] font-black text-rose-600 uppercase tracking-widest">Delayed</div>
+<div className="text-lg font-black text-slate-900">{formatCurrency(finalData['Total Nominal'])}</div>
+</div>
 </div>
 </div>
 </GlassCard>
@@ -617,9 +623,9 @@ Table
 {isDelayed && (
 <button
 onClick={() => setShowImmediateLine(prev => !prev)}
-className={`glimmer-button px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-amber-500 text-white shadow-lg shadow-amber-200/60' : 'bg-white/70 text-slate-500 hover:text-slate-700'}`}
+className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-white/70 text-slate-500 hover:text-slate-700' : 'bg-amber-500 text-white shadow-lg shadow-amber-200/60'}`}
 >
-Start-Now Line
+{showImmediateLine ? 'Remove Start-Now Curve' : 'Add Start-Now Curve'}
 </button>
 )}
 </div>
