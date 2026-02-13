@@ -62,9 +62,10 @@ const Card = ({ children, className = "" }) => (
 </div>
 );
 const CrownLogo = ({ className = "" }) => (
-<svg className={className} viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-<path fill="currentColor" d="M12 46h40l-4 8H16l-4-8zm4-24 8 10 8-18 8 18 8-10 8 20H8l8-20z" />
-<path fill="currentColor" d="M18 22a4 4 0 1 1-8 0 4 4 0 0 1 8 0zm18-6a4 4 0 1 1-8 0 4 4 0 0 1 8 0zm18 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
+<svg className={className} viewBox="0 0 2823 2906" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve" style={{ fillRule: 'evenodd', clipRule: 'evenodd', strokeLinejoin: 'round', strokeMiterlimit: 2 }}>
+<g>
+<path fill="currentColor" d="M2658.782,595.366c90.141,1.653 163.393,76.261 163.393,166.417c0,90.197 -73.318,164.824 -163.501,166.419c-7.079,0 -12.267,-1.189 -19.13,-2.054l-493.229,1690.987c-166.121,387.688 -1273.739,380.771 -1398.357,0l-546.135,-1637.271c-11.623,2.528 -23.483,3.803 -35.377,3.803c-91.309,0 -166.445,-75.136 -166.445,-166.445c0,-91.309 75.136,-166.445 166.445,-166.445c91.309,0 166.445,75.136 166.445,166.445c0,51.095 -23.527,99.444 -63.733,130.974l651.893,1163.658l-193.466,-1599.28c-2.324,0.108 -4.918,0.324 -7.295,0.324c-91.309,0 -166.445,-75.136 -166.445,-166.445c0,-91.309 75.136,-166.445 166.445,-166.445c91.309,0 166.445,75.136 166.445,166.445c0.031,61.621 -34.417,118.339 -89.113,146.72l448.862,1528.595l154.448,-1692.77c-79.602,-12.483 -140.884,-79.494 -140.884,-162.554c0,-91.309 75.136,-166.445 166.445,-166.445c91.309,0 166.445,75.136 166.445,166.445c0.162,74.617 -50.498,140.43 -122.672,159.366l191.628,1737.516l387.364,-1575.07c-64.579,-22.967 -110.729,-83.331 -110.729,-155.691c0,-91.309 75.136,-166.445 166.445,-166.445c91.365,0.005 166.545,75.188 166.545,166.553c0,86.075 -66.726,158.693 -152.494,165.959l-117.917,1613.169l564.455,-1211.43c-44.854,-29.83 -73.225,-80.629 -73.225,-138.56c0,-91.309 75.136,-166.445 166.445,-166.445Zm-1225.319,2196.862c282.2,0 481.07,-85.06 481.07,-190.007c0,-104.947 -198.816,-154.232 -481.07,-154.232c-282.255,0 -511.063,49.285 -511.063,154.232c0,104.947 228.808,190.007 511.063,190.007Z"/>
+</g>
 </svg>
 );
 const Badge = ({ children, color = "indigo" }) => {
@@ -273,6 +274,9 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" error={employeeOverCap ? 'Employee contribution exceeds IRS cap.' : null} />
 <div className="grid grid-cols-2 gap-4 border-t border-indigo-100/50 pt-6 mt-2">
 <div>
+<footer className="mt-10 text-center text-[11px] text-slate-500">
+Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex.
+</footer>
 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Match %</label>
 <input type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-sm font-bold p-2.5 rounded-xl border border-white/60 bg-white/50 text-slate-700" />
 </div>
@@ -591,21 +595,21 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </Card>
 </div>
 {isDelayed && (
-<GlassCard className="p-4 md:p-5 border-rose-200/70 bg-gradient-to-br from-rose-50/90 via-rose-50/70 to-white/85">
-<div className="grid gap-4 md:grid-cols-[1.2fr_1fr] items-center">
+<GlassCard className="p-4 md:p-4 border-rose-200/80 bg-gradient-to-br from-rose-100/90 via-rose-50/80 to-rose-50/60">
+<div className="grid gap-3 md:grid-cols-[1.1fr_1fr] items-center">
 <div>
 <div className="text-[11px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
-<div className="text-3xl sm:text-4xl font-black text-rose-600 tracking-tight">
+<div className="text-3xl sm:text-[2.6rem] font-black text-rose-600 tracking-tight">
 {formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}
 </div>
 <div className="text-[11px] text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge} today.</div>
 </div>
-<div className="flex flex-col sm:flex-row gap-3">
-<div className="flex-1 rounded-xl bg-white/85 p-3 border border-emerald-100/70 shadow-sm">
+<div className="flex flex-col sm:flex-row gap-2">
+<div className="flex-1 rounded-xl bg-emerald-50/70 p-3 border border-emerald-200/60 shadow-sm">
 <div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Now</div>
 <div className="text-lg font-black text-slate-900">{formatCurrency(comparisonData['Total Nominal'])}</div>
 </div>
-<div className="flex-1 rounded-xl bg-white/85 p-3 border border-rose-100/70 shadow-sm">
+<div className="flex-1 rounded-xl bg-rose-50/70 p-3 border border-rose-200/60 shadow-sm">
 <div className="text-[10px] font-black text-rose-600 uppercase tracking-widest">Delayed</div>
 <div className="text-lg font-black text-slate-900">{formatCurrency(finalData['Total Nominal'])}</div>
 </div>
