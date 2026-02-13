@@ -47,7 +47,7 @@ Clock,
 X,
 
 Crown,
-AlertCircle
+Info
 
 } from 'lucide-react';
 
@@ -57,13 +57,13 @@ AlertCircle
 
 const DEFAULT_INPUTS = {
 
-currentAge: 30,
+currentAge: 23,
 
-startAge: 30,
+startAge: 23,
 
-retirementAge: 65,
+retirementAge: 67,
 
-currentSalary: 75000,
+currentSalary: 60000,
 
 salaryGrowth: 3,
 
@@ -569,29 +569,39 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 
 </div>
 
-<div className="mt-4 space-y-2 text-[11px]">
+<div className="mt-4 text-[11px]">
 
-<div className={`flex items-center gap-2 ${employeeOverCap ? 'text-rose-600' : 'text-slate-500'}`}>
+<div className={`flex items-start gap-2 ${employeeOverCap || totalOverCap ? 'text-rose-600' : 'text-slate-500'}`}>
 
-<AlertCircle size={14} className={employeeOverCap ? 'text-rose-500' : 'text-indigo-400'} />
+<Info size={14} className={employeeOverCap || totalOverCap ? 'text-rose-500' : 'text-indigo-400'} />
 
-<span>
+<div className="space-y-2">
+
+<div className={employeeOverCap ? 'text-rose-600' : 'text-slate-500'}>
 
 Employee est: <span className="font-semibold">{formatCurrency(annualEmployee401k)}</span> (cap {formatCurrency(LIMITS.max401kEmployee)}).
 
-</span>
+</div>
+
+<div className={totalOverCap ? 'text-rose-600' : 'text-slate-500'}>
+
+Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k)}</span>.
 
 </div>
 
-<div className={`flex items-center gap-2 ${totalOverCap ? 'text-rose-600' : 'text-slate-500'}`}>
+<div className={`pt-2 border-t ${totalOverCap ? 'border-rose-200/70 text-rose-600' : 'border-slate-200/70 text-slate-500'}`}>
 
-<AlertCircle size={14} className={totalOverCap ? 'text-rose-500' : 'text-indigo-400'} />
+<div className="text-[10px] font-bold uppercase tracking-widest">Total</div>
 
-<span>
+<div className="font-semibold">
 
-Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k)}</span>. Total est: <span className="font-semibold">{formatCurrency(annualTotal401k)}</span> (cap {formatCurrency(LIMITS.max401kTotal)}).
+{formatCurrency(annualEmployee401k)} + {formatCurrency(annualEmployer401k)} = {formatCurrency(annualTotal401k)} (cap {formatCurrency(LIMITS.max401kTotal)}).
 
-</span>
+</div>
+
+</div>
+
+</div>
 
 </div>
 
@@ -1179,6 +1189,44 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 
 </div>
 
+{isDelayed && (
+
+<GlassCard className="p-6 md:p-8 border-rose-200/70 bg-gradient-to-br from-rose-50/80 via-white/85 to-amber-50/50">
+
+<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+
+<div>
+
+<div className="text-[11px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
+
+<div className="text-3xl sm:text-4xl font-black text-rose-600 tracking-tight">
+
+{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}
+
+</div>
+
+<div className="text-xs text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge} today.</div>
+
+</div>
+
+<div className="bg-white/80 rounded-2xl p-4 border border-rose-100/60 shadow-sm">
+
+<div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Start Now Total</div>
+
+<div className="text-xl font-black text-slate-900">{formatCurrency(comparisonData['Total Nominal'])}</div>
+
+<div className="mt-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Delayed Start Total</div>
+
+<div className="text-xl font-black text-slate-900">{formatCurrency(finalData['Total Nominal'])}</div>
+
+</div>
+
+</div>
+
+</GlassCard>
+
+)}
+
   
 
 {/* MAIN CHART CARD */}
@@ -1229,7 +1277,7 @@ Table
 
 onClick={() => setShowImmediateLine(prev => !prev)}
 
-className={`px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-slate-900 text-white' : 'bg-white/70 text-slate-500 hover:text-slate-700'}`}
+className={`glimmer-button px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-amber-500 text-white shadow-lg shadow-amber-200/60' : 'bg-white/70 text-slate-500 hover:text-slate-700'}`}
 
 >
 
@@ -1339,7 +1387,7 @@ separator=""
 
 {isDelayed && showImmediateLine && (
 
-<Line name="Start Now Total" type="monotone" dataKey="Immediate Total Nominal" stroke="#0f172a" strokeDasharray="6 6" strokeWidth={2} dot={false} />
+<Line name="Start Now Total" type="monotone" dataKey="Immediate Total Nominal" stroke="#f59e0b" strokeDasharray="6 6" strokeWidth={2.5} dot={false} />
 
 )}
 
