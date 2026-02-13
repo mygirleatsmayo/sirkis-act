@@ -22,7 +22,6 @@ Building2,
 Coins,
 Clock,
 X,
-Crown,
 Info
 } from 'lucide-react';
 // --- CONSTANTS ---
@@ -61,6 +60,12 @@ const Card = ({ children, className = "" }) => (
 <div className={`bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/70 shadow-[0_18px_35px_-25px_rgba(15,23,42,0.55)] ring-1 ring-slate-100/80 transition-shadow hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.65)] ${className}`}>
 {children}
 </div>
+);
+const CrownLogo = ({ className = "" }) => (
+<svg className={className} viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<path fill="currentColor" d="M12 46h40l-4 8H16l-4-8zm4-24 8 10 8-18 8 18 8-10 8 20H8l8-20z" />
+<path fill="currentColor" d="M18 22a4 4 0 1 1-8 0 4 4 0 0 1 8 0zm18-6a4 4 0 1 1-8 0 4 4 0 0 1 8 0zm18 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
+</svg>
 );
 const Badge = ({ children, color = "indigo" }) => {
 const styles = {
@@ -158,6 +163,9 @@ const ToggleSection = ({ label, enabled, onToggle, children }) => (
 <div
 className={`flex items-center justify-between p-4 cursor-pointer rounded-2xl transition-colors ${enabled ? 'bg-indigo-50/50' : 'hover:bg-white/30'}`}
 onClick={() => onToggle(!enabled)}
+<div className="mt-10 text-center text-[11px] text-slate-500">
+Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex.
+</div>
 >
 <span className={`font-bold text-sm ${enabled ? 'text-indigo-900' : 'text-slate-500'}`}>{label}</span>
 <div className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${enabled ? 'bg-indigo-600' : 'bg-slate-300'}`}>
@@ -201,7 +209,7 @@ return (
 {!isMobile && (
 <div className="mb-8 pt-2">
 <div className="flex items-center gap-2 mb-1 text-indigo-900">
-<Crown size={20} fill="currentColor" className="text-indigo-600" />
+<CrownLogo className="h-5 w-5 text-indigo-600" />
 <span className="font-serif font-black text-xl tracking-tight">Sirkis Act</span>
 </div>
 <p className="text-xs font-medium text-slate-500 ml-7">Financial Planning Tool</p>
@@ -406,6 +414,12 @@ finalData: mainResults[mainResults.length - 1]
 };
 }, [inputs]);
 const isDelayed = inputs.startAge > inputs.currentAge;
+const legendItems = [
+{ label: 'Your Contributions', color: '#6366f1', visible: true },
+{ label: 'Employer Match', color: '#8b5cf6', visible: true },
+{ label: 'Investment Returns', color: '#10b981', visible: true },
+{ label: 'Start Now Total', color: '#f59e0b', visible: isDelayed && showImmediateLine }
+];
 const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }), []);
 const formatCurrency = (val) => currencyFormatter.format(val || 0);
 const INPUT_BOUNDS = {
@@ -466,7 +480,7 @@ return (
 {/* MOBILE HEADER */}
 <div className="lg:hidden flex justify-between items-center p-4 bg-white/80 backdrop-blur-md border-b border-white/50 sticky top-0 z-30 shadow-sm">
 <div className="flex items-center gap-2 font-serif font-black text-xl text-indigo-900">
-<Crown size={24} className="text-indigo-600" fill="currentColor"/>
+<CrownLogo className="h-6 w-6 text-indigo-600" />
 Sirkis Act
 </div>
 <button
@@ -673,7 +687,16 @@ labelStyle={{ color: '#0f172a', marginBottom: '8px', fontWeight: '900', fontFami
 itemStyle={{ padding: 0 }}
 separator=""
 />
-<Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ paddingBottom: '20px', fontWeight: 600, color: '#64748b' }}/>
+<Legend verticalAlign="top" height={36} content={() => (
+<div className="flex flex-wrap gap-4 text-[12px] font-semibold text-slate-500">
+{legendItems.filter((item) => item.visible).map((item) => (
+<div key={item.label} className="flex items-center gap-2">
+<span className="inline-flex h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+<span>{item.label}</span>
+</div>
+))}
+</div>
+)} wrapperStyle={{ paddingBottom: '20px' }} />
 <Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke="#6366f1" strokeWidth={3} fill="url(#colorUser)" stackId="1" />
 <Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke="#8b5cf6" strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
 <Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke="#10b981" strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
