@@ -163,9 +163,6 @@ const ToggleSection = ({ label, enabled, onToggle, children }) => (
 <div
 className={`flex items-center justify-between p-4 cursor-pointer rounded-2xl transition-colors ${enabled ? 'bg-indigo-50/50' : 'hover:bg-white/30'}`}
 onClick={() => onToggle(!enabled)}
-<div className="mt-10 text-center text-[11px] text-slate-500">
-Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex.
-</div>
 >
 <span className={`font-bold text-sm ${enabled ? 'text-indigo-900' : 'text-slate-500'}`}>{label}</span>
 <div className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${enabled ? 'bg-indigo-600' : 'bg-slate-300'}`}>
@@ -175,6 +172,8 @@ Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by
 <div className={`overflow-hidden transition-all duration-500 ease-in-out ${enabled ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
 <div className="p-5 pt-2">
 {children}
+<div className="mt-10 text-center text-[11px] text-slate-500">
+Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex.
 </div>
 </div>
 </div>
@@ -299,6 +298,9 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 <div className="font-semibold">
 {formatCurrency(annualEmployee401k)} + {formatCurrency(annualEmployer401k)} = {formatCurrency(annualTotal401k)} (cap {formatCurrency(LIMITS.max401kTotal)}).
 </div>
+</div>
+<div className="mt-10 text-center text-[11px] text-slate-500">
+Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex.
 </div>
 </div>
 </div>
