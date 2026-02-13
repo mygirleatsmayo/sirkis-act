@@ -172,8 +172,6 @@ onClick={() => onToggle(!enabled)}
 <div className={`overflow-hidden transition-all duration-500 ease-in-out ${enabled ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
 <div className="p-5 pt-2">
 {children}
-<div className="mt-10 text-center text-[11px] text-slate-500">
-Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex.
 </div>
 </div>
 </div>
