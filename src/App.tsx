@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, type ComponentType, type ReactNode } from 'react';
 import {
 XAxis,
 YAxis,
@@ -52,24 +52,28 @@ hsaIndividual: 4150,
 hsaFamily: 8300,
 };
 // --- HELPER COMPONENTS ---
-const GlassCard = ({ children, className = "" }) => (
+type CardProps = { children: ReactNode; className?: string };
+const GlassCard = ({ children, className = "" }: CardProps) => (
 <div className={`bg-gradient-to-br from-white/95 via-white/75 to-slate-50/80 backdrop-blur-2xl border border-white/80 shadow-[0_30px_70px_-45px_rgba(15,23,42,0.6)] rounded-3xl ${className}`}>
 {children}
 </div>
 );
-const Card = ({ children, className = "" }) => (
+const Card = ({ children, className = "" }: CardProps) => (
 <div className={`bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/70 shadow-[0_18px_35px_-25px_rgba(15,23,42,0.55)] ring-1 ring-slate-100/80 transition-shadow hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.65)] ${className}`}>
 {children}
 </div>
 );
-const CrownLogo = ({ className = "" }) => (
+type LogoProps = { className?: string };
+const CrownLogo = ({ className = "" }: LogoProps) => (
 <svg className={className} viewBox="0 0 2823 2906" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve" style={{ fillRule: 'evenodd', clipRule: 'evenodd', strokeLinejoin: 'round', strokeMiterlimit: 2 }}>
 <g>
 <path fill="currentColor" d="M2658.782,595.366c90.141,1.653 163.393,76.261 163.393,166.417c0,90.197 -73.318,164.824 -163.501,166.419c-7.079,0 -12.267,-1.189 -19.13,-2.054l-493.229,1690.987c-166.121,387.688 -1273.739,380.771 -1398.357,0l-546.135,-1637.271c-11.623,2.528 -23.483,3.803 -35.377,3.803c-91.309,0 -166.445,-75.136 -166.445,-166.445c0,-91.309 75.136,-166.445 166.445,-166.445c91.309,0 166.445,75.136 166.445,166.445c0,51.095 -23.527,99.444 -63.733,130.974l651.893,1163.658l-193.466,-1599.28c-2.324,0.108 -4.918,0.324 -7.295,0.324c-91.309,0 -166.445,-75.136 -166.445,-166.445c0,-91.309 75.136,-166.445 166.445,-166.445c91.309,0 166.445,75.136 166.445,166.445c0.031,61.621 -34.417,118.339 -89.113,146.72l448.862,1528.595l154.448,-1692.77c-79.602,-12.483 -140.884,-79.494 -140.884,-162.554c0,-91.309 75.136,-166.445 166.445,-166.445c91.309,0 166.445,75.136 166.445,166.445c0.162,74.617 -50.498,140.43 -122.672,159.366l191.628,1737.516l387.364,-1575.07c-64.579,-22.967 -110.729,-83.331 -110.729,-155.691c0,-91.309 75.136,-166.445 166.445,-166.445c91.365,0.005 166.545,75.188 166.545,166.553c0,86.075 -66.726,158.693 -152.494,165.959l-117.917,1613.169l564.455,-1211.43c-44.854,-29.83 -73.225,-80.629 -73.225,-138.56c0,-91.309 75.136,-166.445 166.445,-166.445Zm-1225.319,2196.862c282.2,0 481.07,-85.06 481.07,-190.007c0,-104.947 -198.816,-154.232 -481.07,-154.232c-282.255,0 -511.063,49.285 -511.063,154.232c0,104.947 228.808,190.007 511.063,190.007Z"/>
 </g>
 </svg>
 );
-const Badge = ({ children, color = "indigo" }) => {
+type BadgeColor = 'indigo' | 'emerald' | 'rose' | 'amber' | 'slate';
+type BadgeProps = { children: ReactNode; color?: BadgeColor };
+const Badge = ({ children, color = "indigo" }: BadgeProps) => {
 const styles = {
 indigo: "bg-purple-600/10 text-purple-900 border-purple-200/30",
 emerald: "bg-amber-500/10 text-amber-800 border-amber-200/30",
@@ -83,7 +87,8 @@ return (
 </span>
 );
 };
-const ComparisonRow = ({ label, value, subLabel, isPrimary = false }) => (
+type ComparisonRowProps = { label: string; value: string; subLabel?: ReactNode; isPrimary?: boolean };
+const ComparisonRow = ({ label, value, subLabel, isPrimary = false }: ComparisonRowProps) => (
 <div className={`flex justify-between items-baseline ${isPrimary ? 'text-slate-900' : 'text-slate-500'}`}>
 <span className="text-xs font-bold uppercase tracking-wide opacity-80">{label}</span>
 <div className="text-right">
@@ -94,7 +99,20 @@ const ComparisonRow = ({ label, value, subLabel, isPrimary = false }) => (
 </div>
 </div>
 );
-const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, helper }) => {
+type IconType = ComponentType<{ size?: number; className?: string }>;
+type InputFieldProps = {
+label: string;
+value: number;
+onChange: (value: number) => void;
+min: number;
+max: number;
+step?: number;
+icon?: IconType;
+unit?: string;
+error?: string | null;
+helper?: string;
+};
+const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, helper }: InputFieldProps) => {
 const [draftValue, setDraftValue] = useState(Number.isFinite(value) ? String(value) : "");
 useEffect(() => {
 setDraftValue(Number.isFinite(value) ? String(value) : "");
@@ -160,7 +178,8 @@ ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
 </div>
 );
 };
-const ToggleSection = ({ label, enabled, onToggle, children }) => (
+type ToggleSectionProps = { label: string; enabled: boolean; onToggle: (value: boolean) => void; children: ReactNode };
+const ToggleSection = ({ label, enabled, onToggle, children }: ToggleSectionProps) => (
 <div className={`p-1 rounded-3xl transition-all duration-300 ${enabled ? 'bg-gradient-to-br from-white/60 to-white/30 shadow-sm border border-white/50' : 'bg-white/20 border border-transparent opacity-80'}`}>
 <div
 className={`flex items-center justify-between p-4 cursor-pointer rounded-2xl transition-colors ${enabled ? 'bg-purple-50/60' : 'hover:bg-white/30'}`}
@@ -192,7 +211,14 @@ next = Math.min(max, next);
 return next;
 };
 // --- SETTINGS PANEL ---
-const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = false }) => {
+type Inputs = typeof DEFAULT_INPUTS;
+type SettingsPanelProps = {
+inputs: Inputs;
+handleInputChange: (key: keyof Inputs | 'RESET', value: number | string | boolean) => void;
+formatCurrency: (value: number) => string;
+isMobile?: boolean;
+};
+const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = false }: SettingsPanelProps) => {
 const annualEmployee401k = inputs.enable401k ? inputs.currentSalary * (inputs.contribution401k / 100) : 0;
 const matchBase = Math.min(inputs.contribution401k, inputs.matchLimit) / 100;
 const annualEmployer401k = inputs.enable401k ? inputs.currentSalary * matchBase * (inputs.matchPercent / 100) : 0;
