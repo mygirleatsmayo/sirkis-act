@@ -41,6 +41,7 @@ enableHSA: false,
 contribution401k: 10,
 matchPercent: 50,
 matchLimit: 6,
+rothMatch401k: true,
 rothContribution: 7000,
 hsaContribution: 4150,
 contributionTiming: 'start',
@@ -48,19 +49,19 @@ contributionTiming: 'start',
 const LIMITS = {
 max401kEmployee: 23000,
 max401kTotal: 69000,
-rothAnnual: 7000,
+rothAnnual: 7500,
 hsaIndividual: 4150,
 hsaFamily: 8300,
 };
 // --- HELPER COMPONENTS ---
 type CardProps = { children: ReactNode; className?: string };
 const GlassCard = ({ children, className = "" }: CardProps) => (
-<div className={`bg-gradient-to-br from-white/95 via-white/75 to-slate-50/80 backdrop-blur-2xl border border-white/80 shadow-[0_30px_70px_-45px_rgba(15,23,42,0.6)] rounded-3xl ${className}`}>
+<div className={`bg-gradient-to-br from-white/95 via-white/80 to-slate-50/80 backdrop-blur-2xl border border-white/80 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.55)] rounded-[28px] ${className}`}>
 {children}
 </div>
 );
 const Card = ({ children, className = "" }: CardProps) => (
-<div className={`bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/70 shadow-[0_18px_35px_-25px_rgba(15,23,42,0.55)] ring-1 ring-slate-100/80 transition-shadow hover:shadow-[0_30px_70px_-40px_rgba(15,23,42,0.65)] ${className}`}>
+<div className={`bg-white/90 backdrop-blur-md rounded-[22px] border border-slate-200/70 shadow-[0_16px_32px_-24px_rgba(15,23,42,0.55)] ring-1 ring-slate-100/80 transition-shadow hover:shadow-[0_24px_50px_-36px_rgba(15,23,42,0.6)] ${className}`}>
 {children}
 </div>
 );
@@ -113,6 +114,7 @@ unit?: string;
 error?: string | null;
 helper?: string;
 tooltip?: string;
+disabled?: boolean;
 };
 type TooltipIconProps = {
 content: string;
@@ -139,7 +141,7 @@ return (
 </div>
 );
 };
-const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, helper, tooltip }: InputFieldProps) => {
+const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, helper, tooltip, disabled = false }: InputFieldProps) => {
 const [draftValue, setDraftValue] = useState(Number.isFinite(value) ? String(value) : "");
 useEffect(() => {
 setDraftValue(Number.isFinite(value) ? String(value) : "");
@@ -166,11 +168,13 @@ max={max}
 step={step}
 value={isNaN(value) ? min : value}
 onChange={(e) => {
+if (disabled) return;
 const next = parseFloat(e.target.value);
 setDraftValue(String(next));
 onChange(next);
 }}
-className="flex-grow h-1.5 bg-slate-200/60 rounded-lg appearance-none cursor-pointer accent-purple-700 hover:accent-purple-600 transition-all"
+disabled={disabled}
+className={`flex-grow h-1.5 bg-slate-200/60 rounded-lg appearance-none transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer accent-purple-700 hover:accent-purple-600'}`}
 />
 <div className="relative flex items-center group-focus-within:scale-105 transition-transform flex-shrink-0 shadow-sm rounded-xl">
 {unit === "$" && (
@@ -181,13 +185,17 @@ type="text"
 inputMode="decimal"
 value={draftValue}
 placeholder="0"
-onChange={(e) => setDraftValue(e.target.value)}
+onChange={(e) => {
+if (disabled) return;
+setDraftValue(e.target.value);
+}}
 onBlur={commitDraft}
 onKeyDown={(e) => {
 if (e.key === 'Enter') {
 e.currentTarget.blur();
 }
 }}
+disabled={disabled}
 className={`text-right py-2 text-sm font-bold border bg-white/50 focus:bg-white focus:ring-2 outline-none transition-all rounded-xl text-slate-800
 ${hasError ? 'border-rose-300 focus:ring-rose-300/40 focus:border-rose-500' : 'border-white/60 focus:ring-purple-500/20 focus:border-purple-600'}
 ${unit === "$" ? "w-36 pl-6 pr-3" : "w-24 pr-8 pl-3"}
@@ -197,12 +205,12 @@ ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
 <span className="absolute right-3 text-slate-500 text-xs font-bold pointer-events-none">%</span>
 )}
 </div>
+</div>
 {(helper || error) && (
 <div className={`mt-2 text-[11px] font-medium ${hasError ? 'text-rose-600' : 'text-slate-500'}`}>
 {error || helper}
 </div>
 )}
-</div>
 </div>
 );
 };
@@ -218,7 +226,7 @@ onClick={() => onToggle(!enabled)}
 <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${enabled ? 'translate-x-5' : ''}`} />
 </div>
 </div>
-<div className={`overflow-hidden transition-all duration-500 ease-in-out ${enabled ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+<div className={`transition-all duration-500 ease-in-out ${enabled ? 'max-h-[500px] opacity-100 overflow-visible' : 'max-h-0 opacity-0 overflow-hidden'}`}>
 <div className="p-5 pt-2">
 {children}
 </div>
@@ -253,7 +261,9 @@ const annualEmployer401k = inputs.enable401k ? inputs.currentSalary * matchBase 
 const annualTotal401k = annualEmployee401k + annualEmployer401k;
 const employeeOverCap = annualEmployee401k > LIMITS.max401kEmployee;
 const totalOverCap = annualTotal401k > LIMITS.max401kTotal;
-const rothOverCap = inputs.enableRoth && inputs.rothContribution > LIMITS.rothAnnual;
+const rothMatchedAmount = Math.min(annualEmployee401k, LIMITS.rothAnnual);
+const rothEffectiveContribution = inputs.rothMatch401k ? rothMatchedAmount : inputs.rothContribution;
+const rothOverCap = inputs.enableRoth && rothEffectiveContribution > LIMITS.rothAnnual;
 const hsaOverCap = inputs.enableHSA && inputs.hsaContribution > LIMITS.hsaFamily;
 return (
 <div className={`${isMobile ? 'pb-32' : 'h-full custom-scrollbar overflow-y-auto pr-4 pl-1'}`}>
@@ -274,8 +284,15 @@ return (
 <Clock size={14} /> Timeline
 </h3>
 <InputField label="Current Age" value={inputs.currentAge} onChange={v => handleInputChange('currentAge', v)} min={18} max={80} icon={User} />
-<div className={`relative overflow-hidden rounded-2xl mb-6 transition-all duration-300 ${inputs.startAge > inputs.currentAge ? 'bg-amber-50/60 ring-1 ring-amber-200' : 'bg-transparent'}`}>
-<div className="p-4 pb-0">
+<div className={`relative rounded-2xl mb-6 transition-all duration-300 ${inputs.startAge > inputs.currentAge ? 'bg-amber-50/50 ring-1 ring-amber-200/70' : 'bg-transparent'}`}>
+<button
+type="button"
+onClick={() => handleInputChange('startAge', inputs.currentAge)}
+className="absolute right-4 top-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-purple-700 transition-colors"
+>
+Reset to current age
+</button>
+<div className="p-4 pb-2">
 <InputField
 label="Start Investing At"
 value={inputs.startAge}
@@ -286,8 +303,8 @@ icon={Clock}
 />
 </div>
 {inputs.startAge > inputs.currentAge && (
-<div className="px-4 pb-4 -mt-4">
-<div className="flex items-center gap-2 text-xs text-amber-800 font-medium bg-amber-100/50 p-2 rounded-lg">
+<div className="px-4 pb-4 -mt-3">
+<div className="flex items-center gap-2 text-[11px] text-amber-800 font-semibold bg-amber-100/60 p-2.5 rounded-lg">
 <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
 {inputs.startAge - inputs.currentAge} year delay active
 </div>
@@ -383,22 +400,32 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 <div className={`pt-2 border-t ${totalOverCap ? 'border-rose-200/70 text-rose-600' : 'border-slate-200/70 text-slate-500'}`}>
 <div className="text-[10px] font-bold uppercase tracking-widest">Total</div>
 <div className="font-semibold">
-{formatCurrency(annualEmployee401k)} + {formatCurrency(annualEmployer401k)} = {formatCurrency(annualTotal401k)} (cap {formatCurrency(LIMITS.max401kTotal)}).
+{formatCurrency(annualTotal401k)} (cap {formatCurrency(LIMITS.max401kTotal)}).
 </div>
 </div>
 </div>
 </div>
-{employeeOverCap && (
-<div className="text-rose-600">Employee contribution exceeds IRS cap. Lower the contribution %.</div>
-)}
-{totalOverCap && (
-<div className="text-rose-600">Total contributions exceed IRS cap. Adjust contribution % or match inputs.</div>
+{(employeeOverCap || totalOverCap) && (
+<div className="text-rose-600">Over IRS caps. Lower contribution % or match inputs.</div>
 )}
 </div>
 </ToggleSection>
 <ToggleSection label="Roth IRA" enabled={inputs.enableRoth} onToggle={(v) => handleInputChange('enableRoth', v)}>
-<InputField label="Annual Amount" value={inputs.rothContribution} onChange={v => handleInputChange('rothContribution', v)} min={0} max={LIMITS.rothAnnual} step={100} unit="$" error={rothOverCap ? 'Roth IRA contribution exceeds IRS cap.' : null} />
-<div className={`mt-2 text-[11px] ${rothOverCap ? 'text-rose-600' : 'text-slate-500'}`}>IRS cap shown: {formatCurrency(LIMITS.rothAnnual)}.</div>
+<div className="flex items-center justify-between mb-3">
+<div className="flex items-center gap-2">
+<span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Match 401(k) / 403(b)</span>
+<TooltipIcon placement="top" content="Matches your 401(k) or 403(b) employee contribution up to the Roth IRA cap." />
+</div>
+<button
+type="button"
+onClick={() => handleInputChange('rothMatch401k', !inputs.rothMatch401k)}
+className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${inputs.rothMatch401k ? 'bg-purple-700' : 'bg-slate-300'}`}
+>
+<div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${inputs.rothMatch401k ? 'translate-x-5' : ''}`} />
+</button>
+</div>
+<InputField label="Annual Amount" value={rothEffectiveContribution} onChange={v => handleInputChange('rothContribution', v)} min={0} max={LIMITS.rothAnnual} step={100} unit="$" error={rothOverCap ? 'Roth IRA contribution exceeds IRS cap.' : null} disabled={inputs.rothMatch401k} />
+<div className={`mt-2 text-[11px] ${rothOverCap ? 'text-rose-600' : 'text-slate-500'}`}>IRS cap: {formatCurrency(LIMITS.rothAnnual)}.</div>
 </ToggleSection>
 <ToggleSection label="HSA / Other" enabled={inputs.enableHSA} onToggle={(v) => handleInputChange('enableHSA', v)}>
 <InputField label="Annual Amount" value={inputs.hsaContribution} onChange={v => handleInputChange('hsaContribution', v)} min={0} max={LIMITS.hsaFamily} step={100} unit="$" error={hsaOverCap ? 'HSA contribution exceeds family cap.' : null} />
@@ -422,6 +449,11 @@ const [inputs, setInputs] = useState(DEFAULT_INPUTS);
 const [activeTab, setActiveTab] = useState('chart');
 const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 const [showImmediateLine, setShowImmediateLine] = useState(true);
+useEffect(() => {
+if (inputs.startAge > inputs.currentAge) {
+setShowImmediateLine(false);
+}
+}, [inputs.startAge, inputs.currentAge]);
 // --- CALCULATIONS ---
 const { results, chartData, comparisonData, finalData } = useMemo(() => {
 // Helper to run a projection
@@ -452,7 +484,11 @@ const matchBase = Math.min(inputs.contribution401k, inputs.matchLimit) / 100;
 employerMatch = currentSalary * matchBase * (inputs.matchPercent / 100);
 }
 }
-const myRothCont = (isContributing && inputs.enableRoth) ? inputs.rothContribution : 0;
+const rothMatchBase = inputs.enable401k ? currentSalary * (inputs.contribution401k / 100) : 0;
+const rothMatchedAmount = Math.min(rothMatchBase, LIMITS.rothAnnual);
+const myRothCont = (isContributing && inputs.enableRoth)
+? (inputs.rothMatch401k ? rothMatchedAmount : inputs.rothContribution)
+: 0;
 const myHSACont = (isContributing && inputs.enableHSA) ? inputs.hsaContribution : 0;
 const totalNewUserCont = my401kCont + myRothCont + myHSACont;
 const totalNewEmployerCont = employerMatch;
@@ -545,7 +581,7 @@ type NumericInputKey =
 | 'matchLimit'
 | 'rothContribution'
 | 'hsaContribution';
-type BooleanInputKey = 'enable401k' | 'enableRoth' | 'enableHSA';
+type BooleanInputKey = 'enable401k' | 'enableRoth' | 'enableHSA' | 'rothMatch401k';
 type InputBounds = Record<NumericInputKey, { min: number; max: number }>;
 const INPUT_BOUNDS: InputBounds = {
 currentAge: { min: 18, max: 80 },
@@ -626,21 +662,21 @@ className="p-2 bg-purple-50 text-purple-700 rounded-lg"
 </div>
 {/* SCROLLABLE DASHBOARD */}
 <div className="flex-1 overflow-y-auto custom-scrollbar">
-<div className="max-w-[1200px] mx-auto p-4 lg:p-12 space-y-10">
+<div className="max-w-[1180px] mx-auto px-4 py-6 lg:px-10 lg:py-10 space-y-6">
 {/* BRANDING HERO SECTION */}
-<div className="text-center lg:text-left space-y-4 py-4 animate-in slide-in-from-bottom duration-700 fade-in">
-<h1 className="text-4xl sm:text-5xl lg:text-7xl font-serif font-black text-slate-900 tracking-tight leading-[0.9]">
+<div className="text-center lg:text-left space-y-3 pt-2 pb-4 animate-in slide-in-from-bottom duration-700 fade-in">
+<h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black text-slate-900 tracking-tight leading-[0.92]">
 Dr. Sirkis's <br className="hidden lg:block"/>
 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-amber-500">High-Wire Act</span>
 </h1>
-<p className="text-lg sm:text-xl text-slate-500 font-medium max-w-2xl lg:ml-1">
+<p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl lg:ml-1">
 Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net</span> with tax-advantaged compounding.
 </p>
 </div>
 {/* TOP METRICS GRID (COMPARISON AWARE) */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 {/* TARGET CARD */}
-<Card className="p-6 flex flex-col justify-center">
+<Card className="p-5 flex flex-col justify-center">
 <div className="flex items-center justify-center gap-2 mb-4">
 <Badge color="indigo">Target</Badge>
 </div>
@@ -670,7 +706,7 @@ subLabel={(
 )}
 </Card>
 {/* GROWTH CARD */}
-<Card className="p-6 flex flex-col justify-center">
+<Card className="p-5 flex flex-col justify-center">
 <div className="flex items-center justify-center gap-2 mb-4">
 <Badge color="emerald">Growth</Badge>
 </div>
@@ -697,7 +733,7 @@ value={formatCurrency(comparisonData['Investment Returns'])}
 )}
 </Card>
 {/* REAL VALUE CARD */}
-<Card className="p-6 flex flex-col justify-center bg-white/80">
+<Card className="p-5 flex flex-col justify-center bg-white/80">
 <div className="flex items-center justify-center gap-2 mb-4">
 <Badge color="rose">Real Value</Badge>
 </div>
@@ -725,11 +761,11 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </Card>
 </div>
 {isDelayed && (
-<GlassCard className="p-4 md:p-4 border-rose-200/80 bg-gradient-to-br from-rose-100/90 via-rose-50/80 to-rose-50/60">
+<GlassCard className="p-4 border-rose-200/80 bg-gradient-to-br from-rose-100/90 via-rose-50/80 to-rose-50/60">
 <div className="grid gap-3 md:grid-cols-[1.1fr_1fr] items-center">
 <div>
 <div className="text-[11px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
-<div className="text-3xl sm:text-[2.6rem] font-black text-rose-600 tracking-tight">
+<div className="text-3xl sm:text-[2.4rem] font-black text-rose-600 tracking-tight">
 {formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}
 </div>
 <div className="text-[11px] text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge} today.</div>
@@ -748,22 +784,22 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </GlassCard>
 )}
 {/* MAIN CHART CARD */}
-<GlassCard className="p-6 lg:p-10 !rounded-[2rem]">
-<div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+<GlassCard className="p-5 lg:p-8 !rounded-[26px]">
+<div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-7 gap-4">
 <div>
-<h2 className="font-serif font-black text-3xl text-slate-900 mb-2">The Trajectory</h2>
+<h2 className="font-serif font-black text-[1.9rem] text-slate-900">The Trajectory</h2>
 </div>
 <div className="flex flex-wrap items-center gap-3">
 <div className="bg-slate-100/50 p-1.5 rounded-xl flex text-sm font-bold shadow-inner">
 <button
 onClick={() => setActiveTab('chart')}
-className={`px-6 py-2.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
+className={`px-5 py-2 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
 >
 Chart
 </button>
 <button
 onClick={() => setActiveTab('table')}
-className={`px-6 py-2.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
+className={`px-5 py-2 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
 >
 Table
 </button>
@@ -771,17 +807,17 @@ Table
 {isDelayed && (
 <button
 onClick={() => setShowImmediateLine(prev => !prev)}
-className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-white/70 text-slate-500 hover:text-slate-700' : 'bg-amber-500 text-white shadow-lg shadow-amber-200/60'}`}
+className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-white/70 text-slate-500 hover:text-slate-700' : 'bg-amber-500 text-white shadow-lg shadow-amber-200/50'}`}
 >
 {showImmediateLine ? 'Remove Start-Now Curve' : 'Add Start-Now Curve'}
 </button>
 )}
 </div>
 </div>
-<div className="mt-3 text-[11px] text-slate-500">
+<div className="mt-2 text-[11px] text-slate-500">
 Assumes contributions through the year selected, no contribution at retirement age, and returns compounded annually.
 </div>
-<div className="h-[400px] w-full">
+<div className="h-[360px] w-full">
 {activeTab === 'chart' ? (
 <ResponsiveContainer width="100%" height="100%">
 <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
@@ -849,16 +885,20 @@ separator=""
 <div className="h-full overflow-auto custom-scrollbar border border-slate-100 rounded-xl bg-white/50">
 <table className="w-full text-left text-sm">
 <thead className="bg-slate-50/80 sticky top-0 font-bold text-slate-600 backdrop-blur z-10">
-<tr>
-<th className="p-4">Age</th>
-<th className="p-4">Employee</th>
-<th className="p-4">Employer</th>
-<th className="p-4">Total Contrib</th>
-<th className="p-4 text-amber-700">Growth</th>
-<th className="p-4 text-amber-700">Returns</th>
-<th className="p-4 text-right">Total</th>
-<th className="p-4 text-right">Real (Today)</th>
-<th className="p-4 text-right">Real (Retire)</th>
+<tr className="text-[12px] text-center">
+<th className="p-3 align-middle text-center" rowSpan={2}>Age</th>
+<th className="p-3 text-center" colSpan={3}>Contributions</th>
+<th className="p-3 text-center text-amber-600" colSpan={2}>Growth</th>
+<th className="p-3 text-center" colSpan={2}>Totals</th>
+</tr>
+<tr className="text-[11px] uppercase tracking-wider text-slate-400 text-center">
+<th className="p-3 text-center">Employee</th>
+<th className="p-3 text-center">Employer</th>
+<th className="p-3 text-center">Total</th>
+<th className="p-3 text-center text-amber-600">Year</th>
+<th className="p-3 text-center text-amber-600">Returns</th>
+<th className="p-3 text-center">Nominal</th>
+<th className="p-3 text-center">Real (Today)</th>
 </tr>
 </thead>
 <tbody className="divide-y divide-slate-100/50">
@@ -867,18 +907,17 @@ const isStartYear = row.age === inputs.startAge && isDelayed;
 const isWaiting = row.age < inputs.startAge;
 return (
 <tr key={idx} className={`transition-colors ${isStartYear ? 'bg-purple-50/80' : 'hover:bg-white/60'} ${isWaiting ? 'opacity-50 grayscale' : ''}`}>
-<td className="p-4 font-bold text-slate-500 flex items-center gap-2">
+<td className="p-4 font-bold text-slate-500 text-center">
 {row.age}
 {isStartYear && <Badge color="indigo">Start</Badge>}
 </td>
-<td className="p-4 font-medium">{formatCurrency(row['Employee Contribution (Year)'])}</td>
-<td className="p-4 font-medium">{formatCurrency(row['Employer Contribution (Year)'])}</td>
-<td className="p-4 font-medium">{formatCurrency(row['Total Contribution (Year)'])}</td>
-<td className="p-4 text-amber-700 font-bold">{formatCurrency(row['Year Growth'])}</td>
-<td className="p-4 text-amber-700 font-bold">{formatCurrency(row['Investment Returns'])}</td>
-<td className="p-4 text-right font-black text-slate-800">{formatCurrency(row['Total Nominal'])}</td>
-<td className="p-4 text-right font-semibold text-slate-600">{formatCurrency(row['Total Real (Today\'s $)'])}</td>
-<td className="p-4 text-right font-semibold text-slate-600">{formatCurrency(row['Total Real (Retirement $)'])}</td>
+<td className="p-4 font-medium text-center">{formatCurrency(row['Employee Contribution (Year)'])}</td>
+<td className="p-4 font-medium text-center">{formatCurrency(row['Employer Contribution (Year)'])}</td>
+<td className="p-4 font-medium text-center">{formatCurrency(row['Total Contribution (Year)'])}</td>
+<td className="p-4 text-amber-600 font-bold text-center">{formatCurrency(row['Year Growth'])}</td>
+<td className="p-4 text-amber-600 font-bold text-center">{formatCurrency(row['Investment Returns'])}</td>
+<td className="p-4 font-black text-slate-800 text-center">{formatCurrency(row['Total Nominal'])}</td>
+<td className="p-4 font-semibold text-slate-600 text-center">{formatCurrency(row['Total Real (Today\'s $)'])}</td>
 </tr>
 );
 })}
@@ -889,49 +928,49 @@ return (
 </div>
 </GlassCard>
 {/* QUICK STATS FOOTER */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6">
+<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 {[
 { label: "Self Funded", value: finalData['Your Contributions'], color: "text-purple-700", bg: "bg-purple-50", icon: User },
 { label: "Employer Funded", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
 { label: "Market Funded", value: finalData['Investment Returns'], color: "text-amber-700", bg: "bg-amber-50", icon: Coins },
 ].map((stat, i) => (
-<GlassCard key={i} className="p-6 flex flex-row items-center gap-6 group hover:scale-[1.02] transition-transform duration-300">
-<div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+<GlassCard key={i} className="p-5 flex flex-row items-center gap-5 group hover:scale-[1.02] transition-transform duration-300">
+<div className={`p-3.5 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
 <stat.icon size={24} />
 </div>
 <div>
-<div className={`text-xl font-black ${stat.color}`}>{formatCurrency(stat.value)}</div>
-<div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+<div className={`text-[1.05rem] font-black ${stat.color}`}>{formatCurrency(stat.value)}</div>
+<div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
 {stat.label} • {finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%
 </div>
 </div>
 </GlassCard>
 ))}
 </div>
-<GlassCard className="p-6 lg:p-8">
-<div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-6">
+<GlassCard className="p-5 lg:p-7">
+<div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-5">
 <div>
-<h3 className="font-serif font-black text-2xl text-slate-900">Withdrawals</h3>
+<h3 className="font-serif font-black text-[1.7rem] text-slate-900">Withdrawals</h3>
 <p className="text-[11px] text-slate-500 mt-1">Growth-aware estimates from retirement through life expectancy.</p>
 </div>
 <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
 {withdrawalYears} years · age {startWithdrawAge} to {inputs.lifeExpectancy}
 </div>
 </div>
-<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 <div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
 <div className="text-[10px] font-black uppercase tracking-widest text-purple-600">Fixed Purchasing Power</div>
-<div className="text-2xl font-black text-slate-900 mt-2">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
+<div className="text-[1.6rem] font-black text-slate-900 mt-2">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
 <div className="text-[11px] text-slate-500 mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} today.</div>
 </div>
 <div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
 <div className="text-[10px] font-black uppercase tracking-widest text-amber-600">Fixed Monthly</div>
-<div className="text-2xl font-black text-slate-900 mt-2">{formatCurrency(monthlyNominalWithdrawal)}</div>
+<div className="text-[1.6rem] font-black text-slate-900 mt-2">{formatCurrency(monthlyNominalWithdrawal)}</div>
 <div className="text-[11px] text-slate-500 mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))}.</div>
 </div>
 <div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
 <div className="text-[10px] font-black uppercase tracking-widest text-rose-500">Fixed Annual</div>
-<div className="text-2xl font-black text-slate-900 mt-2">{formatCurrency(annualNominalWithdrawal)}</div>
+<div className="text-[1.6rem] font-black text-slate-900 mt-2">{formatCurrency(annualNominalWithdrawal)}</div>
 <div className="text-[11px] text-slate-500 mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))}.</div>
 </div>
 </div>
@@ -939,7 +978,7 @@ return (
 Assumes constant returns during retirement and no taxes; for planning only.
 </div>
 </GlassCard>
-<footer className="mt-6 text-center text-[11px] text-slate-500">
+<footer className="mt-4 text-center text-[11px] text-slate-500">
 Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex (but IS open to sponsorship inquiries).
 </footer>
 </div>
