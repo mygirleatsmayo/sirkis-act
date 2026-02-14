@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, type ComponentType, type ReactNode } from 'react';
+import { useState, useMemo, useEffect, useRef, type ComponentType, type ReactNode } from 'react';
 import {
 XAxis,
 YAxis,
@@ -22,7 +22,7 @@ Building2,
 Coins,
 Clock,
 ChevronDown,
-X,
+ChevronUp,
 Info
 } from 'lucide-react';
 // --- CONSTANTS ---
@@ -123,18 +123,45 @@ align?: 'left' | 'center' | 'right';
 placement?: 'top' | 'bottom';
 };
 const TooltipIcon = ({ content, className = "", align = 'center', placement = 'top' }: TooltipIconProps) => {
+const [isTouch, setIsTouch] = useState(false);
+const [isOpen, setIsOpen] = useState(false);
+useEffect(() => {
+if (typeof window === 'undefined') return;
+const media = window.matchMedia('(hover: none) and (pointer: coarse)');
+const updateTouch = () => setIsTouch(media.matches);
+updateTouch();
+media.addEventListener('change', updateTouch);
+return () => media.removeEventListener('change', updateTouch);
+}, []);
 const alignClass = align === 'left'
 ? 'left-0 translate-x-0'
 : align === 'right'
 ? 'right-0 translate-x-0'
 : 'left-1/2 -translate-x-1/2';
 const placementClass = placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2';
+const visibilityClass = isTouch
+? (isOpen ? 'opacity-100' : 'opacity-0')
+: 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100';
 return (
 <div className={`relative flex items-center overflow-visible ${className}`}>
-<button type="button" className="group inline-flex items-center text-slate-400 hover:text-purple-600 focus:outline-none">
+<button
+type="button"
+aria-expanded={isTouch ? isOpen : undefined}
+onClick={() => {
+if (isTouch) {
+setIsOpen((open) => !open);
+}
+}}
+onBlur={() => {
+if (isTouch) {
+setIsOpen(false);
+}
+}}
+className="group inline-flex items-center text-slate-400 hover:text-purple-600 focus:outline-none"
+>
 <Info size={12} />
 <span className="sr-only">Info</span>
-<span className={`pointer-events-none absolute w-64 max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-[11px] font-medium text-slate-600 shadow-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 z-50`}>
+<span className={`pointer-events-none absolute w-64 max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-[11px] font-medium text-slate-600 shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
 {content}
 </span>
 </button>
@@ -196,7 +223,7 @@ e.currentTarget.blur();
 }
 }}
 disabled={disabled}
-className={`text-right py-2 text-sm font-bold border bg-white/50 focus:bg-white focus:ring-2 outline-none transition-all rounded-xl text-slate-800
+className={`text-right py-2 text-[16px] sm:text-sm font-bold border bg-white/50 focus:bg-white focus:ring-2 outline-none transition-all rounded-xl text-slate-800
 ${hasError ? 'border-rose-300 focus:ring-rose-300/40 focus:border-rose-500' : 'border-white/60 focus:ring-purple-500/20 focus:border-purple-600'}
 ${unit === "$" ? "w-36 pl-6 pr-3" : "w-24 pr-8 pl-3"}
 ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
@@ -328,7 +355,7 @@ if (Number.isFinite(next)) {
 handleInputChange('currentSalary', next);
 }
 }}
-className="w-full appearance-none text-sm font-bold p-3 pr-10 rounded-xl border border-white/60 bg-white/60 text-slate-700 shadow-sm"
+className="w-full appearance-none text-[16px] sm:text-sm font-bold p-3 pr-10 rounded-xl border border-white/60 bg-white/60 text-slate-700 shadow-sm"
 >
 <option value="" disabled>Select a major</option>
 <option value="81535">Computer Science - $81,535</option>
@@ -380,11 +407,11 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <div className="grid grid-cols-2 gap-4 border-t border-purple-100/60 pt-6 mt-2">
 <div>
 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Match %</label>
-<input type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-sm font-bold p-2.5 rounded-xl border border-white/60 bg-white/50 text-slate-700" />
+<input type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-white/60 bg-white/50 text-slate-700" />
 </div>
 <div>
 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Limit %</label>
-<input type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-sm font-bold p-2.5 rounded-xl border border-white/60 bg-white/50 text-slate-700" />
+<input type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-white/60 bg-white/50 text-slate-700" />
 </div>
 </div>
 <div className="mt-4 text-[11px]">
@@ -448,12 +475,111 @@ const App = () => {
 const [inputs, setInputs] = useState(DEFAULT_INPUTS);
 const [activeTab, setActiveTab] = useState('chart');
 const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+const [isNarrowScreen, setIsNarrowScreen] = useState(false);
 const [showImmediateLine, setShowImmediateLine] = useState(true);
+const [drawerHeight, setDrawerHeight] = useState(0);
+const [drawerTranslate, setDrawerTranslate] = useState<number | null>(null);
+const [isDraggingDrawer, setIsDraggingDrawer] = useState(false);
+const dragStartY = useRef(0);
+const dragStartTranslate = useRef(0);
+const didDrag = useRef(false);
+const mainScrollRef = useRef<HTMLDivElement | null>(null);
+const drawerRef = useRef<HTMLDivElement | null>(null);
+const lockedScrollTop = useRef(0);
+const HANDLE_HEIGHT = 76;
 useEffect(() => {
 if (inputs.startAge > inputs.currentAge) {
 setShowImmediateLine(false);
 }
 }, [inputs.startAge, inputs.currentAge]);
+useEffect(() => {
+const updateViewport = () => {
+setDrawerHeight(Math.round(window.innerHeight * 0.85));
+setIsNarrowScreen(window.innerWidth < 640);
+};
+updateViewport();
+window.addEventListener('resize', updateViewport);
+return () => window.removeEventListener('resize', updateViewport);
+}, []);
+useEffect(() => {
+if (typeof window === 'undefined') return;
+const isIOS = /iP(ad|hone|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (!isIOS) return;
+let lastTouchEnd = 0;
+const preventGesture = (event: Event) => event.preventDefault();
+const onTouchStart = (event: TouchEvent) => {
+if (event.touches.length > 1) {
+event.preventDefault();
+}
+};
+const onTouchMove = (event: TouchEvent) => {
+if (event.touches.length > 1) {
+event.preventDefault();
+}
+};
+const onTouchEnd = (event: TouchEvent) => {
+const now = Date.now();
+if (now - lastTouchEnd <= 350) {
+event.preventDefault();
+}
+lastTouchEnd = now;
+};
+document.addEventListener('gesturestart', preventGesture, { passive: false });
+document.addEventListener('gesturechange', preventGesture, { passive: false });
+document.addEventListener('gestureend', preventGesture, { passive: false });
+document.addEventListener('touchstart', onTouchStart, { passive: false });
+document.addEventListener('touchmove', onTouchMove, { passive: false });
+document.addEventListener('touchend', onTouchEnd, { passive: false });
+return () => {
+document.removeEventListener('gesturestart', preventGesture);
+document.removeEventListener('gesturechange', preventGesture);
+document.removeEventListener('gestureend', preventGesture);
+document.removeEventListener('touchstart', onTouchStart);
+document.removeEventListener('touchmove', onTouchMove);
+document.removeEventListener('touchend', onTouchEnd);
+};
+}, []);
+useEffect(() => {
+const html = document.documentElement;
+const body = document.body;
+const mainScroll = mainScrollRef.current;
+const drawer = drawerRef.current;
+const handleFocusIn = (event: FocusEvent) => {
+if (!isSettingsOpen || !mainScroll) return;
+if (!(event.target instanceof HTMLElement)) return;
+if (drawer && drawer.contains(event.target)) {
+mainScroll.scrollTop = lockedScrollTop.current;
+}
+};
+const handleScroll = () => {
+if (isSettingsOpen && mainScroll) {
+mainScroll.scrollTop = lockedScrollTop.current;
+}
+};
+if (isSettingsOpen) {
+html.classList.add('drawer-open');
+body.classList.add('drawer-open');
+mainScroll?.classList.add('main-scroll-locked');
+if (mainScroll) {
+lockedScrollTop.current = mainScroll.scrollTop;
+mainScroll.addEventListener('scroll', handleScroll, { passive: true });
+}
+document.addEventListener('focusin', handleFocusIn);
+} else {
+html.classList.remove('drawer-open');
+body.classList.remove('drawer-open');
+mainScroll?.classList.remove('main-scroll-locked');
+mainScroll?.removeEventListener('scroll', handleScroll);
+document.removeEventListener('focusin', handleFocusIn);
+}
+return () => {
+html.classList.remove('drawer-open');
+body.classList.remove('drawer-open');
+mainScroll?.classList.remove('main-scroll-locked');
+mainScroll?.removeEventListener('scroll', handleScroll);
+document.removeEventListener('focusin', handleFocusIn);
+};
+}, [isSettingsOpen]);
 const summarySalary = `$${Math.round(inputs.currentSalary / 1000)}k`;
 const summaryContribution = inputs.enable401k ? `${inputs.contribution401k}%` : 'Off';
 // --- CALCULATIONS ---
@@ -636,7 +762,7 @@ return next;
 }
 };
 return (
-<div className="min-h-screen flex flex-col lg:flex-row bg-slate-100 font-sans overflow-hidden">
+<div className="min-h-screen w-full max-w-[100vw] flex flex-col lg:flex-row bg-slate-100 font-sans overflow-x-hidden relative">
 {/* VIBRANT BACKGROUND */}
 <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#ede6ff] via-[#fff3cf] to-[#f6e5ff]" />
 <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-[#c7a6ff]/40 rounded-full blur-3xl" />
@@ -657,8 +783,8 @@ Sirkis Act
 </div>
 </div>
 {/* SCROLLABLE DASHBOARD */}
-<div className="flex-1 overflow-y-auto custom-scrollbar">
-<div className="max-w-[1180px] mx-auto px-4 py-6 pb-24 lg:px-10 lg:py-10 space-y-6">
+<div ref={mainScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar main-scroll">
+<div className="max-w-[1180px] mx-auto px-4 py-6 pb-14 sm:pb-24 lg:px-10 lg:py-10 space-y-6">
 {/* BRANDING HERO SECTION */}
 <div className="text-center lg:text-left space-y-3 pt-2 pb-4 animate-in slide-in-from-bottom duration-700 fade-in">
 <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black text-slate-900 tracking-tight leading-[0.92]">
@@ -780,7 +906,7 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </GlassCard>
 )}
 {/* MAIN CHART CARD */}
-<GlassCard className="p-5 lg:p-8 !rounded-[26px]">
+<GlassCard className="p-4 sm:p-5 lg:p-8 !rounded-[26px]">
 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-7 gap-4">
 <div>
 <h2 className="font-serif font-black text-[1.9rem] text-slate-900">The Trajectory</h2>
@@ -813,10 +939,18 @@ className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-wides
 <div className="mt-2 text-[11px] text-slate-500">
 Assumes contributions through the year selected, no contribution at retirement age, and returns compounded annually.
 </div>
-<div className="h-[360px] w-full">
+<div className="mt-4 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-500">
+{legendItems.filter((item) => item.visible).map((item) => (
+<div key={item.label} className="flex items-center gap-2">
+<span className="inline-flex h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+<span>{item.label}</span>
+</div>
+))}
+</div>
+<div className="h-[320px] sm:h-[360px] w-full">
 {activeTab === 'chart' ? (
 <ResponsiveContainer width="100%" height="100%">
-<AreaChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
+<AreaChart data={chartData} margin={isNarrowScreen ? { top: 6, right: 8, left: 6, bottom: 0 } : { top: 10, right: 30, left: 20, bottom: 0 }}>
 <defs>
 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
 <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6}/>
@@ -836,14 +970,14 @@ Assumes contributions through the year selected, no contribution at retirement a
 dataKey="age"
 axisLine={false}
 tickLine={false}
-tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 600}}
-dy={10}
+tick={{fill: '#94a3b8', fontSize: isNarrowScreen ? 10 : 12, fontWeight: 600}}
+dy={isNarrowScreen ? 6 : 10}
 />
 <YAxis
-width={80} // Increased width for larger dollar values
+width={isNarrowScreen ? 56 : 80}
 axisLine={false}
 tickLine={false}
-tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 600}}
+tick={{fill: '#94a3b8', fontSize: isNarrowScreen ? 10 : 12, fontWeight: 600}}
 tickFormatter={(val) => {
 const numericVal = typeof val === 'number' ? val : Number(val);
 return `$${(numericVal / 1000).toFixed(0)}k`;
@@ -859,16 +993,6 @@ labelStyle={{ color: '#0f172a', marginBottom: '8px', fontWeight: '900', fontFami
 itemStyle={{ padding: 0 }}
 separator=""
 />
-<Legend verticalAlign="top" height={36} content={() => (
-<div className="flex flex-wrap gap-4 text-[12px] font-semibold text-slate-500">
-{legendItems.filter((item) => item.visible).map((item) => (
-<div key={item.label} className="flex items-center gap-2">
-<span className="inline-flex h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-<span>{item.label}</span>
-</div>
-))}
-</div>
-)} wrapperStyle={{ paddingBottom: '20px' }} />
 <Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke="#6d28d9" strokeWidth={3} fill="url(#colorUser)" stackId="1" />
 <Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke="#a855f7" strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
 <Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke="#f59e0b" strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
@@ -877,24 +1001,24 @@ separator=""
 )}
 </AreaChart>
 </ResponsiveContainer>
-) : (
-<div className="h-full overflow-auto custom-scrollbar border border-slate-100 rounded-xl bg-white/50">
-<table className="w-full text-left text-sm">
+): (
+<div className="h-full overflow-y-auto overflow-x-auto custom-scrollbar border border-slate-100 rounded-xl bg-white/50">
+<table className="w-full text-left text-[11px] sm:text-sm">
 <thead className="bg-slate-50/80 sticky top-0 font-bold text-slate-600 backdrop-blur z-10">
 <tr className="text-[12px] text-center">
-<th className="p-3 align-middle text-center" rowSpan={2}>Age</th>
-<th className="p-3 text-center" colSpan={3}>Contributions</th>
-<th className="p-3 text-center text-amber-600" colSpan={2}>Growth</th>
-<th className="p-3 text-center" colSpan={2}>Totals</th>
+<th className="p-2 align-middle text-center" rowSpan={2}>Age</th>
+<th className="p-2 text-center" colSpan={3}>Contributions</th>
+<th className="p-2 text-center text-amber-600" colSpan={2}>Growth</th>
+<th className="p-2 text-center" colSpan={2}>Totals</th>
 </tr>
 <tr className="text-[11px] uppercase tracking-wider text-slate-400 text-center">
-<th className="p-3 text-center">Employee</th>
-<th className="p-3 text-center">Employer</th>
-<th className="p-3 text-center">Total</th>
-<th className="p-3 text-center text-amber-600">Year</th>
-<th className="p-3 text-center text-amber-600">Returns</th>
-<th className="p-3 text-center">Nominal</th>
-<th className="p-3 text-center">Real (Today)</th>
+<th className="p-2 text-center">Employee</th>
+<th className="p-2 text-center">Employer</th>
+<th className="p-2 text-center">Total</th>
+<th className="p-2 text-center text-amber-600">Year</th>
+<th className="p-2 text-center text-amber-600">Returns</th>
+<th className="p-2 text-center">Nominal</th>
+<th className="p-2 text-center">Real (Today)</th>
 </tr>
 </thead>
 <tbody className="divide-y divide-slate-100/50">
@@ -903,17 +1027,17 @@ const isStartYear = row.age === inputs.startAge && isDelayed;
 const isWaiting = row.age < inputs.startAge;
 return (
 <tr key={idx} className={`transition-colors ${isStartYear ? 'bg-purple-50/80' : 'hover:bg-white/60'} ${isWaiting ? 'opacity-50 grayscale' : ''}`}>
-<td className="p-4 font-bold text-slate-500 text-center">
+<td className="p-2.5 font-bold text-slate-500 text-center">
 {row.age}
 {isStartYear && <Badge color="indigo">Start</Badge>}
 </td>
-<td className="p-4 font-medium text-center">{formatCurrency(row['Employee Contribution (Year)'])}</td>
-<td className="p-4 font-medium text-center">{formatCurrency(row['Employer Contribution (Year)'])}</td>
-<td className="p-4 font-medium text-center">{formatCurrency(row['Total Contribution (Year)'])}</td>
-<td className="p-4 text-amber-600 font-bold text-center">{formatCurrency(row['Year Growth'])}</td>
-<td className="p-4 text-amber-600 font-bold text-center">{formatCurrency(row['Investment Returns'])}</td>
-<td className="p-4 font-black text-slate-800 text-center">{formatCurrency(row['Total Nominal'])}</td>
-<td className="p-4 font-semibold text-slate-600 text-center">{formatCurrency(row['Total Real (Today\'s $)'])}</td>
+<td className="p-2.5 font-medium text-center">{formatCurrency(row['Employee Contribution (Year)'])}</td>
+<td className="p-2.5 font-medium text-center">{formatCurrency(row['Employer Contribution (Year)'])}</td>
+<td className="p-2.5 font-medium text-center">{formatCurrency(row['Total Contribution (Year)'])}</td>
+<td className="p-2.5 text-amber-600 font-bold text-center">{formatCurrency(row['Year Growth'])}</td>
+<td className="p-2.5 text-amber-600 font-bold text-center">{formatCurrency(row['Investment Returns'])}</td>
+<td className="p-2.5 font-black text-slate-800 text-center">{formatCurrency(row['Total Nominal'])}</td>
+<td className="p-2.5 font-semibold text-slate-600 text-center">{formatCurrency(row['Total Real (Today\'s $)'])}</td>
 </tr>
 );
 })}
@@ -980,59 +1104,171 @@ Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by
 </div>
 </div>
 {/* MOBILE SETTINGS DRAWER */}
+<div className="lg:hidden fixed inset-0 z-50 pointer-events-none">
 {isSettingsOpen && (
-<div className="lg:hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center">
 <div
-className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto"
 onClick={() => setIsSettingsOpen(false)}
 />
-<div className="bg-white/90 backdrop-blur-xl w-full h-[85vh] rounded-t-3xl shadow-2xl relative flex flex-col animate-in slide-in-from-bottom duration-300 border-t border-white/50">
-<div className="p-4 border-b border-slate-100/50 flex justify-between items-center">
-<div className="flex flex-col gap-1">
-<div className="h-1.5 w-12 rounded-full bg-slate-300/70 mx-auto" />
-<div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Settings</div>
-</div>
-<button
-onClick={() => setIsSettingsOpen(false)}
-className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 transition-colors"
+)}
+<div
+ref={drawerRef}
+className="bg-white/90 backdrop-blur-xl w-full rounded-t-3xl shadow-2xl border-t border-white/50 transition-transform duration-300 pointer-events-auto absolute inset-x-0 bottom-0"
+style={{
+height: '85vh',
+transform: `translateY(${drawerTranslate ?? (isSettingsOpen ? 0 : Math.max(0, drawerHeight - HANDLE_HEIGHT))}px)`
+}}
 >
-<X size={20} />
-</button>
-</div>
-<div className="p-6 overflow-y-auto custom-scrollbar">
-<SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} isMobile={true} />
-</div>
-</div>
+<div
+role="button"
+tabIndex={0}
+onClick={() => {
+if (didDrag.current) {
+didDrag.current = false;
+return;
+}
+setIsSettingsOpen((open) => !open);
+}}
+onKeyDown={(event) => {
+if (event.key === 'Enter' || event.key === ' ') {
+setIsSettingsOpen((open) => !open);
+}
+}}
+onPointerDown={(event) => {
+event.preventDefault();
+event.currentTarget.setPointerCapture(event.pointerId);
+const closedTranslate = Math.max(0, drawerHeight - HANDLE_HEIGHT);
+dragStartY.current = event.clientY;
+dragStartTranslate.current = drawerTranslate ?? (isSettingsOpen ? 0 : closedTranslate);
+didDrag.current = false;
+setIsDraggingDrawer(true);
+}}
+onPointerMove={(event) => {
+if (!isDraggingDrawer) return;
+const closedTranslate = Math.max(0, drawerHeight - HANDLE_HEIGHT);
+const delta = event.clientY - dragStartY.current;
+const nextTranslate = Math.min(closedTranslate, Math.max(0, dragStartTranslate.current + delta));
+if (Math.abs(delta) > 6) {
+didDrag.current = true;
+}
+setDrawerTranslate(nextTranslate);
+}}
+onPointerUp={(event) => {
+if (!isDraggingDrawer) return;
+event.currentTarget.releasePointerCapture(event.pointerId);
+const closedTranslate = Math.max(0, drawerHeight - HANDLE_HEIGHT);
+const currentTranslate = drawerTranslate ?? (isSettingsOpen ? 0 : closedTranslate);
+const shouldOpen = currentTranslate < closedTranslate * 0.5;
+setIsDraggingDrawer(false);
+setIsSettingsOpen(shouldOpen);
+setDrawerTranslate(null);
+}}
+onPointerCancel={() => {
+setIsDraggingDrawer(false);
+setDrawerTranslate(null);
+}}
+className={`w-full px-4 pt-2 pb-4 text-left select-none cursor-pointer touch-none ${isSettingsOpen ? '' : 'pulse-glow'} ${isDraggingDrawer ? '' : 'transition-transform duration-300'}`}
+>
+{isSettingsOpen && (
+<div className="flex justify-center mb-1">
+<span className="h-1.5 w-10 rounded-full bg-slate-300/80" />
 </div>
 )}
-</div>
-{/* MOBILE SETTINGS HANDLE */}
-<div className="lg:hidden fixed bottom-4 left-4 right-4 z-40">
-<button
-type="button"
-onClick={() => setIsSettingsOpen(true)}
-className="w-full rounded-2xl border border-white/70 bg-white/85 backdrop-blur-lg shadow-lg px-4 py-3 text-left"
->
 <div className="flex items-center justify-between">
 <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
 <span className="h-1 w-6 rounded-full bg-slate-300/70" />
 Inputs
 </div>
-<Settings2 size={18} className="text-purple-700" />
+{isSettingsOpen ? null : (
+<ChevronUp size={18} className="text-purple-700" />
+)}
 </div>
-<div className="mt-2 text-sm font-semibold text-slate-700">
+<div className="mt-1 text-sm font-semibold text-slate-700">
 Age {inputs.currentAge} · Start {inputs.startAge} · Retire {inputs.retirementAge}
 </div>
 <div className="text-[11px] text-slate-500 font-medium">
 Salary {summarySalary} · 401(k) {summaryContribution}
 </div>
-</button>
+</div>
+{isSettingsOpen && (
+<div className="px-6 pb-6 overflow-y-auto custom-scrollbar drawer-scroll h-[calc(85vh-76px)]">
+<SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} isMobile={true} />
+</div>
+)}
+</div>
+</div>
 </div>
 <style>{`
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+.pulse-glow {
+	position: relative;
+}
+.pulse-glow::after {
+	content: '';
+	position: absolute;
+	inset: 4px 10px 10px 10px;
+	border-radius: 18px;
+	box-shadow: 0 0 22px 6px rgba(245, 158, 11, 0.38);
+	animation: glowPulse 2.6s ease-out infinite;
+	pointer-events: none;
+}
+@keyframes glowPulse {
+	0% {
+		box-shadow: 0 0 22px 6px rgba(245, 158, 11, 0.38);
+	}
+	70% {
+		box-shadow: 0 0 34px 12px rgba(245, 158, 11, 0.2);
+	}
+	100% {
+		box-shadow: 0 0 22px 6px rgba(245, 158, 11, 0.3);
+	}
+}
+@media (max-width: 1023px) {
+	html, body, #root {
+		overflow-x: hidden;
+		overflow-y: auto;
+		overscroll-behavior-x: none;
+		max-width: 100vw;
+		width: 100%;
+		overflow-x: clip;
+	}
+	body {
+		touch-action: pan-y;
+	}
+	input,
+	select,
+	textarea {
+		font-size: 16px !important;
+	}
+}
+html.drawer-open, body.drawer-open {
+	overflow: hidden;
+	overscroll-behavior: none;
+	touch-action: none;
+}
+.main-scroll,
+html,
+body {
+	-webkit-text-size-adjust: 100%;
+}
+.main-scroll {
+	overflow-x: hidden;
+	overscroll-behavior-x: none;
+	touch-action: pan-y;
+	max-width: 100vw;
+}
+.drawer-scroll {
+	overscroll-behavior: contain;
+	touch-action: pan-y;
+}
+.main-scroll-locked {
+	overflow: hidden;
+	overscroll-behavior: none;
+	touch-action: none;
+}
 `}</style>
 </div>
 );
