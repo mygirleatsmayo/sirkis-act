@@ -1,8 +1,27 @@
-# React + Tailwind
+# Sirkis Act Financial Planning
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules. One top of the standard Vite setup, [tailwindcss](https://tailwindcss.com/) is installed and ready to be used in React components.
+Interactive retirement and savings planner with contribution timing, employer match, inflation-adjusted projections, and withdrawal modeling.
 
-Additional references:
-* [Getting started with Vite](https://vitejs.dev/guide/)
-* [Tailwind documentation](https://tailwindcss.com/docs/installation)
+## Features
+- 401(k)/403(b), Roth IRA, and HSA toggles with IRS cap helpers
+- Contribution timing and delayed-start comparison overlay
+- Inflation-adjusted and nominal projections with chart + table
+- Withdrawal estimates through life expectancy
+- Curated salary presets by major
+
+## Local Development
+```bash
+npm install
+npm run dev
+```
+
+## Build
+```bash
+npm run build
+```
+
+## Deploy (GitHub Pages)
+GitHub Actions deploys to Pages on push to `main`.
+
+URL: https://mygirleatsmayo.github.io/sirkis-act/
 
