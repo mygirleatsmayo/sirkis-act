@@ -4,15 +4,12 @@ XAxis,
 YAxis,
 CartesianGrid,
 Tooltip,
-Legend,
-ResponsiveContainer,
 AreaChart,
 Area,
 Line
 } from 'recharts';
 import {
 TrendingUp,
-Settings2,
 Briefcase,
 PiggyBank,
 DollarSign,
@@ -476,7 +473,9 @@ const [inputs, setInputs] = useState(DEFAULT_INPUTS);
 const [activeTab, setActiveTab] = useState('chart');
 const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 const [isNarrowScreen, setIsNarrowScreen] = useState(false);
+const [isTouchDevice, setIsTouchDevice] = useState(false);
 const [showImmediateLine, setShowImmediateLine] = useState(true);
+const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 const [drawerHeight, setDrawerHeight] = useState(0);
 const [drawerTranslate, setDrawerTranslate] = useState<number | null>(null);
 const [isDraggingDrawer, setIsDraggingDrawer] = useState(false);
@@ -485,7 +484,9 @@ const dragStartTranslate = useRef(0);
 const didDrag = useRef(false);
 const mainScrollRef = useRef<HTMLDivElement | null>(null);
 const drawerRef = useRef<HTMLDivElement | null>(null);
-const lockedScrollTop = useRef(0);
+const drawerContentRef = useRef<HTMLDivElement | null>(null);
+const chartContainerRef = useRef<HTMLDivElement | null>(null);
+const lockedMainScrollTop = useRef(0);
 const HANDLE_HEIGHT = 76;
 useEffect(() => {
 if (inputs.startAge > inputs.currentAge) {
@@ -496,90 +497,91 @@ useEffect(() => {
 const updateViewport = () => {
 setDrawerHeight(Math.round(window.innerHeight * 0.85));
 setIsNarrowScreen(window.innerWidth < 640);
+setIsTouchDevice(window.matchMedia('(hover: none), (pointer: coarse)').matches);
 };
 updateViewport();
 window.addEventListener('resize', updateViewport);
 return () => window.removeEventListener('resize', updateViewport);
 }, []);
 useEffect(() => {
-if (typeof window === 'undefined') return;
-const isIOS = /iP(ad|hone|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-if (!isIOS) return;
-let lastTouchEnd = 0;
-const preventGesture = (event: Event) => event.preventDefault();
-const onTouchStart = (event: TouchEvent) => {
-if (event.touches.length > 1) {
-event.preventDefault();
-}
+const container = chartContainerRef.current;
+if (!container) return;
+let frame = 0;
+const updateChartReady = () => {
+cancelAnimationFrame(frame);
+frame = requestAnimationFrame(() => {
+const rect = container.getBoundingClientRect();
+setChartSize({ width: Math.max(0, Math.floor(rect.width)), height: Math.max(0, Math.floor(rect.height)) });
+});
 };
-const onTouchMove = (event: TouchEvent) => {
-if (event.touches.length > 1) {
-event.preventDefault();
-}
-};
-const onTouchEnd = (event: TouchEvent) => {
-const now = Date.now();
-if (now - lastTouchEnd <= 350) {
-event.preventDefault();
-}
-lastTouchEnd = now;
-};
-document.addEventListener('gesturestart', preventGesture, { passive: false });
-document.addEventListener('gesturechange', preventGesture, { passive: false });
-document.addEventListener('gestureend', preventGesture, { passive: false });
-document.addEventListener('touchstart', onTouchStart, { passive: false });
-document.addEventListener('touchmove', onTouchMove, { passive: false });
-document.addEventListener('touchend', onTouchEnd, { passive: false });
+updateChartReady();
+const resizeObserver = new ResizeObserver(updateChartReady);
+resizeObserver.observe(container);
+window.addEventListener('orientationchange', updateChartReady);
 return () => {
-document.removeEventListener('gesturestart', preventGesture);
-document.removeEventListener('gesturechange', preventGesture);
-document.removeEventListener('gestureend', preventGesture);
-document.removeEventListener('touchstart', onTouchStart);
-document.removeEventListener('touchmove', onTouchMove);
-document.removeEventListener('touchend', onTouchEnd);
+cancelAnimationFrame(frame);
+resizeObserver.disconnect();
+window.removeEventListener('orientationchange', updateChartReady);
 };
-}, []);
+}, [activeTab]);
 useEffect(() => {
-const html = document.documentElement;
-const body = document.body;
 const mainScroll = mainScrollRef.current;
-const drawer = drawerRef.current;
+const drawerContent = drawerContentRef.current;
+if (!mainScroll) return;
 const handleFocusIn = (event: FocusEvent) => {
-if (!isSettingsOpen || !mainScroll) return;
-if (!(event.target instanceof HTMLElement)) return;
-if (drawer && drawer.contains(event.target)) {
-mainScroll.scrollTop = lockedScrollTop.current;
-}
-};
-const handleScroll = () => {
-if (isSettingsOpen && mainScroll) {
-mainScroll.scrollTop = lockedScrollTop.current;
-}
+if (!isSettingsOpen) return;
+ const focusTarget = event.target;
+ if (!(focusTarget instanceof HTMLElement)) return;
+ if (!drawerContent || !drawerContent.contains(focusTarget)) return;
+requestAnimationFrame(() => {
+ const targetRect = focusTarget.getBoundingClientRect();
+const contentRect = drawerContent.getBoundingClientRect();
+ const targetTopInContent = targetRect.top - contentRect.top + drawerContent.scrollTop;
+const desiredScrollTop = Math.max(0, targetTopInContent - drawerContent.clientHeight * 0.35);
+drawerContent.scrollTo({ top: desiredScrollTop, behavior: 'smooth' });
+mainScroll.scrollTop = lockedMainScrollTop.current;
+});
 };
 if (isSettingsOpen) {
-html.classList.add('drawer-open');
-body.classList.add('drawer-open');
-mainScroll?.classList.add('main-scroll-locked');
-if (mainScroll) {
-lockedScrollTop.current = mainScroll.scrollTop;
-mainScroll.addEventListener('scroll', handleScroll, { passive: true });
-}
+lockedMainScrollTop.current = mainScroll.scrollTop;
+mainScroll.style.overflowY = 'hidden';
 document.addEventListener('focusin', handleFocusIn);
 } else {
-html.classList.remove('drawer-open');
-body.classList.remove('drawer-open');
-mainScroll?.classList.remove('main-scroll-locked');
-mainScroll?.removeEventListener('scroll', handleScroll);
-document.removeEventListener('focusin', handleFocusIn);
+mainScroll.style.overflowY = 'auto';
 }
 return () => {
-html.classList.remove('drawer-open');
-body.classList.remove('drawer-open');
-mainScroll?.classList.remove('main-scroll-locked');
-mainScroll?.removeEventListener('scroll', handleScroll);
+mainScroll.style.overflowY = 'auto';
 document.removeEventListener('focusin', handleFocusIn);
 };
 }, [isSettingsOpen]);
+useEffect(() => {
+if (typeof window === 'undefined') return;
+const isIOS = /iP(ad|hone|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (!isIOS) return;
+const resetInteraction = () => {
+queueMicrotask(() => {
+requestAnimationFrame(() => {
+if (document.body.style.pointerEvents === 'none') {
+document.body.style.pointerEvents = 'auto';
+}
+if (document.body.style.touchAction === 'none') {
+document.body.style.touchAction = '';
+}
+});
+});
+};
+document.addEventListener('focusin', resetInteraction);
+document.addEventListener('focusout', resetInteraction);
+document.addEventListener('visibilitychange', resetInteraction);
+window.addEventListener('pageshow', resetInteraction);
+resetInteraction();
+return () => {
+document.removeEventListener('focusin', resetInteraction);
+document.removeEventListener('focusout', resetInteraction);
+document.removeEventListener('visibilitychange', resetInteraction);
+window.removeEventListener('pageshow', resetInteraction);
+};
+}, []);
 const summarySalary = `$${Math.round(inputs.currentSalary / 1000)}k`;
 const summaryContribution = inputs.enable401k ? `${inputs.contribution401k}%` : 'Off';
 // --- CALCULATIONS ---
@@ -686,6 +688,7 @@ const annualNominalWithdrawal = annualReturn > 0
 ? (nominalAtRetirement * annualReturn) / (1 - Math.pow(1 + annualReturn, -withdrawalYears))
 : nominalAtRetirement / withdrawalYears;
 const monthlyRealWithdrawalAtRetirement = realTodayToNominalAtRetirement(monthlyRealWithdrawal);
+const useThreeColumnPanels = chartSize.width >= 675;
 const legendItems = [
 { label: 'Your Contributions', color: '#6d28d9', visible: true },
 { label: 'Employer Match', color: '#a855f7', visible: true },
@@ -762,7 +765,7 @@ return next;
 }
 };
 return (
-<div className="min-h-screen w-full max-w-[100vw] flex flex-col lg:flex-row bg-slate-100 font-sans overflow-x-hidden relative">
+<div className="min-h-[100dvh] w-full max-w-[100vw] flex flex-col lg:flex-row bg-slate-100 font-sans overflow-x-hidden relative">
 {/* VIBRANT BACKGROUND */}
 <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#ede6ff] via-[#fff3cf] to-[#f6e5ff]" />
 <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-[#c7a6ff]/40 rounded-full blur-3xl" />
@@ -774,7 +777,7 @@ return (
 </div>
 </div>
 {/* MAIN CONTENT AREA */}
-<div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
+<div className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
 {/* MOBILE HEADER */}
 <div className="lg:hidden flex justify-between items-center p-4 bg-white/80 backdrop-blur-md border-b border-white/50 sticky top-0 z-30 shadow-sm">
 <div className="flex items-center gap-2 font-serif font-black text-xl text-purple-900">
@@ -783,8 +786,8 @@ Sirkis Act
 </div>
 </div>
 {/* SCROLLABLE DASHBOARD */}
-<div ref={mainScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar main-scroll">
-<div className="max-w-[1180px] mx-auto px-4 py-6 pb-14 sm:pb-24 lg:px-10 lg:py-10 space-y-6">
+<div ref={mainScrollRef} className="overflow-x-hidden custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+<div className="max-w-[1180px] mx-auto px-4 py-6 pb-8 sm:pb-12 lg:px-10 lg:py-10 space-y-6">
 {/* BRANDING HERO SECTION */}
 <div className="text-center lg:text-left space-y-3 pt-2 pb-4 animate-in slide-in-from-bottom duration-700 fade-in">
 <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black text-slate-900 tracking-tight leading-[0.92]">
@@ -796,7 +799,7 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </p>
 </div>
 {/* TOP METRICS GRID (COMPARISON AWARE) */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-5 min-w-0`}>
 {/* TARGET CARD */}
 <Card className="p-5 flex flex-col justify-center">
 <div className="flex items-center justify-center gap-2 mb-4">
@@ -820,7 +823,7 @@ subLabel={(
 </div>
 ) : (
 <div className="text-center">
-<div className="text-3xl font-black text-slate-900 tracking-tight mb-1">
+<div className="text-[clamp(2rem,3vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
 {formatCurrency(finalData['Total Nominal'])}
 </div>
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projected Nest Egg</p>
@@ -847,7 +850,7 @@ value={formatCurrency(comparisonData['Investment Returns'])}
 </div>
 ) : (
 <div className="text-center">
-<div className="text-3xl font-black text-slate-900 tracking-tight mb-1">
+<div className="text-[clamp(2rem,3vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
 {formatCurrency(finalData['Investment Returns'])}
 </div>
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Compound Interest</p>
@@ -874,7 +877,7 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </div>
 ) : (
 <div className="text-center">
-<div className="text-3xl font-black text-slate-900 tracking-tight mb-1">
+<div className="text-[clamp(2rem,3vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
 {formatCurrency(finalData['Total Real (Today\'s $)'])}
 </div>
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Purchasing Power</p>
@@ -947,10 +950,14 @@ Assumes contributions through the year selected, no contribution at retirement a
 </div>
 ))}
 </div>
-<div className="h-[320px] sm:h-[360px] w-full">
+<div
+ref={chartContainerRef}
+className="h-[320px] sm:h-[360px] min-h-[320px] min-w-0 w-full"
+style={{ touchAction: 'pan-y', pointerEvents: isTouchDevice ? 'none' : 'auto' }}
+>
 {activeTab === 'chart' ? (
-<ResponsiveContainer width="100%" height="100%">
-<AreaChart data={chartData} margin={isNarrowScreen ? { top: 6, right: 8, left: 6, bottom: 0 } : { top: 10, right: 30, left: 20, bottom: 0 }}>
+chartSize.width > 0 && chartSize.height > 0 ? (
+<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 8, left: 6, bottom: 0 } : { top: 10, right: 30, left: 20, bottom: 0 }}>
 <defs>
 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
 <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6}/>
@@ -983,6 +990,7 @@ const numericVal = typeof val === 'number' ? val : Number(val);
 return `$${(numericVal / 1000).toFixed(0)}k`;
 }}
 />
+{!isTouchDevice && (
 <Tooltip
 contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.9)', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)', padding: '16px' }}
 formatter={(value) => {
@@ -993,6 +1001,7 @@ labelStyle={{ color: '#0f172a', marginBottom: '8px', fontWeight: '900', fontFami
 itemStyle={{ padding: 0 }}
 separator=""
 />
+)}
 <Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke="#6d28d9" strokeWidth={3} fill="url(#colorUser)" stackId="1" />
 <Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke="#a855f7" strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
 <Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke="#f59e0b" strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
@@ -1000,7 +1009,9 @@ separator=""
 <Line name="Start Now Total" type="monotone" dataKey="Immediate Total Nominal" stroke="#b45309" strokeDasharray="6 6" strokeWidth={2.5} dot={false} />
 )}
 </AreaChart>
-</ResponsiveContainer>
+) : (
+<div className="h-full w-full rounded-xl bg-white/20" />
+)
 ): (
 <div className="h-full overflow-y-auto overflow-x-auto custom-scrollbar border border-slate-100 rounded-xl bg-white/50">
 <table className="w-full text-left text-[11px] sm:text-sm">
@@ -1048,7 +1059,7 @@ return (
 </div>
 </GlassCard>
 {/* QUICK STATS FOOTER */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-5 min-w-0`}>
 {[
 { label: "Self Funded", value: finalData['Your Contributions'], color: "text-purple-700", bg: "bg-purple-50", icon: User },
 { label: "Employer Funded", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
@@ -1058,10 +1069,11 @@ return (
 <div className={`p-3.5 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
 <stat.icon size={24} />
 </div>
-<div>
-<div className={`text-[1.05rem] font-black ${stat.color}`}>{formatCurrency(stat.value)}</div>
-<div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-{stat.label} • {finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%
+<div className="min-w-0">
+<div className={`text-[clamp(1.1rem,2.1vw,1.55rem)] leading-tight font-black tabular-nums ${stat.color}`}>{formatCurrency(stat.value)}</div>
+<div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
+<div>{stat.label}</div>
+<div>{finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%</div>
 </div>
 </div>
 </GlassCard>
@@ -1073,24 +1085,25 @@ return (
 <h3 className="font-serif font-black text-[1.7rem] text-slate-900">Withdrawals</h3>
 <p className="text-[11px] text-slate-500 mt-1">Growth-aware estimates from retirement through life expectancy.</p>
 </div>
-<div className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-{withdrawalYears} years · age {startWithdrawAge} to {inputs.lifeExpectancy}
+<div className="text-[11px] font-bold uppercase tracking-widest text-slate-400 leading-tight md:text-right">
+<div>{withdrawalYears} years</div>
+<div>Age {startWithdrawAge} to {inputs.lifeExpectancy}</div>
 </div>
 </div>
-<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-3 items-stretch min-w-0`}>
+<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm h-full flex flex-col min-w-0">
 <div className="text-[10px] font-black uppercase tracking-widest text-purple-600">Fixed Purchasing Power</div>
-<div className="text-[1.6rem] font-black text-slate-900 mt-2">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
+<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
 <div className="text-[11px] text-slate-500 mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} today.</div>
 </div>
-<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
+<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm h-full flex flex-col min-w-0">
 <div className="text-[10px] font-black uppercase tracking-widest text-amber-600">Fixed Monthly</div>
-<div className="text-[1.6rem] font-black text-slate-900 mt-2">{formatCurrency(monthlyNominalWithdrawal)}</div>
+<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(monthlyNominalWithdrawal)}</div>
 <div className="text-[11px] text-slate-500 mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))}.</div>
 </div>
-<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
+<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm h-full flex flex-col min-w-0">
 <div className="text-[10px] font-black uppercase tracking-widest text-rose-500">Fixed Annual</div>
-<div className="text-[1.6rem] font-black text-slate-900 mt-2">{formatCurrency(annualNominalWithdrawal)}</div>
+<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(annualNominalWithdrawal)}</div>
 <div className="text-[11px] text-slate-500 mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))}.</div>
 </div>
 </div>
@@ -1191,7 +1204,7 @@ Salary {summarySalary} · 401(k) {summaryContribution}
 </div>
 </div>
 {isSettingsOpen && (
-<div className="px-6 pb-6 overflow-y-auto custom-scrollbar drawer-scroll h-[calc(85vh-76px)]">
+<div ref={drawerContentRef} className="px-6 pb-6 overflow-y-auto custom-scrollbar drawer-scroll h-[calc(85vh-76px)]">
 <SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} isMobile={true} />
 </div>
 )}
@@ -1230,10 +1243,12 @@ Salary {summarySalary} · 401(k) {summaryContribution}
 	html, body, #root {
 		overflow-x: hidden;
 		overflow-y: auto;
-		overscroll-behavior-x: none;
+		overflow-x: clip;
+		overscroll-behavior: auto;
 		max-width: 100vw;
 		width: 100%;
-		overflow-x: clip;
+		height: auto;
+		min-height: 100%;
 	}
 	body {
 		touch-action: pan-y;
@@ -1244,11 +1259,6 @@ Salary {summarySalary} · 401(k) {summaryContribution}
 		font-size: 16px !important;
 	}
 }
-html.drawer-open, body.drawer-open {
-	overflow: hidden;
-	overscroll-behavior: none;
-	touch-action: none;
-}
 .main-scroll,
 html,
 body {
@@ -1256,18 +1266,15 @@ body {
 }
 .main-scroll {
 	overflow-x: hidden;
-	overscroll-behavior-x: none;
-	touch-action: pan-y;
+	overscroll-behavior: auto;
+	touch-action: auto;
 	max-width: 100vw;
+	-webkit-overflow-scrolling: touch;
 }
 .drawer-scroll {
 	overscroll-behavior: contain;
 	touch-action: pan-y;
-}
-.main-scroll-locked {
-	overflow: hidden;
-	overscroll-behavior: none;
-	touch-action: none;
+	-webkit-overflow-scrolling: touch;
 }
 `}</style>
 </div>
