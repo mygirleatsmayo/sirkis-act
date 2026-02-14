@@ -473,7 +473,6 @@ const [inputs, setInputs] = useState(DEFAULT_INPUTS);
 const [activeTab, setActiveTab] = useState('chart');
 const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 const [isNarrowScreen, setIsNarrowScreen] = useState(false);
-const [isTouchDevice, setIsTouchDevice] = useState(false);
 const [showImmediateLine, setShowImmediateLine] = useState(true);
 const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 const [drawerHeight, setDrawerHeight] = useState(0);
@@ -497,7 +496,6 @@ useEffect(() => {
 const updateViewport = () => {
 setDrawerHeight(Math.round(window.innerHeight * 0.85));
 setIsNarrowScreen(window.innerWidth < 640);
-setIsTouchDevice(window.matchMedia('(hover: none), (pointer: coarse)').matches);
 };
 updateViewport();
 window.addEventListener('resize', updateViewport);
@@ -543,45 +541,32 @@ mainScroll.scrollTop = lockedMainScrollTop.current;
 });
 };
 if (isSettingsOpen) {
-lockedMainScrollTop.current = mainScroll.scrollTop;
-mainScroll.style.overflowY = 'hidden';
+lockedMainScrollTop.current = window.scrollY;
+document.body.style.position = 'fixed';
+document.body.style.top = `-${lockedMainScrollTop.current}px`;
+document.body.style.left = '0';
+document.body.style.right = '0';
+document.body.style.overflow = 'hidden';
 document.addEventListener('focusin', handleFocusIn);
 } else {
-mainScroll.style.overflowY = 'auto';
+const savedY = Math.abs(parseInt(document.body.style.top || '0', 10));
+document.body.style.position = '';
+document.body.style.top = '';
+document.body.style.left = '';
+document.body.style.right = '';
+document.body.style.overflow = '';
+window.scrollTo(0, savedY);
 }
 return () => {
-mainScroll.style.overflowY = 'auto';
+document.body.style.position = '';
+document.body.style.top = '';
+document.body.style.left = '';
+document.body.style.right = '';
+document.body.style.overflow = '';
 document.removeEventListener('focusin', handleFocusIn);
 };
 }, [isSettingsOpen]);
-useEffect(() => {
-if (typeof window === 'undefined') return;
-const isIOS = /iP(ad|hone|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-if (!isIOS) return;
-const resetInteraction = () => {
-queueMicrotask(() => {
-requestAnimationFrame(() => {
-if (document.body.style.pointerEvents === 'none') {
-document.body.style.pointerEvents = 'auto';
-}
-if (document.body.style.touchAction === 'none') {
-document.body.style.touchAction = '';
-}
-});
-});
-};
-document.addEventListener('focusin', resetInteraction);
-document.addEventListener('focusout', resetInteraction);
-document.addEventListener('visibilitychange', resetInteraction);
-window.addEventListener('pageshow', resetInteraction);
-resetInteraction();
-return () => {
-document.removeEventListener('focusin', resetInteraction);
-document.removeEventListener('focusout', resetInteraction);
-document.removeEventListener('visibilitychange', resetInteraction);
-window.removeEventListener('pageshow', resetInteraction);
-};
-}, []);
+
 const summarySalary = `$${Math.round(inputs.currentSalary / 1000)}k`;
 const summaryContribution = inputs.enable401k ? `${inputs.contribution401k}%` : 'Off';
 // --- CALCULATIONS ---
@@ -765,11 +750,13 @@ return next;
 }
 };
 return (
-<div className="min-h-[100dvh] w-full max-w-[100vw] flex flex-col lg:flex-row bg-slate-100 font-sans overflow-x-hidden relative">
+<div className="min-h-[100dvh] w-full max-w-[100vw] flex flex-col lg:flex-row bg-slate-100 font-sans overflow-x-clip relative">
 {/* VIBRANT BACKGROUND */}
-<div className="absolute inset-0 z-0 bg-gradient-to-br from-[#ede6ff] via-[#fff3cf] to-[#f6e5ff]" />
+<div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+<div className="absolute inset-0 bg-gradient-to-br from-[#ede6ff] via-[#fff3cf] to-[#f6e5ff]" />
 <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-[#c7a6ff]/40 rounded-full blur-3xl" />
 <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#ffd48a]/40 rounded-full blur-3xl" />
+</div>
 {/* DESKTOP SIDEBAR (GLASS PANEL) */}
 <div className="hidden lg:flex flex-col w-[420px] bg-white/30 backdrop-blur-2xl border-r border-white/50 z-20 relative shadow-2xl shadow-purple-100/50">
 <div className="flex-1 overflow-hidden p-8 hover:overflow-y-auto custom-scrollbar">
@@ -786,8 +773,8 @@ Sirkis Act
 </div>
 </div>
 {/* SCROLLABLE DASHBOARD */}
-<div ref={mainScrollRef} className="overflow-x-hidden custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
-<div className="max-w-[1180px] mx-auto px-4 py-6 pb-8 sm:pb-12 lg:px-10 lg:py-10 space-y-6">
+<div ref={mainScrollRef} className="overflow-x-clip custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+<div className="max-w-[1180px] mx-auto px-4 py-6 pb-20 lg:pb-10 lg:px-10 lg:py-10 space-y-6">
 {/* BRANDING HERO SECTION */}
 <div className="text-center lg:text-left space-y-3 pt-2 pb-4 animate-in slide-in-from-bottom duration-700 fade-in">
 <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black text-slate-900 tracking-tight leading-[0.92]">
@@ -953,7 +940,6 @@ Assumes contributions through the year selected, no contribution at retirement a
 <div
 ref={chartContainerRef}
 className="h-[320px] sm:h-[360px] min-h-[320px] min-w-0 w-full"
-style={{ touchAction: 'pan-y', pointerEvents: isTouchDevice ? 'none' : 'auto' }}
 >
 {activeTab === 'chart' ? (
 chartSize.width > 0 && chartSize.height > 0 ? (
@@ -990,7 +976,6 @@ const numericVal = typeof val === 'number' ? val : Number(val);
 return `$${(numericVal / 1000).toFixed(0)}k`;
 }}
 />
-{!isTouchDevice && (
 <Tooltip
 contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.9)', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)', padding: '16px' }}
 formatter={(value) => {
@@ -1001,7 +986,6 @@ labelStyle={{ color: '#0f172a', marginBottom: '8px', fontWeight: '900', fontFami
 itemStyle={{ padding: 0 }}
 separator=""
 />
-)}
 <Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke="#6d28d9" strokeWidth={3} fill="url(#colorUser)" stackId="1" />
 <Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke="#a855f7" strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
 <Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke="#f59e0b" strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
@@ -1241,17 +1225,9 @@ Salary {summarySalary} · 401(k) {summaryContribution}
 }
 @media (max-width: 1023px) {
 	html, body, #root {
-		overflow-x: hidden;
-		overflow-y: auto;
 		overflow-x: clip;
-		overscroll-behavior: auto;
 		max-width: 100vw;
 		width: 100%;
-		height: auto;
-		min-height: 100%;
-	}
-	body {
-		touch-action: pan-y;
 	}
 	input,
 	select,
@@ -1259,22 +1235,17 @@ Salary {summarySalary} · 401(k) {summaryContribution}
 		font-size: 16px !important;
 	}
 }
-.main-scroll,
 html,
 body {
 	-webkit-text-size-adjust: 100%;
 }
 .main-scroll {
-	overflow-x: hidden;
-	overscroll-behavior: auto;
-	touch-action: auto;
+	overflow-x: clip;
 	max-width: 100vw;
-	-webkit-overflow-scrolling: touch;
 }
 .drawer-scroll {
 	overscroll-behavior: contain;
 	touch-action: pan-y;
-	-webkit-overflow-scrolling: touch;
 }
 `}</style>
 </div>
