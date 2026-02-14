@@ -454,6 +454,8 @@ if (inputs.startAge > inputs.currentAge) {
 setShowImmediateLine(false);
 }
 }, [inputs.startAge, inputs.currentAge]);
+const summarySalary = `$${Math.round(inputs.currentSalary / 1000)}k`;
+const summaryContribution = inputs.enable401k ? `${inputs.contribution401k}%` : 'Off';
 // --- CALCULATIONS ---
 const { results, chartData, comparisonData, finalData } = useMemo(() => {
 // Helper to run a projection
@@ -653,16 +655,10 @@ return (
 <CrownLogo className="h-6 w-6 text-purple-700" />
 Sirkis Act
 </div>
-<button
-onClick={() => setIsSettingsOpen(true)}
-className="p-2 bg-purple-50 text-purple-700 rounded-lg"
->
-<Settings2 size={20} />
-</button>
 </div>
 {/* SCROLLABLE DASHBOARD */}
 <div className="flex-1 overflow-y-auto custom-scrollbar">
-<div className="max-w-[1180px] mx-auto px-4 py-6 lg:px-10 lg:py-10 space-y-6">
+<div className="max-w-[1180px] mx-auto px-4 py-6 pb-24 lg:px-10 lg:py-10 space-y-6">
 {/* BRANDING HERO SECTION */}
 <div className="text-center lg:text-left space-y-3 pt-2 pb-4 animate-in slide-in-from-bottom duration-700 fade-in">
 <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black text-slate-900 tracking-tight leading-[0.92]">
@@ -991,8 +987,11 @@ className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
 onClick={() => setIsSettingsOpen(false)}
 />
 <div className="bg-white/90 backdrop-blur-xl w-full h-[85vh] rounded-t-3xl shadow-2xl relative flex flex-col animate-in slide-in-from-bottom duration-300 border-t border-white/50">
-<div className="p-5 border-b border-slate-100/50 flex justify-between items-center">
-<h3 className="font-serif font-black text-xl text-slate-800">Configuration</h3>
+<div className="p-4 border-b border-slate-100/50 flex justify-between items-center">
+<div className="flex flex-col gap-1">
+<div className="h-1.5 w-12 rounded-full bg-slate-300/70 mx-auto" />
+<div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Settings</div>
+</div>
 <button
 onClick={() => setIsSettingsOpen(false)}
 className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 transition-colors"
@@ -1006,6 +1005,28 @@ className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 trans
 </div>
 </div>
 )}
+</div>
+{/* MOBILE SETTINGS HANDLE */}
+<div className="lg:hidden fixed bottom-4 left-4 right-4 z-40">
+<button
+type="button"
+onClick={() => setIsSettingsOpen(true)}
+className="w-full rounded-2xl border border-white/70 bg-white/85 backdrop-blur-lg shadow-lg px-4 py-3 text-left"
+>
+<div className="flex items-center justify-between">
+<div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+<span className="h-1 w-6 rounded-full bg-slate-300/70" />
+Inputs
+</div>
+<Settings2 size={18} className="text-purple-700" />
+</div>
+<div className="mt-2 text-sm font-semibold text-slate-700">
+Age {inputs.currentAge} · Start {inputs.startAge} · Retire {inputs.retirementAge}
+</div>
+<div className="text-[11px] text-slate-500 font-medium">
+Salary {summarySalary} · 401(k) {summaryContribution}
+</div>
+</button>
 </div>
 <style>{`
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
