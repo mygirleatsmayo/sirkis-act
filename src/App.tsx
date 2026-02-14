@@ -21,6 +21,7 @@ User,
 Building2,
 Coins,
 Clock,
+ChevronDown,
 X,
 Info
 } from 'lucide-react';
@@ -30,7 +31,7 @@ currentAge: 23,
 startAge: 23,
 retirementAge: 67,
 lifeExpectancy: 83,
-currentSalary: 60000,
+currentSalary: 68870,
 salaryGrowth: 3,
 expectedReturn: 7,
 inflationRate: 2.5,
@@ -111,8 +112,34 @@ icon?: IconType;
 unit?: string;
 error?: string | null;
 helper?: string;
+tooltip?: string;
 };
-const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, helper }: InputFieldProps) => {
+type TooltipIconProps = {
+content: string;
+className?: string;
+align?: 'left' | 'center' | 'right';
+placement?: 'top' | 'bottom';
+};
+const TooltipIcon = ({ content, className = "", align = 'center', placement = 'top' }: TooltipIconProps) => {
+const alignClass = align === 'left'
+? 'left-0 translate-x-0'
+: align === 'right'
+? 'right-0 translate-x-0'
+: 'left-1/2 -translate-x-1/2';
+const placementClass = placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2';
+return (
+<div className={`relative flex items-center overflow-visible ${className}`}>
+<button type="button" className="group inline-flex items-center text-slate-400 hover:text-purple-600 focus:outline-none">
+<Info size={12} />
+<span className="sr-only">Info</span>
+<span className={`pointer-events-none absolute w-64 max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-[11px] font-medium text-slate-600 shadow-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 z-50`}>
+{content}
+</span>
+</button>
+</div>
+);
+};
+const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, helper, tooltip }: InputFieldProps) => {
 const [draftValue, setDraftValue] = useState(Number.isFinite(value) ? String(value) : "");
 useEffect(() => {
 setDraftValue(Number.isFinite(value) ? String(value) : "");
@@ -128,6 +155,7 @@ return (
 <label className={`text-sm font-semibold flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600' : 'text-slate-700 group-hover:text-purple-700'}`}>
 {Icon && <Icon size={16} className="text-slate-400 group-hover:text-purple-500 transition-colors" />}
 {label}
+{tooltip && <TooltipIcon content={tooltip} />}
 </label>
 </div>
 <div className="flex items-center gap-4">
@@ -266,16 +294,15 @@ icon={Clock}
 </div>
 )}
 </div>
-<InputField label="Retirement Age" value={inputs.retirementAge} onChange={v => handleInputChange('retirementAge', v)} min={inputs.currentAge + 1} max={100} icon={Briefcase} />
-<InputField label="Life Expectancy" value={inputs.lifeExpectancy} onChange={v => handleInputChange('lifeExpectancy', v)} min={inputs.retirementAge + 1} max={120} icon={Clock} error={inputs.lifeExpectancy <= inputs.retirementAge ? 'Life expectancy must be greater than retirement age.' : null} />
+<InputField label="Retirement Age" value={inputs.retirementAge} onChange={v => handleInputChange('retirementAge', v)} min={inputs.currentAge + 1} max={100} icon={Briefcase} tooltip="Typical retirement ages are in the low-to-mid 60s; full Social Security age is about 66-67." />
+<InputField label="Life Expectancy" value={inputs.lifeExpectancy} onChange={v => handleInputChange('lifeExpectancy', v)} min={inputs.retirementAge + 1} max={120} icon={Clock} error={inputs.lifeExpectancy <= inputs.retirementAge ? 'Life expectancy must be greater than retirement age.' : null} tooltip="SSA actuarial tables suggest an 18-year-old in 2026 expects to live to ~80.3–80.8 on average; male ~75.5–78.0, female ~80.8–82.8." />
 <InputField label="Current Salary" value={inputs.currentSalary} onChange={v => handleInputChange('currentSalary', v)} min={0} max={1000000} step={1000} unit="$" icon={DollarSign} />
 <div className="-mt-3 mb-6">
-<div className="flex items-center justify-between mb-2">
+<div className="flex items-center gap-2 mb-2">
 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Average Starting Salary by Major</label>
-<div className="flex items-center gap-1 text-[10px] text-slate-400 font-semibold">
-<Info size={12} /> NACE
+<TooltipIcon className="text-[10px]" align="right" placement="top" content="Average starting salaries sourced from the National Association of Colleges and Employers (NACE) 2025 and 2026 reports." />
 </div>
-</div>
+<div className="relative">
 <select
 value=""
 onChange={(e) => {
@@ -284,7 +311,7 @@ if (Number.isFinite(next)) {
 handleInputChange('currentSalary', next);
 }
 }}
-className="w-full text-sm font-bold p-3 rounded-xl border border-white/60 bg-white/60 text-slate-700 shadow-sm"
+className="w-full appearance-none text-sm font-bold p-3 pr-10 rounded-xl border border-white/60 bg-white/60 text-slate-700 shadow-sm"
 >
 <option value="" disabled>Select a major</option>
 <option value="81535">Computer Science - $81,535</option>
@@ -296,9 +323,14 @@ className="w-full text-sm font-bold p-3 rounded-xl border border-white/60 bg-whi
 <option value="60353">Communications - $60,353</option>
 <option value="59410">Humanities/Liberal Arts - $59,410</option>
 </select>
+<ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+</div>
 </div>
 <div className="mt-6">
-<label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Contribution Timing</label>
+<div className="flex items-center gap-2 mb-2">
+<label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contribution Timing</label>
+<TooltipIcon placement="top" content="When contributions hit the account. Start of year assumes earlier compounding; mid-year is more conservative." />
+</div>
 <div className="flex bg-white/60 rounded-xl p-1 shadow-inner border border-white/70">
 {['start', 'mid'].map((option) => (
 <button
@@ -317,9 +349,9 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <h3 className="flex items-center gap-2 text-[11px] font-black text-purple-500 uppercase tracking-widest mb-6 ml-1">
 <TrendingUp size={14} /> Market
 </h3>
-<InputField label="Expected Return" value={inputs.expectedReturn} onChange={v => handleInputChange('expectedReturn', v)} min={0} max={15} step={0.5} unit="%" icon={TrendingUp} />
-<InputField label="Salary Growth" value={inputs.salaryGrowth} onChange={v => handleInputChange('salaryGrowth', v)} min={0} max={10} step={0.1} unit="%" icon={TrendingUp} />
-<InputField label="Inflation Rate" value={inputs.inflationRate} onChange={v => handleInputChange('inflationRate', v)} min={0} max={10} step={0.1} unit="%" icon={TrendingUp} />
+<InputField label="Expected Return" value={inputs.expectedReturn} onChange={v => handleInputChange('expectedReturn', v)} min={0} max={15} step={0.5} unit="%" icon={TrendingUp} tooltip="Long-term stock-heavy portfolios often assume 6-8% nominal returns." />
+<InputField label="Salary Growth" value={inputs.salaryGrowth} onChange={v => handleInputChange('salaryGrowth', v)} min={0} max={10} step={0.1} unit="%" icon={TrendingUp} tooltip="Typical wage growth is often around 2-4% per year." />
+<InputField label="Inflation Rate" value={inputs.inflationRate} onChange={v => handleInputChange('inflationRate', v)} min={0} max={10} step={0.1} unit="%" icon={TrendingUp} tooltip="Long-run inflation is often around 2-3% per year." />
 </section>
 {/* Accounts Section */}
 <section className="space-y-4">
