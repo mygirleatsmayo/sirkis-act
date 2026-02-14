@@ -29,6 +29,7 @@ const DEFAULT_INPUTS = {
 currentAge: 23,
 startAge: 23,
 retirementAge: 67,
+lifeExpectancy: 83,
 currentSalary: 60000,
 salaryGrowth: 3,
 expectedReturn: 7,
@@ -70,10 +71,10 @@ const CrownLogo = ({ className = "" }) => (
 );
 const Badge = ({ children, color = "indigo" }) => {
 const styles = {
-indigo: "bg-indigo-500/10 text-indigo-800 border-indigo-200/20",
-emerald: "bg-emerald-500/10 text-emerald-800 border-emerald-200/20",
+indigo: "bg-purple-600/10 text-purple-900 border-purple-200/30",
+emerald: "bg-amber-500/10 text-amber-800 border-amber-200/30",
 rose: "bg-rose-500/10 text-rose-800 border-rose-200/20",
-amber: "bg-amber-500/10 text-amber-800 border-amber-200/20",
+amber: "bg-amber-600/10 text-amber-900 border-amber-200/30",
 slate: "bg-slate-500/10 text-slate-600 border-slate-200/20",
 };
 return (
@@ -106,8 +107,8 @@ const hasError = Boolean(error);
 return (
 <div className="mb-8 group">
 <div className="flex justify-between items-center mb-3">
-<label className={`text-sm font-semibold flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600' : 'text-slate-700 group-hover:text-indigo-700'}`}>
-{Icon && <Icon size={16} className="text-slate-400 group-hover:text-indigo-500 transition-colors" />}
+<label className={`text-sm font-semibold flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600' : 'text-slate-700 group-hover:text-purple-700'}`}>
+{Icon && <Icon size={16} className="text-slate-400 group-hover:text-purple-500 transition-colors" />}
 {label}
 </label>
 </div>
@@ -123,7 +124,7 @@ const next = parseFloat(e.target.value);
 setDraftValue(String(next));
 onChange(next);
 }}
-className="flex-grow h-1.5 bg-slate-200/60 rounded-lg appearance-none cursor-pointer accent-indigo-600 hover:accent-indigo-500 transition-all"
+className="flex-grow h-1.5 bg-slate-200/60 rounded-lg appearance-none cursor-pointer accent-purple-700 hover:accent-purple-600 transition-all"
 />
 <div className="relative flex items-center group-focus-within:scale-105 transition-transform flex-shrink-0 shadow-sm rounded-xl">
 {unit === "$" && (
@@ -142,7 +143,7 @@ e.currentTarget.blur();
 }
 }}
 className={`text-right py-2 text-sm font-bold border bg-white/50 focus:bg-white focus:ring-2 outline-none transition-all rounded-xl text-slate-800
-${hasError ? 'border-rose-300 focus:ring-rose-300/40 focus:border-rose-500' : 'border-white/60 focus:ring-indigo-500/20 focus:border-indigo-500'}
+${hasError ? 'border-rose-300 focus:ring-rose-300/40 focus:border-rose-500' : 'border-white/60 focus:ring-purple-500/20 focus:border-purple-600'}
 ${unit === "$" ? "w-36 pl-6 pr-3" : "w-24 pr-8 pl-3"}
 ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
 />
@@ -162,11 +163,11 @@ ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
 const ToggleSection = ({ label, enabled, onToggle, children }) => (
 <div className={`p-1 rounded-3xl transition-all duration-300 ${enabled ? 'bg-gradient-to-br from-white/60 to-white/30 shadow-sm border border-white/50' : 'bg-white/20 border border-transparent opacity-80'}`}>
 <div
-className={`flex items-center justify-between p-4 cursor-pointer rounded-2xl transition-colors ${enabled ? 'bg-indigo-50/50' : 'hover:bg-white/30'}`}
+className={`flex items-center justify-between p-4 cursor-pointer rounded-2xl transition-colors ${enabled ? 'bg-purple-50/60' : 'hover:bg-white/30'}`}
 onClick={() => onToggle(!enabled)}
 >
-<span className={`font-bold text-sm ${enabled ? 'text-indigo-900' : 'text-slate-500'}`}>{label}</span>
-<div className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${enabled ? 'bg-indigo-600' : 'bg-slate-300'}`}>
+<span className={`font-bold text-sm ${enabled ? 'text-purple-900' : 'text-slate-500'}`}>{label}</span>
+<div className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${enabled ? 'bg-purple-700' : 'bg-slate-300'}`}>
 <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${enabled ? 'translate-x-5' : ''}`} />
 </div>
 </div>
@@ -206,8 +207,8 @@ return (
 {/* Branding in Sidebar (Desktop) */}
 {!isMobile && (
 <div className="mb-8 pt-2">
-<div className="flex items-center gap-2 mb-1 text-indigo-900">
-<CrownLogo className="h-5 w-5 text-indigo-600" />
+<div className="flex items-center gap-2 mb-1 text-purple-900">
+<CrownLogo className="h-5 w-5 text-purple-700" />
 <span className="font-serif font-black text-xl tracking-tight">Sirkis Act</span>
 </div>
 <p className="text-xs font-medium text-slate-500 ml-7">Financial Planning Tool</p>
@@ -215,7 +216,7 @@ return (
 )}
 {/* Timeline Section */}
 <section>
-<h3 className="flex items-center gap-2 text-[11px] font-black text-indigo-400 uppercase tracking-widest mb-6 ml-1">
+<h3 className="flex items-center gap-2 text-[11px] font-black text-purple-500 uppercase tracking-widest mb-6 ml-1">
 <Clock size={14} /> Timeline
 </h3>
 <InputField label="Current Age" value={inputs.currentAge} onChange={v => handleInputChange('currentAge', v)} min={18} max={80} icon={User} />
@@ -240,7 +241,36 @@ icon={Clock}
 )}
 </div>
 <InputField label="Retirement Age" value={inputs.retirementAge} onChange={v => handleInputChange('retirementAge', v)} min={inputs.currentAge + 1} max={100} icon={Briefcase} />
+<InputField label="Life Expectancy" value={inputs.lifeExpectancy} onChange={v => handleInputChange('lifeExpectancy', v)} min={inputs.retirementAge + 1} max={120} icon={Clock} error={inputs.lifeExpectancy <= inputs.retirementAge ? 'Life expectancy must be greater than retirement age.' : null} />
 <InputField label="Current Salary" value={inputs.currentSalary} onChange={v => handleInputChange('currentSalary', v)} min={0} max={1000000} step={1000} unit="$" icon={DollarSign} />
+<div className="-mt-3 mb-6">
+<div className="flex items-center justify-between mb-2">
+<label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Average Starting Salary by Major</label>
+<div className="flex items-center gap-1 text-[10px] text-slate-400 font-semibold">
+<Info size={12} /> NACE
+</div>
+</div>
+<select
+value=""
+onChange={(e) => {
+const next = parseFloat(e.target.value);
+if (Number.isFinite(next)) {
+handleInputChange('currentSalary', next);
+}
+}}
+className="w-full text-sm font-bold p-3 rounded-xl border border-white/60 bg-white/60 text-slate-700 shadow-sm"
+>
+<option value="" disabled>Select a major</option>
+<option value="81535">Computer Science - $81,535</option>
+<option value="78731">Engineering - $78,731</option>
+<option value="68870">Business - $68,870</option>
+<option value="69709">Math and Sciences - $69,709</option>
+<option value="67316">Social Sciences - $67,316</option>
+<option value="63122">Agriculture/Natural Resources - $63,122</option>
+<option value="60353">Communications - $60,353</option>
+<option value="59410">Humanities/Liberal Arts - $59,410</option>
+</select>
+</div>
 <div className="mt-6">
 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Contribution Timing</label>
 <div className="flex bg-white/60 rounded-xl p-1 shadow-inner border border-white/70">
@@ -248,7 +278,7 @@ icon={Clock}
 <button
 key={option}
 onClick={() => handleInputChange('contributionTiming', option)}
-className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/60'}`}
+className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'bg-purple-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/60'}`}
 >
 {option === 'start' ? 'Start of Year' : 'Mid Year'}
 </button>
@@ -258,7 +288,7 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 </section>
 {/* Economics Section */}
 <section>
-<h3 className="flex items-center gap-2 text-[11px] font-black text-indigo-400 uppercase tracking-widest mb-6 ml-1">
+<h3 className="flex items-center gap-2 text-[11px] font-black text-purple-500 uppercase tracking-widest mb-6 ml-1">
 <TrendingUp size={14} /> Market
 </h3>
 <InputField label="Expected Return" value={inputs.expectedReturn} onChange={v => handleInputChange('expectedReturn', v)} min={0} max={15} step={0.5} unit="%" icon={TrendingUp} />
@@ -267,16 +297,13 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 </section>
 {/* Accounts Section */}
 <section className="space-y-4">
-<h3 className="flex items-center gap-2 text-[11px] font-black text-indigo-400 uppercase tracking-widest mb-6 ml-1">
+<h3 className="flex items-center gap-2 text-[11px] font-black text-purple-500 uppercase tracking-widest mb-6 ml-1">
 <PiggyBank size={14} /> Strategy
 </h3>
 <ToggleSection label="401(k) / 403(b)" enabled={inputs.enable401k} onToggle={(v) => handleInputChange('enable401k', v)}>
 <InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" error={employeeOverCap ? 'Employee contribution exceeds IRS cap.' : null} />
-<div className="grid grid-cols-2 gap-4 border-t border-indigo-100/50 pt-6 mt-2">
+<div className="grid grid-cols-2 gap-4 border-t border-purple-100/60 pt-6 mt-2">
 <div>
-<footer className="mt-10 text-center text-[11px] text-slate-500">
-Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex.
-</footer>
 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Match %</label>
 <input type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-sm font-bold p-2.5 rounded-xl border border-white/60 bg-white/50 text-slate-700" />
 </div>
@@ -287,7 +314,7 @@ Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by
 </div>
 <div className="mt-4 text-[11px]">
 <div className={`flex items-start gap-2 ${employeeOverCap || totalOverCap ? 'text-rose-600' : 'text-slate-500'}`}>
-<Info size={14} className={employeeOverCap || totalOverCap ? 'text-rose-500' : 'text-indigo-400'} />
+<Info size={14} className={employeeOverCap || totalOverCap ? 'text-rose-500' : 'text-purple-500'} />
 <div className="space-y-2">
 <div className={employeeOverCap ? 'text-rose-600' : 'text-slate-500'}>
 Employee est: <span className="font-semibold">{formatCurrency(annualEmployee401k)}</span> (cap {formatCurrency(LIMITS.max401kEmployee)}).
@@ -300,9 +327,6 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 <div className="font-semibold">
 {formatCurrency(annualEmployee401k)} + {formatCurrency(annualEmployer401k)} = {formatCurrency(annualTotal401k)} (cap {formatCurrency(LIMITS.max401kTotal)}).
 </div>
-</div>
-<div className="mt-10 text-center text-[11px] text-slate-500">
-Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex.
 </div>
 </div>
 </div>
@@ -326,7 +350,7 @@ Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by
 <div className="pt-8 text-center">
 <button
 onClick={() => handleInputChange('RESET', true)}
-className="text-xs font-bold text-slate-400 hover:text-indigo-600 flex items-center justify-center gap-2 transition-colors mx-auto"
+className="text-xs font-bold text-slate-400 hover:text-purple-700 flex items-center justify-center gap-2 transition-colors mx-auto"
 >
 <RotateCcw size={12} /> Reset to Defaults
 </button>
@@ -418,11 +442,33 @@ finalData: mainResults[mainResults.length - 1]
 };
 }, [inputs]);
 const isDelayed = inputs.startAge > inputs.currentAge;
+const nominalAtRetirement = finalData ? finalData['Total Nominal'] : 0;
+const startWithdrawAge = inputs.retirementAge + 1;
+const withdrawalYears = Math.max(1, inputs.lifeExpectancy - startWithdrawAge + 1);
+const yearsToRetirement = Math.max(0, inputs.retirementAge - inputs.currentAge);
+const annualReturn = inputs.expectedReturn / 100;
+const annualInflation = inputs.inflationRate / 100;
+const monthlyReturn = Math.pow(1 + annualReturn, 1 / 12) - 1;
+const realMonthlyReturn = Math.pow((1 + annualReturn) / (1 + annualInflation), 1 / 12) - 1;
+const monthsInRetirement = withdrawalYears * 12;
+const nominalToRealToday = (value, age) => value / Math.pow(1 + annualInflation, Math.max(0, age - inputs.currentAge));
+const realTodayToNominalAtRetirement = (value) => value * Math.pow(1 + annualInflation, yearsToRetirement);
+const retirementBalanceToday = nominalToRealToday(nominalAtRetirement, inputs.retirementAge);
+const monthlyRealWithdrawal = realMonthlyReturn > 0
+? (retirementBalanceToday * realMonthlyReturn) / (1 - Math.pow(1 + realMonthlyReturn, -monthsInRetirement))
+: retirementBalanceToday / monthsInRetirement;
+const monthlyNominalWithdrawal = monthlyReturn > 0
+? (nominalAtRetirement * monthlyReturn) / (1 - Math.pow(1 + monthlyReturn, -monthsInRetirement))
+: nominalAtRetirement / monthsInRetirement;
+const annualNominalWithdrawal = annualReturn > 0
+? (nominalAtRetirement * annualReturn) / (1 - Math.pow(1 + annualReturn, -withdrawalYears))
+: nominalAtRetirement / withdrawalYears;
+const monthlyRealWithdrawalAtRetirement = realTodayToNominalAtRetirement(monthlyRealWithdrawal);
 const legendItems = [
-{ label: 'Your Contributions', color: '#6366f1', visible: true },
-{ label: 'Employer Match', color: '#8b5cf6', visible: true },
-{ label: 'Investment Returns', color: '#10b981', visible: true },
-{ label: 'Start Now Total', color: '#f59e0b', visible: isDelayed && showImmediateLine }
+{ label: 'Your Contributions', color: '#6d28d9', visible: true },
+{ label: 'Employer Match', color: '#a855f7', visible: true },
+{ label: 'Investment Returns', color: '#f59e0b', visible: true },
+{ label: 'Start Now Total', color: '#b45309', visible: isDelayed && showImmediateLine }
 ];
 const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }), []);
 const formatCurrency = (val) => currencyFormatter.format(val || 0);
@@ -430,6 +476,7 @@ const INPUT_BOUNDS = {
 currentAge: { min: 18, max: 80 },
 startAge: { min: 18, max: 100 },
 retirementAge: { min: 19, max: 100 },
+lifeExpectancy: { min: 40, max: 120 },
 currentSalary: { min: 0, max: 1000000 },
 salaryGrowth: { min: 0, max: 10 },
 expectedReturn: { min: 0, max: 15 },
@@ -459,22 +506,27 @@ next.retirementAge = Math.max(next.retirementAge, next.currentAge + 1);
 }
 if (key === 'retirementAge') {
 next.startAge = Math.min(next.startAge, next.retirementAge - 1);
+next.lifeExpectancy = Math.max(next.lifeExpectancy, next.retirementAge + 1);
 }
 if (key === 'startAge') {
 next.retirementAge = Math.max(next.retirementAge, next.startAge + 1);
 }
+if (key === 'lifeExpectancy') {
+next.retirementAge = Math.min(next.retirementAge, next.lifeExpectancy - 1);
+}
+next.lifeExpectancy = Math.max(next.lifeExpectancy, next.retirementAge + 1);
 return next;
 });
 }
 };
 return (
-<div className="h-screen flex flex-col lg:flex-row bg-slate-100 font-sans overflow-hidden">
+<div className="min-h-screen flex flex-col lg:flex-row bg-slate-100 font-sans overflow-hidden">
 {/* VIBRANT BACKGROUND */}
-<div className="absolute inset-0 z-0 bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-50" />
-<div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-purple-200/40 rounded-full blur-3xl" />
-<div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-200/40 rounded-full blur-3xl" />
+<div className="absolute inset-0 z-0 bg-gradient-to-br from-[#ede6ff] via-[#fff3cf] to-[#f6e5ff]" />
+<div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-[#c7a6ff]/40 rounded-full blur-3xl" />
+<div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#ffd48a]/40 rounded-full blur-3xl" />
 {/* DESKTOP SIDEBAR (GLASS PANEL) */}
-<div className="hidden lg:flex flex-col w-[420px] bg-white/30 backdrop-blur-2xl border-r border-white/50 z-20 relative shadow-2xl shadow-indigo-100/50">
+<div className="hidden lg:flex flex-col w-[420px] bg-white/30 backdrop-blur-2xl border-r border-white/50 z-20 relative shadow-2xl shadow-purple-100/50">
 <div className="flex-1 overflow-hidden p-8 hover:overflow-y-auto custom-scrollbar">
 <SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} />
 </div>
@@ -483,13 +535,13 @@ return (
 <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
 {/* MOBILE HEADER */}
 <div className="lg:hidden flex justify-between items-center p-4 bg-white/80 backdrop-blur-md border-b border-white/50 sticky top-0 z-30 shadow-sm">
-<div className="flex items-center gap-2 font-serif font-black text-xl text-indigo-900">
-<CrownLogo className="h-6 w-6 text-indigo-600" />
+<div className="flex items-center gap-2 font-serif font-black text-xl text-purple-900">
+<CrownLogo className="h-6 w-6 text-purple-700" />
 Sirkis Act
 </div>
 <button
 onClick={() => setIsSettingsOpen(true)}
-className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"
+className="p-2 bg-purple-50 text-purple-700 rounded-lg"
 >
 <Settings2 size={20} />
 </button>
@@ -501,7 +553,7 @@ className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"
 <div className="text-center lg:text-left space-y-4 py-4 animate-in slide-in-from-bottom duration-700 fade-in">
 <h1 className="text-4xl sm:text-5xl lg:text-7xl font-serif font-black text-slate-900 tracking-tight leading-[0.9]">
 Dr. Sirkis's <br className="hidden lg:block"/>
-<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">High-Wire Act</span>
+<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-amber-500">High-Wire Act</span>
 </h1>
 <p className="text-lg sm:text-xl text-slate-500 font-medium max-w-2xl lg:ml-1">
 Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net</span> with tax-advantaged compounding.
@@ -605,8 +657,8 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 <div className="text-[11px] text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge} today.</div>
 </div>
 <div className="flex flex-col sm:flex-row gap-2">
-<div className="flex-1 rounded-xl bg-emerald-50/70 p-3 border border-emerald-200/60 shadow-sm">
-<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Now</div>
+<div className="flex-1 rounded-xl bg-amber-50/70 p-3 border border-amber-200/70 shadow-sm">
+<div className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Start Now</div>
 <div className="text-lg font-black text-slate-900">{formatCurrency(comparisonData['Total Nominal'])}</div>
 </div>
 <div className="flex-1 rounded-xl bg-rose-50/70 p-3 border border-rose-200/60 shadow-sm">
@@ -627,13 +679,13 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 <div className="bg-slate-100/50 p-1.5 rounded-xl flex text-sm font-bold shadow-inner">
 <button
 onClick={() => setActiveTab('chart')}
-className={`px-6 py-2.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
+className={`px-6 py-2.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
 >
 Chart
 </button>
 <button
 onClick={() => setActiveTab('table')}
-className={`px-6 py-2.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
+className={`px-6 py-2.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
 >
 Table
 </button>
@@ -657,16 +709,16 @@ Assumes contributions through the year selected, no contribution at retirement a
 <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
 <defs>
 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
-<stop offset="5%" stopColor="#10b981" stopOpacity={0.6}/>
-<stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+<stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6}/>
+<stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
 </linearGradient>
 <linearGradient id="colorUser" x1="0" y1="0" x2="0" y2="1">
-<stop offset="5%" stopColor="#6366f1" stopOpacity={0.6}/>
-<stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+<stop offset="5%" stopColor="#6d28d9" stopOpacity={0.6}/>
+<stop offset="95%" stopColor="#6d28d9" stopOpacity={0}/>
 </linearGradient>
 <linearGradient id="colorEmployer" x1="0" y1="0" x2="0" y2="1">
-<stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.6}/>
-<stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+<stop offset="5%" stopColor="#a855f7" stopOpacity={0.6}/>
+<stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
 </linearGradient>
 </defs>
 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.5} />
@@ -701,11 +753,11 @@ separator=""
 ))}
 </div>
 )} wrapperStyle={{ paddingBottom: '20px' }} />
-<Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke="#6366f1" strokeWidth={3} fill="url(#colorUser)" stackId="1" />
-<Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke="#8b5cf6" strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
-<Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke="#10b981" strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
+<Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke="#6d28d9" strokeWidth={3} fill="url(#colorUser)" stackId="1" />
+<Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke="#a855f7" strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
+<Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke="#f59e0b" strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
 {isDelayed && showImmediateLine && (
-<Line name="Start Now Total" type="monotone" dataKey="Immediate Total Nominal" stroke="#f59e0b" strokeDasharray="6 6" strokeWidth={2.5} dot={false} />
+<Line name="Start Now Total" type="monotone" dataKey="Immediate Total Nominal" stroke="#b45309" strokeDasharray="6 6" strokeWidth={2.5} dot={false} />
 )}
 </AreaChart>
 </ResponsiveContainer>
@@ -718,8 +770,8 @@ separator=""
 <th className="p-4">Employee</th>
 <th className="p-4">Employer</th>
 <th className="p-4">Total Contrib</th>
-<th className="p-4 text-emerald-600">Growth</th>
-<th className="p-4 text-emerald-600">Returns</th>
+<th className="p-4 text-amber-700">Growth</th>
+<th className="p-4 text-amber-700">Returns</th>
 <th className="p-4 text-right">Total</th>
 <th className="p-4 text-right">Real (Today)</th>
 <th className="p-4 text-right">Real (Retire)</th>
@@ -730,7 +782,7 @@ separator=""
 const isStartYear = row.age === inputs.startAge && isDelayed;
 const isWaiting = row.age < inputs.startAge;
 return (
-<tr key={idx} className={`transition-colors ${isStartYear ? 'bg-indigo-50/80' : 'hover:bg-white/60'} ${isWaiting ? 'opacity-50 grayscale' : ''}`}>
+<tr key={idx} className={`transition-colors ${isStartYear ? 'bg-purple-50/80' : 'hover:bg-white/60'} ${isWaiting ? 'opacity-50 grayscale' : ''}`}>
 <td className="p-4 font-bold text-slate-500 flex items-center gap-2">
 {row.age}
 {isStartYear && <Badge color="indigo">Start</Badge>}
@@ -738,8 +790,8 @@ return (
 <td className="p-4 font-medium">{formatCurrency(row['Employee Contribution (Year)'])}</td>
 <td className="p-4 font-medium">{formatCurrency(row['Employer Contribution (Year)'])}</td>
 <td className="p-4 font-medium">{formatCurrency(row['Total Contribution (Year)'])}</td>
-<td className="p-4 text-emerald-600 font-bold">{formatCurrency(row['Year Growth'])}</td>
-<td className="p-4 text-emerald-600 font-bold">{formatCurrency(row['Investment Returns'])}</td>
+<td className="p-4 text-amber-700 font-bold">{formatCurrency(row['Year Growth'])}</td>
+<td className="p-4 text-amber-700 font-bold">{formatCurrency(row['Investment Returns'])}</td>
 <td className="p-4 text-right font-black text-slate-800">{formatCurrency(row['Total Nominal'])}</td>
 <td className="p-4 text-right font-semibold text-slate-600">{formatCurrency(row['Total Real (Today\'s $)'])}</td>
 <td className="p-4 text-right font-semibold text-slate-600">{formatCurrency(row['Total Real (Retirement $)'])}</td>
@@ -753,11 +805,11 @@ return (
 </div>
 </GlassCard>
 {/* QUICK STATS FOOTER */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-20">
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6">
 {[
-{ label: "Self Funded", value: finalData['Your Contributions'], color: "text-indigo-600", bg: "bg-indigo-50", icon: User },
+{ label: "Self Funded", value: finalData['Your Contributions'], color: "text-purple-700", bg: "bg-purple-50", icon: User },
 { label: "Employer Funded", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
-{ label: "Market Funded", value: finalData['Investment Returns'], color: "text-emerald-600", bg: "bg-emerald-50", icon: Coins },
+{ label: "Market Funded", value: finalData['Investment Returns'], color: "text-amber-700", bg: "bg-amber-50", icon: Coins },
 ].map((stat, i) => (
 <GlassCard key={i} className="p-6 flex flex-row items-center gap-6 group hover:scale-[1.02] transition-transform duration-300">
 <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
@@ -772,6 +824,40 @@ return (
 </GlassCard>
 ))}
 </div>
+<GlassCard className="p-6 lg:p-8">
+<div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-6">
+<div>
+<h3 className="font-serif font-black text-2xl text-slate-900">Withdrawals</h3>
+<p className="text-[11px] text-slate-500 mt-1">Growth-aware estimates from retirement through life expectancy.</p>
+</div>
+<div className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+{withdrawalYears} years · age {startWithdrawAge} to {inputs.lifeExpectancy}
+</div>
+</div>
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
+<div className="text-[10px] font-black uppercase tracking-widest text-purple-600">Fixed Purchasing Power</div>
+<div className="text-2xl font-black text-slate-900 mt-2">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
+<div className="text-[11px] text-slate-500 mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} today.</div>
+</div>
+<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
+<div className="text-[10px] font-black uppercase tracking-widest text-amber-600">Fixed Monthly</div>
+<div className="text-2xl font-black text-slate-900 mt-2">{formatCurrency(monthlyNominalWithdrawal)}</div>
+<div className="text-[11px] text-slate-500 mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))}.</div>
+</div>
+<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm">
+<div className="text-[10px] font-black uppercase tracking-widest text-rose-500">Fixed Annual</div>
+<div className="text-2xl font-black text-slate-900 mt-2">{formatCurrency(annualNominalWithdrawal)}</div>
+<div className="text-[11px] text-slate-500 mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))}.</div>
+</div>
+</div>
+<div className="mt-4 text-[11px] text-slate-500">
+Assumes constant returns during retirement and no taxes; for planning only.
+</div>
+</GlassCard>
+<footer className="mt-6 text-center text-[11px] text-slate-500">
+Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex (but IS open to sponsorship inquiries).
+</footer>
 </div>
 </div>
 {/* MOBILE SETTINGS DRAWER */}
