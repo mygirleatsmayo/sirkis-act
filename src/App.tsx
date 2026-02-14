@@ -197,7 +197,7 @@ onClick={() => onToggle(!enabled)}
 </div>
 </div>
 );
-const clampNumber = (value, min, max, fallback) => {
+const clampNumber = (value: number, min: number | undefined, max: number | undefined, fallback: number) => {
 if (!Number.isFinite(value)) {
 return fallback;
 }
@@ -393,7 +393,7 @@ const [showImmediateLine, setShowImmediateLine] = useState(true);
 // --- CALCULATIONS ---
 const { results, chartData, comparisonData, finalData } = useMemo(() => {
 // Helper to run a projection
-const runProjection = (startAgeOverride) => {
+const runProjection = (startAgeOverride: number) => {
 const data = [];
 let balance401k = 0;
 let balanceRoth = 0;
@@ -477,8 +477,8 @@ const annualInflation = inputs.inflationRate / 100;
 const monthlyReturn = Math.pow(1 + annualReturn, 1 / 12) - 1;
 const realMonthlyReturn = Math.pow((1 + annualReturn) / (1 + annualInflation), 1 / 12) - 1;
 const monthsInRetirement = withdrawalYears * 12;
-const nominalToRealToday = (value, age) => value / Math.pow(1 + annualInflation, Math.max(0, age - inputs.currentAge));
-const realTodayToNominalAtRetirement = (value) => value * Math.pow(1 + annualInflation, yearsToRetirement);
+const nominalToRealToday = (value: number, age: number) => value / Math.pow(1 + annualInflation, Math.max(0, age - inputs.currentAge));
+const realTodayToNominalAtRetirement = (value: number) => value * Math.pow(1 + annualInflation, yearsToRetirement);
 const retirementBalanceToday = nominalToRealToday(nominalAtRetirement, inputs.retirementAge);
 const monthlyRealWithdrawal = realMonthlyReturn > 0
 ? (retirementBalanceToday * realMonthlyReturn) / (1 - Math.pow(1 + realMonthlyReturn, -monthsInRetirement))
@@ -497,8 +497,24 @@ const legendItems = [
 { label: 'Start Now Total', color: '#b45309', visible: isDelayed && showImmediateLine }
 ];
 const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }), []);
-const formatCurrency = (val) => currencyFormatter.format(val || 0);
-const INPUT_BOUNDS = {
+const formatCurrency = (val: number) => currencyFormatter.format(val || 0);
+type InputKey = keyof Inputs;
+type NumericInputKey =
+| 'currentAge'
+| 'startAge'
+| 'retirementAge'
+| 'lifeExpectancy'
+| 'currentSalary'
+| 'salaryGrowth'
+| 'expectedReturn'
+| 'inflationRate'
+| 'contribution401k'
+| 'matchPercent'
+| 'matchLimit'
+| 'rothContribution'
+| 'hsaContribution';
+type InputBounds = Record<NumericInputKey, { min: number; max: number }>;
+const INPUT_BOUNDS: InputBounds = {
 currentAge: { min: 18, max: 80 },
 startAge: { min: 18, max: 100 },
 retirementAge: { min: 19, max: 100 },
@@ -513,18 +529,19 @@ matchLimit: { min: 0, max: 100 },
 rothContribution: { min: 0, max: LIMITS.rothAnnual },
 hsaContribution: { min: 0, max: LIMITS.hsaFamily },
 };
-const handleInputChange = (key, value) => {
+type InputValue = Inputs[InputKey] | number | string | boolean;
+const handleInputChange = (key: InputKey | 'RESET', value: InputValue) => {
 if (key === 'RESET') {
 setInputs(DEFAULT_INPUTS);
 } else {
 setInputs(prev => {
 const next = { ...prev };
-if (INPUT_BOUNDS[key]) {
-const bounds = INPUT_BOUNDS[key];
-const fallback = prev[key];
-next[key] = clampNumber(value, bounds.min, bounds.max, fallback);
+if (key in INPUT_BOUNDS) {
+const bounds = INPUT_BOUNDS[key as NumericInputKey];
+const fallback = prev[key as NumericInputKey] as number;
+next[key as NumericInputKey] = clampNumber(Number(value), bounds.min, bounds.max, fallback) as Inputs[InputKey];
 } else {
-next[key] = value;
+next[key as InputKey] = value as Inputs[InputKey];
 }
 if (key === 'currentAge') {
 next.startAge = Math.max(next.startAge, next.currentAge);
