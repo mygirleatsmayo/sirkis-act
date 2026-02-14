@@ -513,6 +513,7 @@ type NumericInputKey =
 | 'matchLimit'
 | 'rothContribution'
 | 'hsaContribution';
+type BooleanInputKey = 'enable401k' | 'enableRoth' | 'enableHSA';
 type InputBounds = Record<NumericInputKey, { min: number; max: number }>;
 const INPUT_BOUNDS: InputBounds = {
 currentAge: { min: 18, max: 80 },
@@ -539,9 +540,11 @@ const next = { ...prev };
 if (key in INPUT_BOUNDS) {
 const bounds = INPUT_BOUNDS[key as NumericInputKey];
 const fallback = prev[key as NumericInputKey] as number;
-next[key as NumericInputKey] = clampNumber(Number(value), bounds.min, bounds.max, fallback) as Inputs[InputKey];
+next[key as NumericInputKey] = clampNumber(Number(value), bounds.min, bounds.max, fallback);
+} else if (key === 'contributionTiming') {
+next.contributionTiming = String(value);
 } else {
-next[key as InputKey] = value as Inputs[InputKey];
+next[key as BooleanInputKey] = Boolean(value);
 }
 if (key === 'currentAge') {
 next.startAge = Math.max(next.startAge, next.currentAge);
@@ -777,11 +780,17 @@ width={80} // Increased width for larger dollar values
 axisLine={false}
 tickLine={false}
 tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 600}}
-tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+tickFormatter={(val) => {
+const numericVal = typeof val === 'number' ? val : Number(val);
+return `$${(numericVal / 1000).toFixed(0)}k`;
+}}
 />
 <Tooltip
 contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.9)', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)', padding: '16px' }}
-formatter={(value) => [formatCurrency(value), ""]}
+formatter={(value) => {
+const numericValue = typeof value === 'number' ? value : Number(value || 0);
+return [formatCurrency(numericValue), ""];
+}}
 labelStyle={{ color: '#0f172a', marginBottom: '8px', fontWeight: '900', fontFamily: 'serif', fontSize: '18px' }}
 itemStyle={{ padding: 0 }}
 separator=""
