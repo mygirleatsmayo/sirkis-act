@@ -622,17 +622,22 @@ let my401kCont = 0;
 let employerMatch = 0;
 if (isContributing) {
 if (inputs.enable401k) {
-my401kCont = currentSalary * (inputs.contribution401k / 100);
+const rawEmployee401k = currentSalary * (inputs.contribution401k / 100);
+my401kCont = Math.min(rawEmployee401k, LIMITS.max401kEmployee);
 const matchBase = Math.min(inputs.contribution401k, inputs.matchLimit) / 100;
-employerMatch = currentSalary * matchBase * (inputs.matchPercent / 100);
+const rawEmployerMatch = currentSalary * matchBase * (inputs.matchPercent / 100);
+// Clamp total 401k to IRS limit
+employerMatch = Math.min(rawEmployerMatch, Math.max(0, LIMITS.max401kTotal - my401kCont));
 }
 }
 const rothMatchBase = inputs.enable401k ? currentSalary * (inputs.contribution401k / 100) : 0;
 const rothMatchedAmount = Math.min(rothMatchBase, LIMITS.rothAnnual);
-const myRothCont = (isContributing && inputs.enableRoth)
+const rawRothCont = (isContributing && inputs.enableRoth)
 ? (inputs.rothMatch401k ? rothMatchedAmount : inputs.rothContribution)
 : 0;
-const myHSACont = (isContributing && inputs.enableHSA) ? inputs.hsaContribution : 0;
+const myRothCont = Math.min(rawRothCont, LIMITS.rothAnnual);
+const rawHSACont = (isContributing && inputs.enableHSA) ? inputs.hsaContribution : 0;
+const myHSACont = Math.min(rawHSACont, LIMITS.hsaFamily);
 const totalNewUserCont = my401kCont + myRothCont + myHSACont;
 const totalNewEmployerCont = employerMatch;
 const startBalance = balance401k + balanceRoth + balanceHSA;
