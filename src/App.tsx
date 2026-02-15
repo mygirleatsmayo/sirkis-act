@@ -91,7 +91,7 @@ const ComparisonRow = ({ label, value, subLabel, isPrimary = false }: Comparison
 <div className={`flex justify-between items-baseline ${isPrimary ? 'text-slate-900' : 'text-slate-500'}`}>
 <span className="text-xs font-bold uppercase tracking-wide opacity-80">{label}</span>
 <div className="text-right">
-<div className={`font-black tracking-tight ${isPrimary ? 'text-2xl font-serif' : 'text-sm'}`}>
+<div className={`font-black tracking-tight ${isPrimary ? 'text-lg sm:text-2xl font-serif' : 'text-sm'}`}>
 {value}
 </div>
 {subLabel && <div className="text-[10px] font-medium opacity-60">{subLabel}</div>}
@@ -295,11 +295,13 @@ return (
 {/* Branding in Sidebar (Desktop) */}
 {!isMobile && (
 <div className="mb-8 pt-2">
-<div className="flex items-center gap-2 mb-1 text-purple-900">
-<CrownLogo className="h-5 w-5 text-purple-700" />
-<span className="font-serif font-black text-xl tracking-tight">Sirkis Act</span>
+<div className="flex items-center gap-2.5 text-purple-900">
+<CrownLogo className="h-9 w-9 text-purple-700" />
+<div>
+<div className="font-serif font-black text-xl tracking-tight leading-tight">Sirkis Act</div>
+<div className="text-[10px] font-medium text-slate-500 leading-tight">Old-Fashioned Financial Planning</div>
 </div>
-<p className="text-xs font-medium text-slate-500 ml-7">Financial Planning Tool</p>
+</div>
 </div>
 )}
 {/* Timeline Section */}
@@ -468,12 +470,28 @@ className="text-xs font-bold text-slate-400 hover:text-purple-700 flex items-cen
 </div>
 );
 };
+const SIRKISMS = [
+  "I am a capitalist. I love money. No shame.",
+  "You don't lose the money from the early years. You lose all the money from the later years.",
+  "Drive the truck yourself.",
+  "How did most American millionaires achieve their wealth? They saved it. That's it.",
+  "Dollar sign goes in FRONT!",
+  "This is one of the most important things I could possibly pass on to you.",
+  "Careers on TV are fake. Fake. Fake.",
+  "I'm old-fashioned.",
+  "The secret to wealth is… compound interest.",
+  "If you don't find a career, a career will find you.",
+  "You look like a jackass if you refer to yourself with lowercase i.",
+];
+
 const App = () => {
 const [inputs, setInputs] = useState(DEFAULT_INPUTS);
 const [activeTab, setActiveTab] = useState('chart');
 const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 const [isNarrowScreen, setIsNarrowScreen] = useState(false);
+const [isScrolled, setIsScrolled] = useState(false);
 const [showImmediateLine, setShowImmediateLine] = useState(true);
+const [quoteIndex, setQuoteIndex] = useState(0);
 const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 const [drawerHeight, setDrawerHeight] = useState(0);
 const [drawerTranslate, setDrawerTranslate] = useState<number | null>(null);
@@ -500,6 +518,14 @@ setIsNarrowScreen(window.innerWidth < 640);
 updateViewport();
 window.addEventListener('resize', updateViewport);
 return () => window.removeEventListener('resize', updateViewport);
+}, []);
+useEffect(() => {
+const handleScroll = () => {
+const scrollY = window.scrollY;
+setIsScrolled(scrollY > 20);
+};
+window.addEventListener('scroll', handleScroll, { passive: true });
+return () => window.removeEventListener('scroll', handleScroll);
 }, []);
 useEffect(() => {
 const container = chartContainerRef.current;
@@ -676,7 +702,7 @@ const monthlyRealWithdrawalAtRetirement = realTodayToNominalAtRetirement(monthly
 const useThreeColumnPanels = chartSize.width >= 675;
 const legendItems = [
 { label: 'Your Contributions', color: '#6d28d9', visible: true },
-{ label: 'Employer Match', color: '#a855f7', visible: true },
+{ label: 'Employer Match (OPM)', color: '#a855f7', visible: true },
 { label: 'Investment Returns', color: '#f59e0b', visible: true },
 { label: 'Start Now Total', color: '#b45309', visible: isDelayed && showImmediateLine }
 ];
@@ -766,30 +792,48 @@ return (
 {/* MAIN CONTENT AREA */}
 <div className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
 {/* MOBILE HEADER */}
-<div className="lg:hidden flex justify-between items-center p-4 bg-white/80 backdrop-blur-md border-b border-white/50 sticky top-0 z-30 shadow-sm">
-<div className="flex items-center gap-2 font-serif font-black text-xl text-purple-900">
-<CrownLogo className="h-6 w-6 text-purple-700" />
-Sirkis Act
+<div className={`lg:hidden flex justify-between items-center px-4 bg-white/80 backdrop-blur-md border-b border-white/50 sticky top-0 z-30 shadow-sm transition-all duration-300 ${isScrolled ? 'py-1.5' : 'py-3'}`}>
+<div className="flex items-center gap-2 text-purple-900">
+<CrownLogo className={`text-purple-700 transition-all duration-300 ${isScrolled ? 'h-6 w-6' : 'h-9 w-9'}`} />
+<div className={`flex items-baseline gap-1.5 transition-all duration-300 ${isScrolled ? '' : 'flex-col !gap-0'}`}>
+<div className={`font-serif font-black tracking-tight leading-tight transition-all duration-300 ${isScrolled ? 'text-base' : 'text-xl'}`}>Sirkis Act</div>
+<div className={`font-medium text-slate-500 leading-tight transition-all duration-300 ${isScrolled ? 'text-[9px]' : 'text-[10px]'}`}>Old-Fashioned Financial Planning</div>
+</div>
 </div>
 </div>
 {/* SCROLLABLE DASHBOARD */}
 <div ref={mainScrollRef} className="overflow-x-clip custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
-<div className="max-w-[1180px] mx-auto px-4 py-6 pb-20 lg:pb-10 lg:px-10 lg:py-10 space-y-6">
+<div className="max-w-[1180px] mx-auto px-4 py-4 pb-20 lg:pb-8 lg:px-10 lg:py-8 space-y-4">
 {/* BRANDING HERO SECTION */}
-<div className="text-center lg:text-left space-y-3 pt-2 pb-4 animate-in slide-in-from-bottom duration-700 fade-in">
+<div className="text-left space-y-3 pt-2 pb-1 animate-in slide-in-from-bottom duration-700 fade-in">
 <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black text-slate-900 tracking-tight leading-[0.92]">
-Dr. Sirkis's <br className="hidden lg:block"/>
+Dr. Sirkis's<br />
 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-amber-500">High-Wire Act</span>
 </h1>
 <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl lg:ml-1">
-Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net</span> with tax-advantaged compounding.
+Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net</span> with<br className="sm:hidden" /> tax-advantaged compounding.
 </p>
+{/* SIRKISM QUOTE CAROUSEL */}
+<div
+  onClick={() => setQuoteIndex(i => (i + 1) % SIRKISMS.length)}
+  className="group cursor-pointer select-none max-w-2xl lg:ml-1"
+  role="button"
+  tabIndex={0}
+  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setQuoteIndex(i => (i + 1) % SIRKISMS.length); } }}
+>
+  <p className="text-sm sm:text-base italic text-slate-400 transition-opacity duration-300">
+    &ldquo;{SIRKISMS[quoteIndex]}&rdquo;
+  </p>
+  <p className="text-[10px] text-slate-400/60 mt-1 font-medium tracking-wide uppercase group-hover:text-slate-400 transition-colors">
+    <span className="hidden sm:inline">Click</span><span className="sm:hidden">Tap</span> for a new Sirkism
+  </p>
+</div>
 </div>
 {/* TOP METRICS GRID (COMPARISON AWARE) */}
 <div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-5 min-w-0`}>
 {/* TARGET CARD */}
-<Card className="p-5 flex flex-col justify-center">
-<div className="flex items-center justify-center gap-2 mb-4">
+<Card className="p-4 flex flex-col justify-center">
+<div className="flex items-center justify-center gap-2 mb-2">
 <Badge color="indigo">Target</Badge>
 </div>
 {isDelayed ? (
@@ -810,7 +854,7 @@ subLabel={(
 </div>
 ) : (
 <div className="text-center">
-<div className="text-[clamp(2rem,3vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
+<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
 {formatCurrency(finalData['Total Nominal'])}
 </div>
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projected Nest Egg</p>
@@ -818,8 +862,8 @@ subLabel={(
 )}
 </Card>
 {/* GROWTH CARD */}
-<Card className="p-5 flex flex-col justify-center">
-<div className="flex items-center justify-center gap-2 mb-4">
+<Card className="p-4 flex flex-col justify-center">
+<div className="flex items-center justify-center gap-2 mb-2">
 <Badge color="emerald">Growth</Badge>
 </div>
 {isDelayed ? (
@@ -837,7 +881,7 @@ value={formatCurrency(comparisonData['Investment Returns'])}
 </div>
 ) : (
 <div className="text-center">
-<div className="text-[clamp(2rem,3vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
+<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
 {formatCurrency(finalData['Investment Returns'])}
 </div>
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Compound Interest</p>
@@ -845,8 +889,8 @@ value={formatCurrency(comparisonData['Investment Returns'])}
 )}
 </Card>
 {/* REAL VALUE CARD */}
-<Card className="p-5 flex flex-col justify-center bg-white/80">
-<div className="flex items-center justify-center gap-2 mb-4">
+<Card className="p-4 flex flex-col justify-center bg-white/80">
+<div className="flex items-center justify-center gap-2 mb-2">
 <Badge color="rose">Real Value</Badge>
 </div>
 {isDelayed ? (
@@ -864,7 +908,7 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </div>
 ) : (
 <div className="text-center">
-<div className="text-[clamp(2rem,3vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
+<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
 {formatCurrency(finalData['Total Real (Today\'s $)'])}
 </div>
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Purchasing Power</p>
@@ -880,7 +924,7 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 <div className="text-3xl sm:text-[2.4rem] font-black text-rose-600 tracking-tight">
 {formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}
 </div>
-<div className="text-[11px] text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge} today.</div>
+<div className="text-[11px] text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge}</div>
 </div>
 <div className="flex flex-col sm:flex-row gap-2">
 <div className="flex-1 rounded-xl bg-amber-50/70 p-3 border border-amber-200/70 shadow-sm">
@@ -896,38 +940,33 @@ value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </GlassCard>
 )}
 {/* MAIN CHART CARD */}
-<GlassCard className="p-4 sm:p-5 lg:p-8 !rounded-[26px]">
-<div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-7 gap-4">
-<div>
+<GlassCard className="p-4 sm:p-5 lg:p-6 !rounded-[26px]">
+<div className="flex flex-wrap justify-between items-end mb-4 gap-3">
 <h2 className="font-serif font-black text-[1.9rem] text-slate-900">The Trajectory</h2>
-</div>
-<div className="flex flex-wrap items-center gap-3">
-<div className="bg-slate-100/50 p-1.5 rounded-xl flex text-sm font-bold shadow-inner">
+<div className="flex items-center justify-between gap-2 ml-auto flex-1 min-w-[200px] max-w-full sm:flex-none sm:justify-end">
+{isDelayed && (
+<button
+onClick={() => setShowImmediateLine(prev => !prev)}
+className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-white/70 text-slate-500 hover:text-slate-700' : 'bg-amber-500 text-white shadow-lg shadow-amber-200/50'}`}
+>
+{showImmediateLine ? 'Remove Start-Now' : 'Add Start-Now'}
+</button>
+)}
+<div className="bg-slate-100/50 p-1 rounded-xl flex text-xs font-bold shadow-inner">
 <button
 onClick={() => setActiveTab('chart')}
-className={`px-5 py-2 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
+className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
 >
 Chart
 </button>
 <button
 onClick={() => setActiveTab('table')}
-className={`px-5 py-2 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
+className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
 >
 Table
 </button>
 </div>
-{isDelayed && (
-<button
-onClick={() => setShowImmediateLine(prev => !prev)}
-className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-white/70 text-slate-500 hover:text-slate-700' : 'bg-amber-500 text-white shadow-lg shadow-amber-200/50'}`}
->
-{showImmediateLine ? 'Remove Start-Now Curve' : 'Add Start-Now Curve'}
-</button>
-)}
 </div>
-</div>
-<div className="mt-2 text-[11px] text-slate-500">
-Assumes contributions through the year selected, no contribution at retirement age, and returns compounded annually.
 </div>
 <div className="mt-4 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-500">
 {legendItems.filter((item) => item.visible).map((item) => (
@@ -943,7 +982,7 @@ className="h-[320px] sm:h-[360px] min-h-[320px] min-w-0 w-full"
 >
 {activeTab === 'chart' ? (
 chartSize.width > 0 && chartSize.height > 0 ? (
-<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 8, left: 6, bottom: 0 } : { top: 10, right: 30, left: 20, bottom: 0 }}>
+<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 8, left: 6, bottom: 0 } : { top: 10, right: 12, left: 4, bottom: 0 }}>
 <defs>
 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
 <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6}/>
@@ -1007,7 +1046,7 @@ separator=""
 <th className="p-2 text-center" colSpan={2}>Totals</th>
 </tr>
 <tr className="text-[11px] uppercase tracking-wider text-slate-400 text-center">
-<th className="p-2 text-center">Employee</th>
+<th className="p-2 text-center">You</th>
 <th className="p-2 text-center">Employer</th>
 <th className="p-2 text-center">Total</th>
 <th className="p-2 text-center text-amber-600">Year</th>
@@ -1041,15 +1080,37 @@ return (
 </div>
 )}
 </div>
+<div className="mt-2 text-[11px] text-slate-500">
+Assumes contributions through the year selected, no contribution at retirement age, and returns compounded annually.
+</div>
 </GlassCard>
 {/* QUICK STATS FOOTER */}
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-5 min-w-0`}>
-{[
+{(() => {
+const stats = [
 { label: "Self Funded", value: finalData['Your Contributions'], color: "text-purple-700", bg: "bg-purple-50", icon: User },
-{ label: "Employer Funded", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
+{ label: "Employer Funded (OPM)", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
 { label: "Market Funded", value: finalData['Investment Returns'], color: "text-amber-700", bg: "bg-amber-50", icon: Coins },
-].map((stat, i) => (
-<GlassCard key={i} className="p-5 flex flex-row items-center gap-5 group hover:scale-[1.02] transition-transform duration-300">
+];
+const compactStats = useThreeColumnPanels && stats.some(s => s.value >= 10_000_000);
+return (
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-5 min-w-0`}>
+{stats.map((stat, i) => (
+<GlassCard key={i} className={`p-5 group hover:scale-[1.02] transition-transform duration-300 ${compactStats ? 'flex flex-col gap-2' : 'flex flex-row items-center gap-5'}`}>
+{compactStats ? (
+<>
+<div className={`text-[clamp(1.1rem,2.1vw,1.55rem)] leading-tight font-black tabular-nums ${stat.color}`}>{formatCurrency(stat.value)}</div>
+<div className="flex items-center gap-3">
+<div className={`p-2.5 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+<stat.icon size={20} />
+</div>
+<div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
+<div>{stat.label}</div>
+<div>{finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%</div>
+</div>
+</div>
+</>
+) : (
+<>
 <div className={`p-3.5 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
 <stat.icon size={24} />
 </div>
@@ -1060,9 +1121,13 @@ return (
 <div>{finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%</div>
 </div>
 </div>
+</>
+)}
 </GlassCard>
 ))}
 </div>
+);
+})()}
 <GlassCard className="p-5 lg:p-7">
 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-5">
 <div>
