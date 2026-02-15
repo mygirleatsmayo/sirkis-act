@@ -1101,15 +1101,15 @@ const stats = [
 { label: "Market Funded", value: finalData['Investment Returns'], color: "text-amber-700", bg: "bg-amber-50", icon: Coins },
 ];
 return (
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} ${chartSize.width >= 900 ? 'gap-5' : 'gap-3'} min-w-0`}>
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'} min-w-0`}>
 {stats.map((stat, i) => (
-<GlassCard key={i} className={`${chartSize.width >= 900 ? 'p-5' : 'p-3'} group hover:scale-[1.02] transition-transform duration-300 flex flex-row items-center ${chartSize.width >= 900 ? 'justify-center gap-7' : 'gap-3'}`}>
-<div className={`${chartSize.width >= 900 ? 'p-3.5' : 'p-2'} rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-<stat.icon size={chartSize.width >= 900 ? 24 : 20} />
+<GlassCard key={i} className={`${chartSize.width >= 750 ? 'p-4' : 'p-3'} group hover:scale-[1.02] transition-transform duration-300 flex flex-row items-center justify-center ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'}`}>
+<div className={`${chartSize.width >= 750 ? 'p-2.5' : 'p-2'} rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+<stat.icon size={chartSize.width >= 750 ? 22 : 20} />
 </div>
 <div className="min-w-0">
-<div className={`text-[clamp(1.1rem,2.1vw,1.55rem)] leading-tight font-black tabular-nums ${stat.color}`}>{useThreeColumnPanels && chartSize.width < 900 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value)}</div>
-<div className={`text-[10px] font-bold text-slate-500 uppercase ${chartSize.width >= 900 ? 'tracking-widest' : 'tracking-wider'} leading-tight whitespace-nowrap`}>
+<div className={`text-[clamp(1.1rem,2.1vw,1.55rem)] leading-tight font-black tabular-nums ${stat.color}`}>{useThreeColumnPanels && chartSize.width < 750 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value)}</div>
+<div className={`text-[10px] font-bold text-slate-500 uppercase ${chartSize.width >= 750 ? 'tracking-widest' : 'tracking-wider'} leading-tight whitespace-nowrap`}>
 <div>{stat.label}</div>
 <div>{finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%</div>
 </div>
