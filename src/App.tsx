@@ -489,6 +489,7 @@ const [inputs, setInputs] = useState(DEFAULT_INPUTS);
 const [activeTab, setActiveTab] = useState('chart');
 const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 const [isNarrowScreen, setIsNarrowScreen] = useState(false);
+const [isMediumScreen, setIsMediumScreen] = useState(false);
 const [isScrolled, setIsScrolled] = useState(false);
 const [showImmediateLine, setShowImmediateLine] = useState(true);
 const [quoteIndex, setQuoteIndex] = useState(0);
@@ -514,6 +515,7 @@ useEffect(() => {
 const updateViewport = () => {
 setDrawerHeight(Math.round(window.innerHeight * 0.85));
 setIsNarrowScreen(window.innerWidth < 640);
+setIsMediumScreen(window.innerWidth >= 640 && window.innerWidth < 1024);
 };
 updateViewport();
 window.addEventListener('resize', updateViewport);
@@ -978,11 +980,11 @@ Table
 </div>
 <div
 ref={chartContainerRef}
-className="h-[320px] sm:h-[360px] min-h-[320px] min-w-0 w-full"
+className="h-[320px] sm:h-[360px] min-h-[320px] min-w-0 w-full overflow-visible"
 >
 {activeTab === 'chart' ? (
 chartSize.width > 0 && chartSize.height > 0 ? (
-<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 8, left: -2, bottom: 0 } : { top: 10, right: 12, left: -6, bottom: 0 }}>
+<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 0, left: -2, bottom: 0 } : isMediumScreen ? { top: 10, right: 0, left: -10, bottom: 0 } : { top: 10, right: 12, left: -5, bottom: 0 }}>
 <defs>
 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
 <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6}/>
@@ -1006,7 +1008,7 @@ tick={{fill: '#94a3b8', fontSize: isNarrowScreen ? 10 : 12, fontWeight: 600}}
 dy={isNarrowScreen ? 6 : 10}
 />
 <YAxis
-width={isNarrowScreen ? 52 : 72}
+width={isNarrowScreen ? 52 : isMediumScreen ? 64 : 68}
 axisLine={false}
 tickLine={false}
 tick={{fill: '#94a3b8', fontSize: isNarrowScreen ? 10 : 12, fontWeight: 600}}
@@ -1262,6 +1264,7 @@ Salary {summarySalary} · 401(k) {summaryContribution}
 </div>
 </div>
 <style>{`
+.recharts-surface { overflow: visible; }
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
