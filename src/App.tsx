@@ -402,7 +402,7 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <PiggyBank size={14} /> Strategy
 </h3>
 <ToggleSection label="401(k) / 403(b)" enabled={inputs.enable401k} onToggle={(v) => handleInputChange('enable401k', v)}>
-<InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" error={employeeOverCap ? 'Employee contribution exceeds IRS cap.' : null} />
+<InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" error={employeeOverCap ? 'Exceeds IRS cap. Projections use cap.' : null} />
 <div className="grid grid-cols-2 gap-4 border-t border-purple-100/60 pt-6 mt-2">
 <div>
 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Match %</label>
@@ -432,7 +432,7 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 </div>
 </div>
 {(employeeOverCap || totalOverCap) && (
-<div className="text-rose-600">Over IRS caps. Lower contribution % or match inputs.</div>
+<div className="text-rose-600">Over IRS caps. Projections use capped values.</div>
 )}
 </div>
 </ToggleSection>
@@ -450,11 +450,11 @@ className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-
 <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${inputs.rothMatch401k ? 'translate-x-5' : ''}`} />
 </button>
 </div>
-<InputField label="Annual Amount" value={rothEffectiveContribution} onChange={v => handleInputChange('rothContribution', v)} min={0} max={LIMITS.rothAnnual} step={100} unit="$" error={rothOverCap ? 'Roth IRA contribution exceeds IRS cap.' : null} disabled={inputs.rothMatch401k} />
+<InputField label="Annual Amount" value={rothEffectiveContribution} onChange={v => handleInputChange('rothContribution', v)} min={0} max={LIMITS.rothAnnual} step={100} unit="$" error={rothOverCap ? 'Exceeds IRS cap. Projections use cap.' : null} disabled={inputs.rothMatch401k} />
 <div className={`mt-2 text-[11px] ${rothOverCap ? 'text-rose-600' : 'text-slate-500'}`}>IRS cap: {formatCurrency(LIMITS.rothAnnual)}.</div>
 </ToggleSection>
 <ToggleSection label="HSA / Other" enabled={inputs.enableHSA} onToggle={(v) => handleInputChange('enableHSA', v)}>
-<InputField label="Annual Amount" value={inputs.hsaContribution} onChange={v => handleInputChange('hsaContribution', v)} min={0} max={LIMITS.hsaFamily} step={100} unit="$" error={hsaOverCap ? 'HSA contribution exceeds family cap.' : null} />
+<InputField label="Annual Amount" value={inputs.hsaContribution} onChange={v => handleInputChange('hsaContribution', v)} min={0} max={LIMITS.hsaFamily} step={100} unit="$" error={hsaOverCap ? 'Exceeds family cap. Projections use cap.' : null} />
 <div className={`mt-2 text-[11px] ${hsaOverCap ? 'text-rose-600' : 'text-slate-500'}`}>Common caps: {formatCurrency(LIMITS.hsaIndividual)} individual, {formatCurrency(LIMITS.hsaFamily)} family.</div>
 </ToggleSection>
 </section>
