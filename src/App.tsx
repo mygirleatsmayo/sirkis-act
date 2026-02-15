@@ -982,7 +982,7 @@ className="h-[320px] sm:h-[360px] min-h-[320px] min-w-0 w-full"
 >
 {activeTab === 'chart' ? (
 chartSize.width > 0 && chartSize.height > 0 ? (
-<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 8, left: 6, bottom: 0 } : { top: 10, right: 12, left: 4, bottom: 0 }}>
+<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 8, left: -2, bottom: 0 } : { top: 10, right: 12, left: -6, bottom: 0 }}>
 <defs>
 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
 <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6}/>
@@ -1006,7 +1006,7 @@ tick={{fill: '#94a3b8', fontSize: isNarrowScreen ? 10 : 12, fontWeight: 600}}
 dy={isNarrowScreen ? 6 : 10}
 />
 <YAxis
-width={isNarrowScreen ? 56 : 80}
+width={isNarrowScreen ? 52 : 72}
 axisLine={false}
 tickLine={false}
 tick={{fill: '#94a3b8', fontSize: isNarrowScreen ? 10 : 12, fontWeight: 600}}
@@ -1021,6 +1021,7 @@ formatter={(value) => {
 const numericValue = typeof value === 'number' ? value : Number(value || 0);
 return [formatCurrency(numericValue), ""];
 }}
+itemSorter={(item) => -(typeof item.value === 'number' ? item.value : Number(item.value || 0))}
 labelStyle={{ color: '#0f172a', marginBottom: '8px', fontWeight: '900', fontFamily: 'serif', fontSize: '18px' }}
 itemStyle={{ padding: 0 }}
 separator=""
