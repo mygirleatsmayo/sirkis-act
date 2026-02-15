@@ -701,7 +701,7 @@ const annualNominalWithdrawal = annualReturn > 0
 ? (nominalAtRetirement * annualReturn) / (1 - Math.pow(1 + annualReturn, -withdrawalYears))
 : nominalAtRetirement / withdrawalYears;
 const monthlyRealWithdrawalAtRetirement = realTodayToNominalAtRetirement(monthlyRealWithdrawal);
-const useThreeColumnPanels = chartSize.width >= 675;
+const useThreeColumnPanels = chartSize.width >= 550;
 const legendItems = [
 { label: 'Your Contributions', color: '#6d28d9', visible: true },
 { label: 'Employer Match (OPM)', color: '#a855f7', visible: true },
@@ -710,6 +710,12 @@ const legendItems = [
 ];
 const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }), []);
 const formatCurrency = (val: number) => currencyFormatter.format(val || 0);
+const formatCompact = (val: number) => {
+  const abs = Math.abs(val || 0);
+  if (abs >= 1_000_000) return `$${(val / 1_000_000).toPrecision(4)}M`;
+  if (abs >= 1_000) return `$${(val / 1_000).toPrecision(4)}K`;
+  return formatCurrency(val);
+};
 type InputKey = keyof Inputs;
 type NumericInputKey =
 | 'currentAge'
@@ -813,7 +819,7 @@ Dr. Sirkis's<br />
 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-amber-500">High-Wire Act</span>
 </h1>
 <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl lg:ml-1">
-Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net</span> with<br className="sm:hidden" /> tax-advantaged compounding.
+Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net</span> with{' '}<span className="inline-block">tax-advantaged compounding.</span>
 </p>
 {/* SIRKISM QUOTE CAROUSEL */}
 <div
@@ -1091,41 +1097,23 @@ Assumes contributions through the year selected, no contribution at retirement a
 {(() => {
 const stats = [
 { label: "Self Funded", value: finalData['Your Contributions'], color: "text-purple-700", bg: "bg-purple-50", icon: User },
-{ label: "Employer Funded (OPM)", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
+{ label: "Employer (OPM)", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
 { label: "Market Funded", value: finalData['Investment Returns'], color: "text-amber-700", bg: "bg-amber-50", icon: Coins },
 ];
-const compactStats = useThreeColumnPanels && stats.some(s => s.value >= 10_000_000);
 return (
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-5 min-w-0`}>
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} ${chartSize.width >= 900 ? 'gap-5' : 'gap-3'} min-w-0`}>
 {stats.map((stat, i) => (
-<GlassCard key={i} className={`p-5 group hover:scale-[1.02] transition-transform duration-300 ${compactStats ? 'flex flex-col gap-2' : 'flex flex-row items-center gap-5'}`}>
-{compactStats ? (
-<>
-<div className={`text-[clamp(1.1rem,2.1vw,1.55rem)] leading-tight font-black tabular-nums ${stat.color}`}>{formatCurrency(stat.value)}</div>
-<div className="flex items-center gap-3">
-<div className={`p-2.5 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-<stat.icon size={20} />
-</div>
-<div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
-<div>{stat.label}</div>
-<div>{finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%</div>
-</div>
-</div>
-</>
-) : (
-<>
-<div className={`p-3.5 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-<stat.icon size={24} />
+<GlassCard key={i} className={`${chartSize.width >= 900 ? 'p-5' : 'p-3'} group hover:scale-[1.02] transition-transform duration-300 flex flex-row items-center ${chartSize.width >= 900 ? 'justify-center gap-7' : 'gap-3'}`}>
+<div className={`${chartSize.width >= 900 ? 'p-3.5' : 'p-2'} rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+<stat.icon size={chartSize.width >= 900 ? 24 : 20} />
 </div>
 <div className="min-w-0">
-<div className={`text-[clamp(1.1rem,2.1vw,1.55rem)] leading-tight font-black tabular-nums ${stat.color}`}>{formatCurrency(stat.value)}</div>
-<div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
+<div className={`text-[clamp(1.1rem,2.1vw,1.55rem)] leading-tight font-black tabular-nums ${stat.color}`}>{useThreeColumnPanels && chartSize.width < 900 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value)}</div>
+<div className={`text-[10px] font-bold text-slate-500 uppercase ${chartSize.width >= 900 ? 'tracking-widest' : 'tracking-wider'} leading-tight whitespace-nowrap`}>
 <div>{stat.label}</div>
 <div>{finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%</div>
 </div>
 </div>
-</>
-)}
 </GlassCard>
 ))}
 </div>
