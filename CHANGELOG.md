@@ -1,6 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+
+- **IRS Cap Enforcement**: Contributions exceeding IRS limits now clamped in projection calculations (401k, Roth IRA, HSA).
+- **Responsive Stats Panels**: Smart per-value abbreviation, adaptive layout scaling, 3-column threshold lowered to 550px.
+- **Chart Tooltip**: Reordered legend to match chart stacking order (Start Now highest).
+- **Chart/Table Padding**: Fixed values matching "The Trajectory" alignment.
+- **Subheadline Fix**: Prevented orphan words with inline-block wrapping.
+- **Title/Meta**: Updated page title and added Open Graph meta tags.
 - **Theme & Branding**: Shifted to a purple-and-gold palette, crown favicon, and updated tab title.
 - **Quote Carousel**: Added "Sirkism" quote carousel for educational reinforcement.
 - **Responsiveness**: Enhanced scroll handling, viewport management, and mobile layout.

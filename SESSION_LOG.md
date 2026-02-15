@@ -1,5 +1,35 @@
 # Session Log
 
+## Session 4: Stats Panels, IRS Cap Fix, Branching Workflow
+**Date:** 2026-02-15
+
+### What Was Done
+- **Responsive Stats Panels**: Smart per-value abbreviation (4 sig digits), adaptive icon/padding/gap scaling, `whitespace-nowrap` labels, tuned 3-column threshold to 550px
+- **IRS Cap Enforcement**: Warp Oz cloud agent clamped 401(k), Roth IRA, and HSA contributions to IRS limits in projection calculations (bugfix/irs-cap-enforcement branch, merged to main)
+- **Git Branching Workflow**: Established conventions (hyphens for branch names, namespace prefixes for sub-branches, checkpoint tags), documented in CLAUDE.md and Memory MCP
+- **Subheadline Orphan Fix**: Wrapped "tax-advantaged compounding." in `inline-block` span
+- **Title/OG Tags**: Updated page title and added Open Graph meta tags
+- **Label Change**: "Employer Funded (OPM)" shortened to "Employer (OPM)"
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/App.tsx` | Modified (stats panels, abbreviation, orphan fix, label) |
+| `index.html` | Modified (title, OG meta tags) |
+| `CLAUDE.md` | Modified (added §7 branching workflow, §8 backup safety) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| Warp Oz setup | Setup commands run before repo clone; `npm install` must be in prompt | Low |
+
+### Next Steps
+1. Tighten vertical height of top 3-4 panels in mobile view
+2. Visual identity pass (color palette, gold color, fonts, quote carousel)
+3. Drawer handle improvements (context info, glow effect)
+
+---
+
 ## Session 3: UI Polish & Responsiveness
 **Date:** 2026-02-15
 
