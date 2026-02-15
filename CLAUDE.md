@@ -151,7 +151,17 @@ Prepend newest first:
 
 ---
 
-## 7. Backup Safety
+## 7. Git Branching Workflow
+
+- **No `/` separators** in branch names; use hyphens instead (e.g., `ui-polish-2`, not `ui/polish-2`)
+- **Sub-branches use `/`** off a namespace that is not itself a branch (e.g., `ui-polish-2/stats-panels`, `ui-polish-2/visual-identity`)
+- **Tag checkpoints** before merging to `main` (e.g., `git tag ui-polish-checkpoint-feb15`)
+- **Workflow**: work on sub-branches → merge to `main` when ready → tag before merge
+- The namespace parent (e.g., `ui-polish-2`) should not exist as a branch; it's just a grouping prefix
+
+---
+
+## 8. Backup Safety
 
 Before making significant changes:
 - Check when the last git commit was made
