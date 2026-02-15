@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 - **Theme & Branding**: Shifted to a purple-and-gold palette, crown favicon, and updated tab title.
+- **Quote Carousel**: Added "Sirkism" quote carousel for educational reinforcement.
+- **Responsiveness**: Enhanced scroll handling, viewport management, and mobile layout.
 - **Withdrawals**: Added life expectancy input and growth-aware withdrawal estimates.
 - **Inputs**: Added major-based starting salary presets (NACE) and tightened input validation.
 
