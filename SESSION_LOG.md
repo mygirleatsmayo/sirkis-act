@@ -1,5 +1,42 @@
 # Session Log
 
+## Session 5: IRS Cap Merge, Warp Prompts, Closeout/Onboard Commands
+**Date:** 2026-02-16
+
+### What Was Done
+- **IRS Cap Merge**: Reviewed Warp Oz agent's `bugfix/irs-cap-enforcement` branch and merged to `main`
+- **Page Title/OG**: Updated `<title>` and added `og:title`, `og:type`, `og:url` meta tags
+- **Warp Oz Task Doc**: Expanded from single-task to multi-task doc with 5 prompts (IRS cap done, accessibility, meta tags, unit tests, performance)
+- **Global `/closeout` Command**: Created `~/.claude/commands/closeout.md` (9-step session closeout procedure)
+- **Global `/onboard` Command**: Created `~/.claude/commands/onboard.md` (8-step session onboarding procedure)
+- **Session Awareness Update**: Rewrote `~/.claude/rules/session-awareness.md` to reference both commands
+- **VSCode Git Fix**: Diagnosed ECONNREFUSED socket error (stale socket, restart VSCode)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `index.html` | Modified (title, OG meta tags) |
+| `SESSION_LOG.md` | Modified |
+| `CHANGELOG.md` | Modified |
+| `~/.claude/commands/closeout.md` | Created |
+| `~/.claude/commands/onboard.md` | Created |
+| `~/.claude/rules/session-awareness.md` | Modified |
+| Obsidian `Warp-Oz-sirkis-act.md` | Modified (expanded with 4 new task prompts) |
+| Obsidian `wAPP-Sirkis-High-wire-Act-TODO.md` | Modified (IRS cap marked complete) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| `/closeout` and `/onboard` not yet surfaced | Need VSCode/Claude Code restart to register new commands | Low |
+
+### Next Steps
+1. Tighten vertical height of top 3-4 panels in mobile view
+2. Visual identity pass (color palette, gold color, fonts, quote carousel)
+3. Drawer handle improvements (context info, glow effect)
+4. Run Warp Oz tasks (accessibility, meta tags, unit tests, performance)
+
+---
+
 ## Session 4: Stats Panels, IRS Cap Fix, Branching Workflow
 **Date:** 2026-02-15
 
