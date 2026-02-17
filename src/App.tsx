@@ -747,12 +747,12 @@ return (
 {/* MAIN CONTENT AREA */}
 <div className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
 {/* MOBILE HEADER */}
-<div className={`lg:hidden flex justify-between items-center px-4 bg-white/80 backdrop-blur-md border-b border-white/50 sticky top-0 z-30 shadow-sm transition-all duration-300 ${isScrolled ? 'py-1.5' : 'py-3'}`}>
+<div className={`lg:hidden flex justify-between items-center px-4 bg-white/90 border-b border-white/50 sticky top-0 z-30 shadow-sm transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
 <div className="flex items-center gap-2 text-purple-900">
-<CrownLogo className={`text-purple-700 transition-all duration-300 ${isScrolled ? 'h-6 w-6' : 'h-9 w-9'}`} />
+<CrownLogo className={`text-purple-700 transition-[height,width] duration-300 ease-in-out ${isScrolled ? 'h-6 w-6' : 'h-9 w-9'}`} />
 <div className="flex flex-col">
-<div className={`font-serif font-black tracking-tight leading-tight transition-all duration-300 ${isScrolled ? 'text-base' : 'text-xl'}`}>Sirkis Act</div>
-<div className={`font-medium text-slate-500 leading-tight text-[10px] overflow-hidden transition-all duration-300 ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
+<div className={`font-serif font-black tracking-tight leading-tight transition-[font-size] duration-300 ease-in-out ${isScrolled ? 'text-base' : 'text-xl'}`}>Sirkis Act</div>
+<div className={`font-medium text-slate-500 leading-tight text-[10px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
 </div>
 </div>
 </div>
