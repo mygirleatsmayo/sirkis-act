@@ -1,5 +1,35 @@
 # Session Log
 
+## Session 6: Compact Mobile Panels
+
+**Date:** 2026-02-17
+
+### What Was Done
+- **Hero+Two-Across Layout**: Converted narrow-screen metric panels from single-column stack to hero card (col-span-2) + two side-by-side cards for Target/Growth/Real, Stats Footer, and Withdrawals sections
+- **Delayed Mode Redesign**: Merged Target+Potential Loss into single card with sub-cards (narrow); separate full-width Potential Loss 4th row (wide/3-col)
+- **Start Early Sub-Cards**: Green-framed sub-cards with "Start Early" label and gray descriptors (Projected Nest Egg, Compound Interest, Purchasing Power) on all delayed panels
+- **Stats Footer Hero**: Market Funded card with scaled-up number (`clamp(2rem,6vw,2.8rem)`), 36px icon, single-line "MARKET FUNDED · 79%" label
+- **Terminology**: Renamed "Start Now" / "If started at [age]" → "Start Early" across all comparison panels
+- **Cleanup**: Removed unused `ComparisonRow` type and component
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/App.tsx` | Modified (100 insertions, 90 deletions) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| Market Funded hero height | User said "enough for now" but padding/scaling could still be fine-tuned | Low |
+| ESLint v9 config missing | Pre-existing: `npm run lint` fails due to missing `eslint.config.js` | Medium |
+
+### Next Steps
+1. Fine-tune Market Funded hero card padding if needed
+2. Drawer handle enrichment and glow effect
+3. Header collapse/expand smoothness on mobile scroll
+4. Drawer open/close rendering smoothness
+5. Warp Oz codebase audit (after changes settle)
+
 ## Session 5: IRS Cap Merge, Warp Prompts, Closeout/Onboard Commands
 **Date:** 2026-02-16
 

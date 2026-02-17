@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 - **IRS Cap Enforcement**: Contributions exceeding IRS limits now clamped in projection calculations (401k, Roth IRA, HSA).
+- **Compact Mobile Panels**: Hero+two-across layout for narrow screens; merged delayed-start Target+Potential Loss; "Start Early" green sub-cards with descriptors.
 - **Responsive Stats Panels**: Smart per-value abbreviation, adaptive layout scaling, 3-column threshold lowered to 550px.
 - **Chart Tooltip**: Reordered legend to match chart stacking order (Start Now highest).
 - **Chart/Table Padding**: Fixed values matching "The Trajectory" alignment.
