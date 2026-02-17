@@ -470,6 +470,14 @@ const SIRKISMS = [
   "The secret to wealth is… compound interest.",
   "If you don't find a career, a career will find you.",
   "You look like a jackass if you refer to yourself with lowercase i.",
+  "C's get degrees.",
+  "A W is better than a D. A D is better than an F. But a C is better than all of them.",
+  "The cost of waiting is not $8,000. It's half your retirement.",
+  "Work until 74, or start now. Your choice.",
+  "If you can't pay cash for the car, you can't afford the car.",
+  "Professors are human beings. They have sides.",
+  "Don't show up late with a Duncan Donuts cup.",
+  "Horror stories exist for a reason.",
 ];
 
 const App = () => {
