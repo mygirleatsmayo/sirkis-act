@@ -86,18 +86,6 @@ return (
 </span>
 );
 };
-type ComparisonRowProps = { label: string; value: string; subLabel?: ReactNode; isPrimary?: boolean };
-const ComparisonRow = ({ label, value, subLabel, isPrimary = false }: ComparisonRowProps) => (
-<div className={`flex justify-between items-baseline ${isPrimary ? 'text-slate-900' : 'text-slate-500'}`}>
-<span className="text-xs font-bold uppercase tracking-wide opacity-80">{label}</span>
-<div className="text-right">
-<div className={`font-black tracking-tight ${isPrimary ? 'text-lg sm:text-2xl font-serif' : 'text-sm'}`}>
-{value}
-</div>
-{subLabel && <div className="text-[10px] font-medium opacity-60">{subLabel}</div>}
-</div>
-</div>
-);
 type IconType = ComponentType<{ size?: number; className?: string }>;
 type InputFieldProps = {
 label: string;
@@ -843,27 +831,37 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </div>
 </div>
 {/* TOP METRICS GRID (COMPARISON AWARE) */}
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-5 min-w-0`}>
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-5' : 'grid-cols-2 gap-3'} min-w-0`}>
 {/* TARGET CARD */}
-<Card className="p-4 flex flex-col justify-center">
+<Card className={`${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-4'} flex flex-col justify-center`}>
 <div className="flex items-center justify-center gap-2 mb-2">
 <Badge color="indigo">Target</Badge>
 </div>
 {isDelayed ? (
-<div className="space-y-4">
-<ComparisonRow
-label={`Start at ${inputs.startAge}`}
-value={formatCurrency(finalData['Total Nominal'])}
-isPrimary={true}
-/>
-<div className="w-full h-px bg-slate-100" />
-<ComparisonRow
-label={`If Started at ${inputs.currentAge}`}
-value={formatCurrency(comparisonData['Total Nominal'])}
-subLabel={(
-<span className="text-rose-600 font-bold">Potential Loss: {formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</span>
+<div className="text-center">
+<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
+{formatCurrency(finalData['Total Nominal'])}
+</div>
+<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projected Nest Egg</p>
+{useThreeColumnPanels ? (
+<div className="rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/60 mt-3 text-center">
+<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Early</div>
+<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-slate-900 tracking-tight">
+{formatCurrency(comparisonData['Total Nominal'])}
+</div>
+</div>
+) : (
+<div className="grid grid-cols-2 gap-2 mt-3">
+<div className="rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/60">
+<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Early</div>
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-slate-900">{formatCurrency(comparisonData['Total Nominal'])}</div>
+</div>
+<div className="rounded-xl bg-rose-50/70 p-2.5 border border-rose-200/60">
+<div className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-rose-600">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
+</div>
+</div>
 )}
-/>
 </div>
 ) : (
 <div className="text-center">
@@ -875,82 +873,85 @@ subLabel={(
 )}
 </Card>
 {/* GROWTH CARD */}
-<Card className="p-4 flex flex-col justify-center">
+<Card className={`${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center`}>
 <div className="flex items-center justify-center gap-2 mb-2">
 <Badge color="emerald">Growth</Badge>
 </div>
 {isDelayed ? (
-<div className="space-y-4">
-<ComparisonRow
-label={`Start at ${inputs.startAge}`}
-value={formatCurrency(finalData['Investment Returns'])}
-isPrimary={true}
-/>
-<div className="w-full h-px bg-slate-100" />
-<ComparisonRow
-label={`If Started at ${inputs.currentAge}`}
-value={formatCurrency(comparisonData['Investment Returns'])}
-/>
+<div className="text-center">
+<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-slate-900 tracking-tight mb-1`}>
+{formatCurrency(finalData['Investment Returns'])}
+</div>
+<p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Compound Interest</p>
+{useThreeColumnPanels ? (
+<div className="rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/60 mt-3 text-center">
+<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Early</div>
+<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-slate-900 tracking-tight">
+{formatCurrency(comparisonData['Investment Returns'])}
+</div>
+</div>
+) : (
+<>
+<div className="w-full h-px bg-slate-100 mt-2 mb-1" />
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-emerald-600 tracking-tight">
+{formatCurrency(comparisonData['Investment Returns'])}
+</div>
+<p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Start Early</p>
+</>
+)}
 </div>
 ) : (
 <div className="text-center">
-<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
+<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-slate-900 tracking-tight mb-1`}>
 {formatCurrency(finalData['Investment Returns'])}
 </div>
-<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Compound Interest</p>
+<p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Compound Interest</p>
 </div>
 )}
 </Card>
 {/* REAL VALUE CARD */}
-<Card className="p-4 flex flex-col justify-center bg-white/80">
+<Card className={`${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center bg-white/80`}>
 <div className="flex items-center justify-center gap-2 mb-2">
-<Badge color="rose">Real Value</Badge>
+<Badge color="slate">Real Value</Badge>
 </div>
 {isDelayed ? (
-<div className="space-y-4">
-<ComparisonRow
-label={`Start at ${inputs.startAge}`}
-value={formatCurrency(finalData['Total Real (Today\'s $)'])}
-isPrimary={true}
-/>
-<div className="w-full h-px bg-slate-100" />
-<ComparisonRow
-label={`If Started at ${inputs.currentAge}`}
-value={formatCurrency(comparisonData['Total Real (Today\'s $)'])}
-/>
+<div className="text-center">
+<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-slate-900 tracking-tight mb-1`}>
+{formatCurrency(finalData['Total Real (Today\'s $)'])}
+</div>
+<p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Purchasing Power</p>
+{useThreeColumnPanels ? (
+<div className="rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/60 mt-3 text-center">
+<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Early</div>
+<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-slate-900 tracking-tight">
+{formatCurrency(comparisonData['Total Real (Today\'s $)'])}
+</div>
+</div>
+) : (
+<>
+<div className="w-full h-px bg-slate-100 mt-2 mb-1" />
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-emerald-600 tracking-tight">
+{formatCurrency(comparisonData['Total Real (Today\'s $)'])}
+</div>
+<p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Start Early</p>
+</>
+)}
 </div>
 ) : (
 <div className="text-center">
-<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
+<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-slate-900 tracking-tight mb-1`}>
 {formatCurrency(finalData['Total Real (Today\'s $)'])}
 </div>
-<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Purchasing Power</p>
+<p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Purchasing Power</p>
 </div>
 )}
 </Card>
 </div>
-{isDelayed && (
-<GlassCard className="p-4 border-rose-200/80 bg-gradient-to-br from-rose-100/90 via-rose-50/80 to-rose-50/60">
-<div className="grid gap-3 md:grid-cols-[1.1fr_1fr] items-center">
-<div>
-<div className="text-[11px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
-<div className="text-3xl sm:text-[2.4rem] font-black text-rose-600 tracking-tight">
-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}
-</div>
-<div className="text-[11px] text-slate-500 mt-1">Starting at {inputs.startAge} vs {inputs.currentAge}</div>
-</div>
-<div className="flex flex-col sm:flex-row gap-2">
-<div className="flex-1 rounded-xl bg-amber-50/70 p-3 border border-amber-200/70 shadow-sm">
-<div className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Start Now</div>
-<div className="text-lg font-black text-slate-900">{formatCurrency(comparisonData['Total Nominal'])}</div>
-</div>
-<div className="flex-1 rounded-xl bg-rose-50/70 p-3 border border-rose-200/60 shadow-sm">
-<div className="text-[10px] font-black text-rose-600 uppercase tracking-widest">Delayed</div>
-<div className="text-lg font-black text-slate-900">{formatCurrency(finalData['Total Nominal'])}</div>
-</div>
-</div>
-</div>
-</GlassCard>
+{isDelayed && useThreeColumnPanels && (
+<Card className="p-4 flex items-center justify-center gap-3 bg-rose-50/50 border-rose-200/40">
+<div className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
+<div className="text-[clamp(1.1rem,2vw,1.5rem)] font-black text-rose-600">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
+</Card>
 )}
 {/* MAIN CHART CARD */}
 <GlassCard className="p-4 sm:p-5 lg:p-6 !rounded-[26px]">
@@ -1101,26 +1102,35 @@ Assumes contributions through the year selected, no contribution at retirement a
 {/* QUICK STATS FOOTER */}
 {(() => {
 const stats = [
+{ label: "Market Funded", value: finalData['Investment Returns'], color: "text-amber-700", bg: "bg-amber-50", icon: Coins },
 { label: "Self Funded", value: finalData['Your Contributions'], color: "text-purple-700", bg: "bg-purple-50", icon: User },
 { label: "Employer (OPM)", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
-{ label: "Market Funded", value: finalData['Investment Returns'], color: "text-amber-700", bg: "bg-amber-50", icon: Coins },
 ];
 return (
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'} min-w-0`}>
-{stats.map((stat, i) => (
-<GlassCard key={i} className={`${chartSize.width >= 750 ? 'p-4' : 'p-3'} group hover:scale-[1.02] transition-transform duration-300 flex flex-row items-center justify-center ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'}`}>
-<div className={`${chartSize.width >= 750 ? 'p-2.5' : 'p-2'} rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-<stat.icon size={chartSize.width >= 750 ? 22 : 20} />
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-2'} ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'} min-w-0`}>
+{stats.map((stat, i) => {
+const isHero = !useThreeColumnPanels && i === 0;
+return (
+<GlassCard key={i} className={`${isHero ? 'col-span-2' : ''} ${chartSize.width >= 750 ? 'p-4' : 'p-3'} group hover:scale-[1.02] transition-transform duration-300 flex flex-row items-center justify-center ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'}`}>
+<div className={`${isHero ? 'p-3.5' : chartSize.width >= 750 ? 'p-2.5' : 'p-2'} rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+<stat.icon size={isHero ? 36 : chartSize.width >= 750 ? 22 : 20} />
 </div>
 <div className="min-w-0">
-<div className={`text-[clamp(1.1rem,2.1vw,1.55rem)] leading-tight font-black tabular-nums ${stat.color}`}>{useThreeColumnPanels && chartSize.width < 750 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value)}</div>
-<div className={`text-[10px] font-bold text-slate-500 uppercase ${chartSize.width >= 750 ? 'tracking-widest' : 'tracking-wider'} leading-tight whitespace-nowrap`}>
+<div className={`${isHero ? 'text-[clamp(2rem,6vw,2.8rem)]' : !useThreeColumnPanels ? 'text-[clamp(0.95rem,4vw,1.35rem)]' : 'text-[clamp(1.1rem,2.1vw,1.55rem)]'} leading-tight font-black tabular-nums ${stat.color}`}>{!useThreeColumnPanels && !isHero && stat.value >= 1_000_000 ? formatCompact(stat.value) : (useThreeColumnPanels && chartSize.width < 750 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value))}</div>
+{isHero ? (
+<div className="text-xs font-bold text-slate-500 uppercase tracking-wider leading-tight whitespace-nowrap">
+{stat.label} · {finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%
+</div>
+) : (
+<div className={`text-[10px] font-bold text-slate-500 uppercase ${chartSize.width >= 750 ? 'tracking-widest' : !useThreeColumnPanels ? 'tracking-wide' : 'tracking-wider'} leading-tight whitespace-nowrap`}>
 <div>{stat.label}</div>
 <div>{finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%</div>
 </div>
+)}
 </div>
 </GlassCard>
-))}
+);
+})}
 </div>
 );
 })()}
@@ -1135,18 +1145,18 @@ return (
 <div>Age {startWithdrawAge} to {inputs.lifeExpectancy}</div>
 </div>
 </div>
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-1'} gap-3 items-stretch min-w-0`}>
-<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm h-full flex flex-col min-w-0">
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-3' : 'grid-cols-2 gap-3'} items-stretch min-w-0`}>
+<div className={`rounded-2xl bg-white/70 border border-white/80 ${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-3'} shadow-sm h-full flex flex-col min-w-0`}>
 <div className="text-[10px] font-black uppercase tracking-widest text-purple-600">Fixed Purchasing Power</div>
 <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
 <div className="text-[11px] text-slate-500 mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} today.</div>
 </div>
-<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm h-full flex flex-col min-w-0">
+<div className={`rounded-2xl bg-white/70 border border-white/80 ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
 <div className="text-[10px] font-black uppercase tracking-widest text-amber-600">Fixed Monthly</div>
 <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(monthlyNominalWithdrawal)}</div>
 <div className="text-[11px] text-slate-500 mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))}.</div>
 </div>
-<div className="rounded-2xl bg-white/70 border border-white/80 p-4 shadow-sm h-full flex flex-col min-w-0">
+<div className={`rounded-2xl bg-white/70 border border-white/80 ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
 <div className="text-[10px] font-black uppercase tracking-widest text-rose-500">Fixed Annual</div>
 <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(annualNominalWithdrawal)}</div>
 <div className="text-[11px] text-slate-500 mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))}.</div>
