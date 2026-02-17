@@ -1286,22 +1286,20 @@ Salary {summarySalary} · 401(k) {summaryContribution}
 .pulse-glow::after {
 	content: '';
 	position: absolute;
-	inset: 4px 10px 10px 10px;
-	border-radius: 18px;
-	box-shadow: 0 0 22px 6px rgba(245, 158, 11, 0.38);
-	animation: glowPulse 2.6s ease-out infinite;
+	inset: 2px 8px 8px 8px;
+	border-radius: 20px;
+	box-shadow:
+		0 0 18px 4px  rgba(109,  40, 217, 0.55),
+		0 0 44px 12px rgba(245, 158, 11,  0.22),
+		0 0 72px 22px rgba(245, 158, 11,  0.16);
+	opacity: 0.7;
+	animation: glowPulse 3s ease-in-out infinite;
 	pointer-events: none;
 }
 @keyframes glowPulse {
-	0% {
-		box-shadow: 0 0 22px 6px rgba(245, 158, 11, 0.38);
-	}
-	70% {
-		box-shadow: 0 0 34px 12px rgba(245, 158, 11, 0.2);
-	}
-	100% {
-		box-shadow: 0 0 22px 6px rgba(245, 158, 11, 0.3);
-	}
+	0%   { opacity: 0.55; box-shadow: 0 0 18px 4px rgba(109,40,217,0.55),  0 0 44px 12px rgba(245,158,11,0.22),  0 0 72px 22px rgba(245,158,11,0.16); }
+	50%  { opacity: 1;    box-shadow: 0 0 26px 8px rgba(109,40,217,0.72),  0 0 60px 18px rgba(245,158,11,0.30),  0 0 92px 32px rgba(245,158,11,0.22); }
+	100% { opacity: 0.55; box-shadow: 0 0 18px 4px rgba(109,40,217,0.55),  0 0 44px 12px rgba(245,158,11,0.22),  0 0 72px 22px rgba(245,158,11,0.16); }
 }
 @media (max-width: 1023px) {
 	html, body, #root {
