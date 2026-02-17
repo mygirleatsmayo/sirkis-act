@@ -510,7 +510,7 @@ return () => window.removeEventListener('resize', updateViewport);
 useEffect(() => {
 const handleScroll = () => {
 const scrollY = window.scrollY;
-setIsScrolled(scrollY > 20);
+setIsScrolled(scrollY > 60);
 };
 window.addEventListener('scroll', handleScroll, { passive: true });
 return () => window.removeEventListener('scroll', handleScroll);
@@ -747,11 +747,19 @@ return (
 {/* MAIN CONTENT AREA */}
 <div className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
 {/* MOBILE HEADER */}
-<div className={`lg:hidden flex justify-between items-center px-4 bg-white/90 border-b border-white/50 sticky top-0 z-30 shadow-sm transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
+<div className={`lg:hidden flex justify-between items-center px-4 bg-white/90 border-b border-white/50 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
 <div className="flex items-center gap-2 text-purple-900">
-<CrownLogo className={`text-purple-700 transition-[height,width] duration-300 ease-in-out ${isScrolled ? 'h-6 w-6' : 'h-9 w-9'}`} />
+<div
+  className="transition-transform duration-300 ease-in-out"
+  style={{ transform: isScrolled ? 'scale(0.67)' : 'scale(1)', transformOrigin: 'left center' }}
+>
+  <CrownLogo className="text-purple-700 h-9 w-9" />
+</div>
 <div className="flex flex-col">
-<div className={`font-serif font-black tracking-tight leading-tight transition-[font-size] duration-300 ease-in-out ${isScrolled ? 'text-base' : 'text-xl'}`}>Sirkis Act</div>
+<div
+  className="font-serif font-black tracking-tight leading-tight text-xl transition-transform duration-300 ease-in-out"
+  style={{ transform: isScrolled ? 'scale(0.8)' : 'scale(1)', transformOrigin: 'left center' }}
+>Sirkis Act</div>
 <div className={`font-medium text-slate-500 leading-tight text-[10px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
 </div>
 </div>
@@ -1218,11 +1226,6 @@ onFocus={(e) => {
 	100% { opacity: 0.55; box-shadow: 0 0 18px 4px rgba(109,40,217,0.55),  0 0 44px 12px rgba(245,158,11,0.22),  0 0 72px 22px rgba(245,158,11,0.16); }
 }
 @media (max-width: 1023px) {
-	html, body, #root {
-		overflow-x: clip;
-		max-width: 100vw;
-		width: 100%;
-	}
 	input,
 	select,
 	textarea {
