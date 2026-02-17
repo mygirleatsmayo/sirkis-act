@@ -750,9 +750,9 @@ return (
 <div className={`lg:hidden flex justify-between items-center px-4 bg-white/80 backdrop-blur-md border-b border-white/50 sticky top-0 z-30 shadow-sm transition-all duration-300 ${isScrolled ? 'py-1.5' : 'py-3'}`}>
 <div className="flex items-center gap-2 text-purple-900">
 <CrownLogo className={`text-purple-700 transition-all duration-300 ${isScrolled ? 'h-6 w-6' : 'h-9 w-9'}`} />
-<div className={`flex items-baseline gap-1.5 transition-all duration-300 ${isScrolled ? '' : 'flex-col !gap-0'}`}>
+<div className="flex flex-col">
 <div className={`font-serif font-black tracking-tight leading-tight transition-all duration-300 ${isScrolled ? 'text-base' : 'text-xl'}`}>Sirkis Act</div>
-<div className={`font-medium text-slate-500 leading-tight transition-all duration-300 ${isScrolled ? 'text-[9px]' : 'text-[10px]'}`}>Old-Fashioned Financial Planning</div>
+<div className={`font-medium text-slate-500 leading-tight text-[10px] overflow-hidden transition-all duration-300 ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
 </div>
 </div>
 </div>
