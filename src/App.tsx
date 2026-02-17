@@ -468,6 +468,7 @@ const SIRKISMS = [
   "This is one of the most important things I could possibly pass on to you.",
   "Careers on TV are fake. Fake. Fake.",
   "I'm old-fashioned.",
+  "There are stupid questions.",
   "The secret to wealth is… compound interest.",
   "If you don't find a career, a career will find you.",
   "You look like a jackass if you refer to yourself with lowercase i.",
