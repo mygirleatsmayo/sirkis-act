@@ -22,6 +22,7 @@ ChevronDown,
 ChevronUp,
 Info
 } from 'lucide-react';
+import { Drawer } from 'vaul';
 // --- CONSTANTS ---
 const DEFAULT_INPUTS = {
 currentAge: 23,
@@ -490,18 +491,8 @@ const [isScrolled, setIsScrolled] = useState(false);
 const [showImmediateLine, setShowImmediateLine] = useState(true);
 const [quoteIndex, setQuoteIndex] = useState(0);
 const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
-const [drawerHeight, setDrawerHeight] = useState(0);
-const [drawerTranslate, setDrawerTranslate] = useState<number | null>(null);
-const [isDraggingDrawer, setIsDraggingDrawer] = useState(false);
-const dragStartY = useRef(0);
-const dragStartTranslate = useRef(0);
-const didDrag = useRef(false);
-const mainScrollRef = useRef<HTMLDivElement | null>(null);
-const drawerRef = useRef<HTMLDivElement | null>(null);
-const drawerContentRef = useRef<HTMLDivElement | null>(null);
+const peekDragStartY = useRef(0);
 const chartContainerRef = useRef<HTMLDivElement | null>(null);
-const lockedMainScrollTop = useRef(0);
-const HANDLE_HEIGHT = 76;
 useEffect(() => {
 if (inputs.startAge > inputs.currentAge) {
 setShowImmediateLine(false);
@@ -509,7 +500,6 @@ setShowImmediateLine(false);
 }, [inputs.startAge, inputs.currentAge]);
 useEffect(() => {
 const updateViewport = () => {
-setDrawerHeight(Math.round(window.innerHeight * 0.85));
 setIsNarrowScreen(window.innerWidth < 640);
 setIsMediumScreen(window.innerWidth >= 640 && window.innerWidth < 1024);
 };
@@ -546,50 +536,6 @@ resizeObserver.disconnect();
 window.removeEventListener('orientationchange', updateChartReady);
 };
 }, [activeTab]);
-useEffect(() => {
-const mainScroll = mainScrollRef.current;
-const drawerContent = drawerContentRef.current;
-if (!mainScroll) return;
-const handleFocusIn = (event: FocusEvent) => {
-if (!isSettingsOpen) return;
- const focusTarget = event.target;
- if (!(focusTarget instanceof HTMLElement)) return;
- if (!drawerContent || !drawerContent.contains(focusTarget)) return;
-requestAnimationFrame(() => {
- const targetRect = focusTarget.getBoundingClientRect();
-const contentRect = drawerContent.getBoundingClientRect();
- const targetTopInContent = targetRect.top - contentRect.top + drawerContent.scrollTop;
-const desiredScrollTop = Math.max(0, targetTopInContent - drawerContent.clientHeight * 0.35);
-drawerContent.scrollTo({ top: desiredScrollTop, behavior: 'smooth' });
-mainScroll.scrollTop = lockedMainScrollTop.current;
-});
-};
-if (isSettingsOpen) {
-lockedMainScrollTop.current = window.scrollY;
-document.body.style.position = 'fixed';
-document.body.style.top = `-${lockedMainScrollTop.current}px`;
-document.body.style.left = '0';
-document.body.style.right = '0';
-document.body.style.overflow = 'hidden';
-document.addEventListener('focusin', handleFocusIn);
-} else {
-const savedY = Math.abs(parseInt(document.body.style.top || '0', 10));
-document.body.style.position = '';
-document.body.style.top = '';
-document.body.style.left = '';
-document.body.style.right = '';
-document.body.style.overflow = '';
-window.scrollTo(0, savedY);
-}
-return () => {
-document.body.style.position = '';
-document.body.style.top = '';
-document.body.style.left = '';
-document.body.style.right = '';
-document.body.style.overflow = '';
-document.removeEventListener('focusin', handleFocusIn);
-};
-}, [isSettingsOpen]);
 
 const summarySalary = `$${Math.round(inputs.currentSalary / 1000)}k`;
 const summaryContribution = inputs.enable401k ? `${inputs.contribution401k}%` : 'Off';
@@ -811,7 +757,7 @@ return (
 </div>
 </div>
 {/* SCROLLABLE DASHBOARD */}
-<div ref={mainScrollRef} className="overflow-x-clip custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+<div className="overflow-x-clip custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
 <div className="max-w-[1180px] mx-auto px-4 py-4 pb-20 lg:pb-8 lg:px-10 lg:py-8 space-y-4">
 {/* BRANDING HERO SECTION */}
 <div className="text-left space-y-3 pt-2 pb-1 animate-in slide-in-from-bottom duration-700 fade-in">
@@ -1180,84 +1126,32 @@ Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by
 </div>
 </div>
 {/* MOBILE SETTINGS DRAWER */}
-<div className="lg:hidden fixed inset-0 z-50 pointer-events-none">
-{isSettingsOpen && (
+<div className="lg:hidden">
+{!isSettingsOpen && (
 <div
-className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto"
-onClick={() => setIsSettingsOpen(false)}
-/>
-)}
-<div
-ref={drawerRef}
-className="bg-white/90 backdrop-blur-xl w-full rounded-t-3xl shadow-2xl border-t border-white/50 transition-transform duration-300 pointer-events-auto absolute inset-x-0 bottom-0"
-style={{
-height: '85vh',
-transform: `translateY(${drawerTranslate ?? (isSettingsOpen ? 0 : Math.max(0, drawerHeight - HANDLE_HEIGHT))}px)`
-}}
->
-<div
+className="fixed inset-x-0 bottom-0 z-40 cursor-pointer select-none touch-none"
+onClick={() => setIsSettingsOpen(true)}
 role="button"
 tabIndex={0}
-onClick={() => {
-if (didDrag.current) {
-didDrag.current = false;
-return;
-}
-setIsSettingsOpen((open) => !open);
-}}
-onKeyDown={(event) => {
-if (event.key === 'Enter' || event.key === ' ') {
-setIsSettingsOpen((open) => !open);
+onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsSettingsOpen(true); }}
+onPointerDown={(e) => { peekDragStartY.current = e.clientY; }}
+onPointerMove={(e) => {
+if (!peekDragStartY.current) return;
+if (peekDragStartY.current - e.clientY > 20) {
+setIsSettingsOpen(true);
+peekDragStartY.current = 0;
 }
 }}
-onPointerDown={(event) => {
-event.preventDefault();
-event.currentTarget.setPointerCapture(event.pointerId);
-const closedTranslate = Math.max(0, drawerHeight - HANDLE_HEIGHT);
-dragStartY.current = event.clientY;
-dragStartTranslate.current = drawerTranslate ?? (isSettingsOpen ? 0 : closedTranslate);
-didDrag.current = false;
-setIsDraggingDrawer(true);
-}}
-onPointerMove={(event) => {
-if (!isDraggingDrawer) return;
-const closedTranslate = Math.max(0, drawerHeight - HANDLE_HEIGHT);
-const delta = event.clientY - dragStartY.current;
-const nextTranslate = Math.min(closedTranslate, Math.max(0, dragStartTranslate.current + delta));
-if (Math.abs(delta) > 6) {
-didDrag.current = true;
-}
-setDrawerTranslate(nextTranslate);
-}}
-onPointerUp={(event) => {
-if (!isDraggingDrawer) return;
-event.currentTarget.releasePointerCapture(event.pointerId);
-const closedTranslate = Math.max(0, drawerHeight - HANDLE_HEIGHT);
-const currentTranslate = drawerTranslate ?? (isSettingsOpen ? 0 : closedTranslate);
-const shouldOpen = currentTranslate < closedTranslate * 0.5;
-setIsDraggingDrawer(false);
-setIsSettingsOpen(shouldOpen);
-setDrawerTranslate(null);
-}}
-onPointerCancel={() => {
-setIsDraggingDrawer(false);
-setDrawerTranslate(null);
-}}
-className={`w-full px-4 pt-2 pb-4 text-left select-none cursor-pointer touch-none ${isSettingsOpen ? '' : 'pulse-glow'} ${isDraggingDrawer ? '' : 'transition-transform duration-300'}`}
+onPointerUp={() => { peekDragStartY.current = 0; }}
+onPointerCancel={() => { peekDragStartY.current = 0; }}
 >
-{isSettingsOpen && (
-<div className="flex justify-center mb-1">
-<span className="h-1.5 w-10 rounded-full bg-slate-300/80" />
-</div>
-)}
+<div className="pulse-glow bg-white/90 backdrop-blur-xl border-t border-white/50 shadow-2xl rounded-t-3xl px-4 pt-2 pb-4">
 <div className="flex items-center justify-between">
 <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
 <span className="h-1 w-6 rounded-full bg-slate-300/70" />
 Inputs
 </div>
-{isSettingsOpen ? null : (
 <ChevronUp size={18} className="text-purple-700" />
-)}
 </div>
 <div className="mt-1 text-sm font-semibold text-slate-700">
 Age {inputs.currentAge} · Start {inputs.startAge} · Retire {inputs.retirementAge}
@@ -1266,12 +1160,34 @@ Age {inputs.currentAge} · Start {inputs.startAge} · Retire {inputs.retirementA
 Salary {summarySalary} · 401(k) {summaryContribution}
 </div>
 </div>
-{isSettingsOpen && (
-<div ref={drawerContentRef} className="px-6 pb-6 overflow-y-auto custom-scrollbar drawer-scroll h-[calc(85vh-76px)]">
-<SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} isMobile={true} />
+<div style={{ height: 'env(safe-area-inset-bottom)' }} />
 </div>
 )}
+<Drawer.Root open={isSettingsOpen} onOpenChange={setIsSettingsOpen} repositionInputs={false}>
+<Drawer.Portal>
+<Drawer.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40" />
+<Drawer.Content
+className="bg-white/95 rounded-t-3xl border-t border-white/50 shadow-2xl fixed inset-x-0 bottom-0 z-50 flex flex-col outline-none"
+style={{ height: '85dvh' }}
+>
+<Drawer.Title className="sr-only">Settings</Drawer.Title>
+<div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+<span className="h-1.5 w-10 rounded-full bg-slate-300/80" />
 </div>
+<div
+className="flex-1 overflow-y-auto custom-scrollbar drawer-scroll px-6"
+style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 24px)' }}
+onFocus={(e) => {
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) {
+    setTimeout(() => e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 300);
+  }
+}}
+>
+<SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} isMobile={true} />
+</div>
+</Drawer.Content>
+</Drawer.Portal>
+</Drawer.Root>
 </div>
 </div>
 <style>{`
