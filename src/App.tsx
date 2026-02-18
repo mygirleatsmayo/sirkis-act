@@ -109,6 +109,7 @@ step?: number;
 icon?: IconType;
 unit?: string;
 error?: string | null;
+errorState?: boolean;
 helper?: string;
 tooltip?: string;
 disabled?: boolean;
@@ -165,7 +166,7 @@ className="group inline-flex items-center text-slate-400 hover:text-[#00A499] fo
 </div>
 );
 };
-const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, helper, tooltip, disabled = false }: InputFieldProps) => {
+const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, errorState = false, helper, tooltip, disabled = false }: InputFieldProps) => {
 const [draftValue, setDraftValue] = useState(Number.isFinite(value) ? String(value) : "");
 useEffect(() => {
 setDraftValue(Number.isFinite(value) ? String(value) : "");
@@ -174,11 +175,11 @@ const commitDraft = () => {
 const next = draftValue.trim() === "" ? NaN : parseFloat(draftValue);
 onChange(next);
 };
-const hasError = Boolean(error);
+const hasError = Boolean(error) || errorState;
 return (
 <div className="mb-8 group">
 <div className="flex justify-between items-center mb-3">
-<label className={`text-sm font-semibold flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600' : 'text-slate-200 group-hover:text-[#00A499]'}`}>
+<label className={`text-sm flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600 font-bold' : 'text-slate-200 font-semibold group-hover:text-[#00A499]'}`}>
 {Icon && <Icon size={16} className="text-slate-400 group-hover:text-[#A8A8A8] transition-colors" />}
 {label}
 {tooltip && <TooltipIcon content={tooltip} />}
@@ -402,7 +403,7 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <PiggyBank size={14} /> Strategy
 </h3>
 <ToggleSection label="401(k) / 403(b)" enabled={inputs.enable401k} onToggle={(v) => handleInputChange('enable401k', v)}>
-<InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" error={employeeOverCap ? 'Exceeds IRS cap. Projections use cap.' : null} />
+<InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" errorState={employeeOverCap} />
 <div className="grid grid-cols-2 gap-4 border-t border-white/[0.07] pt-6 mt-2">
 <div>
 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Match %</label>
@@ -418,7 +419,7 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <Info size={14} className={employeeOverCap || totalOverCap ? 'text-rose-500' : 'text-[#A8A8A8]'} />
 <div className="space-y-2">
 <div className={employeeOverCap ? 'text-rose-600' : 'text-slate-400'}>
-Employee est: <span className="font-semibold">{formatCurrency(annualEmployee401k)}</span> (cap {formatCurrency(LIMITS.max401kEmployee)}).
+Employee est: <span className="font-semibold">{formatCurrency(annualEmployee401k)}</span> (cap <span className="font-bold">{formatCurrency(LIMITS.max401kEmployee)}</span>).
 </div>
 <div className={totalOverCap ? 'text-rose-600' : 'text-slate-400'}>
 Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k)}</span>.
@@ -432,7 +433,7 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 </div>
 </div>
 {(employeeOverCap || totalOverCap) && (
-<div className="text-rose-600">Over IRS caps. Projections use capped values.</div>
+<div className="text-rose-600 font-bold">Over IRS caps. Projections use capped values.</div>
 )}
 </div>
 </ToggleSection>
@@ -883,7 +884,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 )}
 </Card>
 {/* REAL VALUE CARD */}
-<Card className={`${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center bg-white/80`}>
+<Card className={`${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center`}>
 <div className="flex items-center justify-center gap-2 mb-2">
 <Badge color="slate">Real Value</Badge>
 </div>
@@ -921,10 +922,10 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 </Card>
 </div>
 {isDelayed && useThreeColumnPanels && (
-<Card className="p-4 flex items-center justify-center gap-3 bg-[#D32F2F]/10 border-[#D32F2F]/50">
+<div className="p-4 flex items-center justify-center gap-3 rounded-[22px] shadow-[0_16px_32px_-24px_rgba(0,0,0,0.7)]" style={{ background: 'rgba(211,47,47,0.10)', border: '1px solid rgba(211,47,47,0.50)' }}>
 <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
 <div className="text-[clamp(1.1rem,2vw,1.5rem)] font-black text-rose-600">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
-</Card>
+</div>
 )}
 {/* MAIN CHART CARD */}
 <GlassCard className="p-4 sm:p-5 lg:p-6 !rounded-[26px]">
