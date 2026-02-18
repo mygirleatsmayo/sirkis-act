@@ -1,0 +1,78 @@
+/* ============================================
+   PURPLE + GOLD THEME — reference snapshot
+   To reapply: update THEME const in App.tsx
+   with values below, swap background/blobs,
+   hero gradient, glow CSS, and accent classes.
+   ============================================ */
+
+
+/* --- THEME CONST (src/App.tsx) ------------- */
+
+--brand:       #4A235A;   /* Your Contributions (deep amethyst) */
+--brand-bg:    rgba(74, 35, 90, 0.06);
+
+--opm:         #7E4F8A;   /* Employer Match (muted mauve) */
+
+--returns:     #C59A17;   /* Investment Returns (dark goldenrod) — unchanged */
+--returns-bg:  rgba(197, 154, 23, 0.08);
+
+--start-now:   #0D9488;   /* Start Now / Early Start — unchanged */
+--start-bg:    rgba(13, 148, 136, 0.08);
+
+--loss:        #E11D48;   /* Loss / errors — unchanged */
+--loss-bg:     rgba(225, 29, 72, 0.07);
+
+
+/* --- BADGE COMPONENT (line ~89) ------------ */
+/* indigo: "bg-[#4A235A]/10 text-[#4A235A] border-[#4A235A]/20" */
+/* emerald: "bg-[#C59A17]/10 text-[#C59A17] border-[#C59A17]/20" */
+
+
+/* --- ARBITRARY TAILWIND CLASSES ------------ */
+/* Replace all #0F6B5E → #4A235A              */
+/* Replace all #3BAA9A  → #7E4F8A              */
+/* accent-[#0F6B5E]     → accent-[#4A235A]     */
+/* hover:accent-[#0D9488] → hover:accent-[#6B2D8B] (or keep teal) */
+
+
+/* --- BACKGROUND (line ~749) ---------------- */
+
+/* gradient: from-[#ece3ef] via-[#fdf5d4] to-[#ece3ef] */
+--bg-from: #ece3ef;
+--bg-via:  #fdf5d4;
+--bg-to:   #ece3ef;
+
+/* top-right blob */
+--blob-purple: #b896c0;   /* bg-[#b896c0]/40 rounded-full blur-3xl */
+
+/* bottom-left blob */
+--blob-gold:   #f0d470;   /* bg-[#f0d470]/40 rounded-full blur-3xl */
+
+
+/* --- HERO HEADLINE (line ~786) ------------- */
+/* Gradient span: linear-gradient(to right, #4A235A, #C59A17)    */
+/* Restore:                                                        */
+/* <span className="text-transparent bg-clip-text"                */
+/*   style={{ backgroundImage:                                    */
+/*     `linear-gradient(to right, ${THEME.brand}, ${THEME.returns})` }}> */
+/* High-Wire Act                                                   */
+/* </span>                                                         */
+/* Also restore "Dr. Sirkis's" to text-slate-900 (remove teal)   */
+
+
+/* --- GLOW CSS (pulse-glow::after) ---------- */
+/* Dual-color: brand purple + gold             */
+
+/*
+.pulse-glow::after {
+  box-shadow:
+    0 0 18px 4px  rgba(74,  35, 90,  0.55),
+    0 0 44px 12px rgba(197, 154, 23, 0.22),
+    0 0 72px 22px rgba(197, 154, 23, 0.16);
+}
+@keyframes glowPulse {
+  0%   { box-shadow: 0 0 18px 4px rgba(74,35,90,0.55),   0 0 44px 12px rgba(197,154,23,0.22), 0 0 72px 22px rgba(197,154,23,0.16); }
+  50%  { box-shadow: 0 0 26px 8px rgba(74,35,90,0.72),   0 0 60px 18px rgba(197,154,23,0.30), 0 0 92px 32px rgba(197,154,23,0.22); }
+  100% { box-shadow: 0 0 18px 4px rgba(74,35,90,0.55),   0 0 44px 12px rgba(197,154,23,0.22), 0 0 72px 22px rgba(197,154,23,0.16); }
+}
+*/

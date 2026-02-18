@@ -1,0 +1,33 @@
+/* ============================================
+   BRAND — deep forest teal (replaces purple)
+   ============================================ */
+
+--brand:      #0F6B5E;   /* Your Contributions / UI chrome */
+--brand-bg:   rgba(15, 107, 94, 0.06);
+
+--opm:        #3BAA9A;   /* Employer Match (lighter jade) */
+--opm-bg:     rgba(59, 170, 154, 0.08);
+
+/* ============================================
+   DATA — returns, comparison, loss
+   ============================================ */
+
+--returns:    #C59A17;   /* Investment Returns (true gold) */
+--returns-bg: rgba(197, 154, 23, 0.08);
+
+--start-now:  #0D9488;   /* Start Now / Early Start (aqua teal) */
+--start-bg:   rgba(13, 148, 136, 0.08);
+
+--loss:       #E11D48;   /* Delayed start / loss / errors */
+--loss-bg:    rgba(225, 29, 72, 0.07);
+
+/* ============================================
+   BACKGROUND CANVAS
+   ============================================ */
+
+--bg-from:    #E0EFED;   /* gradient start (pale teal) */
+--bg-via:     #FDF5D4;   /* gradient mid (pale gold) */
+--bg-to:      #E0EFED;   /* gradient end (pale teal) */
+
+--blob-teal:  #7DBFB8;   /* top-right blob */
+--blob-gold:  #F0D470;   /* bottom-left blob */

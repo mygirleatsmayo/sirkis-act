@@ -1,0 +1,66 @@
+/* ============================================
+   TEAL + GOLD THEME — reference snapshot
+   To reapply: update THEME const in App.tsx
+   with values below, swap background/blobs,
+   hero text, glow CSS, and accent classes.
+   ============================================ */
+
+
+/* --- THEME CONST (src/App.tsx) ------------- */
+
+--brand:       #0F6B5E;   /* Your Contributions (deep forest teal) */
+--brand-bg:    rgba(15, 107, 94, 0.06);
+
+--opm:         #3BAA9A;   /* Employer Match (lighter jade teal) */
+
+--returns:     #C59A17;   /* Investment Returns (dark goldenrod) */
+--returns-bg:  rgba(197, 154, 23, 0.08);
+
+--start-now:   #0D9488;   /* Start Now / Early Start (aqua teal) */
+--start-bg:    rgba(13, 148, 136, 0.08);
+
+--loss:        #E11D48;   /* Loss / errors */
+--loss-bg:     rgba(225, 29, 72, 0.07);
+
+
+/* --- BADGE COMPONENT (line ~89) ------------ */
+/* indigo: "bg-[#0F6B5E]/10 text-[#0F6B5E] border-[#0F6B5E]/20" */
+/* emerald: "bg-[#C59A17]/10 text-[#C59A17] border-[#C59A17]/20" */
+
+
+/* --- ARBITRARY TAILWIND CLASSES ------------ */
+/* All instances: #0F6B5E (brand), #3BAA9A (opm) */
+/* accent-[#0F6B5E] hover:accent-[#0D9488]        */
+
+
+/* --- BACKGROUND (line ~749) ---------------- */
+
+/* gradient: from-[#FDF5D4] to-[#E0EFED]  (gold → teal, no via) */
+--bg-from: #FDF5D4;
+--bg-to:   #E0EFED;
+
+/* bottom-left blob only (top-right removed) */
+--blob-gold: #f0d470;   /* bg-[#f0d470]/40 rounded-full blur-3xl */
+
+
+/* --- HERO HEADLINE (line ~784) ------------- */
+/* Two solid spans, no gradient:              */
+/* "Dr. Sirkis's" → style={{ color: THEME.brand }}  (#0F6B5E)  */
+/* "High-Wire Act" → style={{ color: THEME.returns }} (#C59A17) */
+
+
+/* --- GLOW CSS (pulse-glow::after) ---------- */
+/* Gold only                                  */
+
+/*
+.pulse-glow::after {
+  box-shadow:
+    0 0 44px 12px rgba(197, 154, 23, 0.28),
+    0 0 72px 22px rgba(197, 154, 23, 0.18);
+}
+@keyframes glowPulse {
+  0%   { box-shadow: 0 0 44px 12px rgba(197,154,23,0.28), 0 0 72px 22px rgba(197,154,23,0.18); }
+  50%  { box-shadow: 0 0 60px 18px rgba(197,154,23,0.40), 0 0 92px 32px rgba(197,154,23,0.26); }
+  100% { box-shadow: 0 0 44px 12px rgba(197,154,23,0.28), 0 0 72px 22px rgba(197,154,23,0.18); }
+}
+*/

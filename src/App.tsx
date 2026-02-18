@@ -51,15 +51,26 @@ rothAnnual: 7500,
 hsaIndividual: 4150,
 hsaFamily: 8300,
 };
+const THEME = {
+brand:     '#00A499',  // Your Contributions (persian green)
+opm:       '#A8A8A8',  // Employer Match (boulder grey — lightened for dark bg)
+returns:   '#E6C300',  // Investment Returns (corn gold)
+startNow:  '#0D9488',  // Start Now / Early Start (aqua teal — close to brand, watch)
+loss:      '#D32F2F',  // Delayed start / loss / errors (persian red)
+brandBg:   'rgba(0,164,153,0.06)',
+returnsBg: 'rgba(230,195,0,0.08)',
+startNowBg:'rgba(13,148,136,0.08)',
+lossBg:    'rgba(211,47,47,0.07)',
+} as const;
 // --- HELPER COMPONENTS ---
 type CardProps = { children: ReactNode; className?: string };
 const GlassCard = ({ children, className = "" }: CardProps) => (
-<div className={`bg-gradient-to-br from-white/95 via-white/80 to-slate-50/80 backdrop-blur-2xl border border-white/80 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.55)] rounded-[28px] ${className}`}>
+<div className={`bg-[#004745] border border-white/[0.07] shadow-[0_22px_55px_-38px_rgba(0,0,0,0.8)] rounded-[28px] ${className}`}>
 {children}
 </div>
 );
 const Card = ({ children, className = "" }: CardProps) => (
-<div className={`bg-white/90 backdrop-blur-md rounded-[22px] border border-slate-200/70 shadow-[0_16px_32px_-24px_rgba(15,23,42,0.55)] ring-1 ring-slate-100/80 transition-shadow hover:shadow-[0_24px_50px_-36px_rgba(15,23,42,0.6)] ${className}`}>
+<div className={`bg-[#004240] rounded-[22px] border border-white/[0.06] shadow-[0_16px_32px_-24px_rgba(0,0,0,0.7)] transition-shadow hover:shadow-[0_24px_50px_-36px_rgba(0,0,0,0.85)] ${className}`}>
 {children}
 </div>
 );
@@ -75,11 +86,11 @@ type BadgeColor = 'indigo' | 'emerald' | 'rose' | 'amber' | 'slate';
 type BadgeProps = { children: ReactNode; color?: BadgeColor };
 const Badge = ({ children, color = "indigo" }: BadgeProps) => {
 const styles = {
-indigo: "bg-purple-600/10 text-purple-900 border-purple-200/30",
-emerald: "bg-amber-500/10 text-amber-800 border-amber-200/30",
-rose: "bg-rose-500/10 text-rose-800 border-rose-200/20",
-amber: "bg-amber-600/10 text-amber-900 border-amber-200/30",
-slate: "bg-slate-500/10 text-slate-600 border-slate-200/20",
+indigo: "bg-[#00A499]/10 text-[#00A499] border-[#00A499]/20",
+emerald: "bg-[#C59A17]/10 text-[#C59A17] border-[#C59A17]/20",
+rose: "bg-rose-500/15 text-rose-400 border-rose-500/20",
+amber: "bg-amber-500/15 text-amber-300 border-amber-400/20",
+slate: "bg-white/10 text-slate-300 border-white/15",
 };
 return (
 <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${styles[color] || styles.indigo}`}>
@@ -143,11 +154,11 @@ if (isTouch) {
 setIsOpen(false);
 }
 }}
-className="group inline-flex items-center text-slate-400 hover:text-purple-600 focus:outline-none"
+className="group inline-flex items-center text-slate-400 hover:text-[#00A499] focus:outline-none"
 >
 <Info size={12} />
 <span className="sr-only">Info</span>
-<span className={`pointer-events-none absolute w-64 max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-[11px] font-medium text-slate-600 shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
+<span className={`pointer-events-none absolute w-64 max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-white/15 bg-[#004745] px-3 py-2 text-[11px] font-medium text-slate-300 shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
 {content}
 </span>
 </button>
@@ -167,8 +178,8 @@ const hasError = Boolean(error);
 return (
 <div className="mb-8 group">
 <div className="flex justify-between items-center mb-3">
-<label className={`text-sm font-semibold flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600' : 'text-slate-700 group-hover:text-purple-700'}`}>
-{Icon && <Icon size={16} className="text-slate-400 group-hover:text-purple-500 transition-colors" />}
+<label className={`text-sm font-semibold flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600' : 'text-slate-200 group-hover:text-[#00A499]'}`}>
+{Icon && <Icon size={16} className="text-slate-400 group-hover:text-[#A8A8A8] transition-colors" />}
 {label}
 {tooltip && <TooltipIcon content={tooltip} />}
 </label>
@@ -187,11 +198,11 @@ setDraftValue(String(next));
 onChange(next);
 }}
 disabled={disabled}
-className={`flex-grow h-1.5 bg-slate-200/60 rounded-lg appearance-none transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer accent-purple-700 hover:accent-purple-600'}`}
+className={`flex-grow h-1.5 bg-white/15 rounded-lg appearance-none transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer accent-[#00A499] hover:accent-[#0D9488]'}`}
 />
 <div className="relative flex items-center group-focus-within:scale-105 transition-transform flex-shrink-0 shadow-sm rounded-xl">
 {unit === "$" && (
-<span className="absolute left-3 text-slate-500 text-xs font-bold pointer-events-none">$</span>
+<span className="absolute left-3 text-slate-400 text-xs font-bold pointer-events-none">$</span>
 )}
 <input
 type="text"
@@ -209,18 +220,18 @@ e.currentTarget.blur();
 }
 }}
 disabled={disabled}
-className={`text-right py-2 text-[16px] sm:text-sm font-bold border bg-white/50 focus:bg-white focus:ring-2 outline-none transition-all rounded-xl text-slate-800
-${hasError ? 'border-rose-300 focus:ring-rose-300/40 focus:border-rose-500' : 'border-white/60 focus:ring-purple-500/20 focus:border-purple-600'}
+className={`text-right py-2 text-[16px] sm:text-sm font-bold border bg-[#002E2B] focus:bg-[#002E2B] focus:ring-2 outline-none transition-all rounded-xl text-white
+${hasError ? 'border-rose-500/50 focus:ring-rose-500/20 focus:border-rose-500' : 'border-[#006560]/50 focus:ring-[#00A499]/20 focus:border-[#00A499]/60'}
 ${unit === "$" ? "w-36 pl-6 pr-3" : "w-24 pr-8 pl-3"}
 ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
 />
 {unit === "%" && (
-<span className="absolute right-3 text-slate-500 text-xs font-bold pointer-events-none">%</span>
+<span className="absolute right-3 text-slate-400 text-xs font-bold pointer-events-none">%</span>
 )}
 </div>
 </div>
 {(helper || error) && (
-<div className={`mt-2 text-[11px] font-medium ${hasError ? 'text-rose-600' : 'text-slate-500'}`}>
+<div className={`mt-2 text-[11px] font-medium ${hasError ? 'text-rose-600' : 'text-slate-400'}`}>
 {error || helper}
 </div>
 )}
@@ -229,13 +240,13 @@ ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
 };
 type ToggleSectionProps = { label: string; enabled: boolean; onToggle: (value: boolean) => void; children: ReactNode };
 const ToggleSection = ({ label, enabled, onToggle, children }: ToggleSectionProps) => (
-<div className={`p-1 rounded-3xl transition-all duration-300 ${enabled ? 'bg-gradient-to-br from-white/60 to-white/30 shadow-sm border border-white/50' : 'bg-white/20 border border-transparent opacity-80'}`}>
+<div className={`p-1 rounded-3xl transition-all duration-300 ${enabled ? 'bg-[#003D3A]/40 border border-white/[0.06]' : 'bg-[#003D3A]/30 border border-transparent opacity-80'}`}>
 <div
-className={`flex items-center justify-between p-4 cursor-pointer rounded-2xl transition-colors ${enabled ? 'bg-purple-50/60' : 'hover:bg-white/30'}`}
+className={`flex items-center justify-between p-4 cursor-pointer rounded-2xl transition-colors ${enabled ? '' : 'hover:bg-white/[0.05]'}`} style={enabled ? { background: THEME.brandBg } : undefined}
 onClick={() => onToggle(!enabled)}
 >
-<span className={`font-bold text-sm ${enabled ? 'text-purple-900' : 'text-slate-500'}`}>{label}</span>
-<div className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${enabled ? 'bg-purple-700' : 'bg-slate-300'}`}>
+<span className={`font-bold text-sm ${enabled ? '' : 'text-slate-400'}`} style={enabled ? { color: THEME.brand } : undefined}>{label}</span>
+<div className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${!enabled ? 'bg-slate-300' : ''}`} style={enabled ? { background: THEME.brand } : undefined}>
 <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${enabled ? 'translate-x-5' : ''}`} />
 </div>
 </div>
@@ -284,26 +295,26 @@ return (
 {/* Branding in Sidebar (Desktop) */}
 {!isMobile && (
 <div className="mb-8 pt-2">
-<div className="flex items-center gap-2.5 text-purple-900">
-<CrownLogo className="h-9 w-9 text-purple-700" />
+<div className="flex items-center gap-2.5" style={{ color: THEME.brand }}>
+<CrownLogo className="h-9 w-9" />
 <div>
 <div className="font-serif font-black text-xl tracking-tight leading-tight">Sirkis Act</div>
-<div className="text-[10px] font-medium text-slate-500 leading-tight">Old-Fashioned Financial Planning</div>
+<div className="text-[10px] font-medium text-slate-400 leading-tight">Old-Fashioned Financial Planning</div>
 </div>
 </div>
 </div>
 )}
 {/* Timeline Section */}
 <section>
-<h3 className="flex items-center gap-2 text-[11px] font-black text-purple-500 uppercase tracking-widest mb-6 ml-1">
+<h3 className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest mb-6 ml-1" style={{ color: THEME.returns }}>
 <Clock size={14} /> Timeline
 </h3>
 <InputField label="Current Age" value={inputs.currentAge} onChange={v => handleInputChange('currentAge', v)} min={18} max={80} icon={User} />
-<div className={`relative rounded-2xl mb-6 transition-all duration-300 ${inputs.startAge > inputs.currentAge ? 'bg-amber-50/50 ring-1 ring-amber-200/70' : 'bg-transparent'}`}>
+<div className={`relative rounded-2xl mb-6 transition-all duration-300 ${inputs.startAge > inputs.currentAge ? 'bg-[#E6C300]/8 ring-1 ring-[#E6C300]/25' : 'bg-transparent'}`}>
 <button
 type="button"
 onClick={() => handleInputChange('startAge', inputs.currentAge)}
-className="absolute right-4 top-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-purple-700 transition-colors"
+className="absolute right-4 top-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-[#00A499] transition-colors"
 >
 Reset to current age
 </button>
@@ -319,8 +330,8 @@ icon={Clock}
 </div>
 {inputs.startAge > inputs.currentAge && (
 <div className="px-4 pb-4 -mt-3">
-<div className="flex items-center gap-2 text-[11px] text-amber-800 font-semibold bg-amber-100/60 p-2.5 rounded-lg">
-<div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+<div className="flex items-center gap-2 text-[11px] text-rose-400 font-semibold bg-[#D32F2F]/10 p-2.5 rounded-lg">
+<div className="w-1.5 h-1.5 rounded-full bg-[#D32F2F] animate-pulse" />
 {inputs.startAge - inputs.currentAge} year delay active
 </div>
 </div>
@@ -343,7 +354,7 @@ if (Number.isFinite(next)) {
 handleInputChange('currentSalary', next);
 }
 }}
-className="w-full appearance-none text-[16px] sm:text-sm font-bold p-3 pr-10 rounded-xl border border-white/60 bg-white/60 text-slate-700 shadow-sm"
+className="w-full appearance-none text-[16px] sm:text-sm font-bold p-3 pr-10 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white shadow-sm"
 >
 <option value="" disabled>Select a major</option>
 <option value="81535">Computer Science - $81,535</option>
@@ -363,12 +374,12 @@ className="w-full appearance-none text-[16px] sm:text-sm font-bold p-3 pr-10 rou
 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contribution Timing</label>
 <TooltipIcon placement="top" content="When contributions hit the account. Start of year assumes earlier compounding; mid-year is more conservative." />
 </div>
-<div className="flex bg-white/60 rounded-xl p-1 shadow-inner border border-white/70">
+<div className="flex bg-black/20 rounded-xl p-1 shadow-inner border border-white/[0.06]">
 {['start', 'mid'].map((option) => (
 <button
 key={option}
 onClick={() => handleInputChange('contributionTiming', option)}
-className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'bg-purple-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/60'}`}
+className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-white/10'}`} style={inputs.contributionTiming === option ? { background: THEME.brand } : undefined}
 >
 {option === 'start' ? 'Start of Year' : 'Mid Year'}
 </button>
@@ -378,7 +389,7 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 </section>
 {/* Economics Section */}
 <section>
-<h3 className="flex items-center gap-2 text-[11px] font-black text-purple-500 uppercase tracking-widest mb-6 ml-1">
+<h3 className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest mb-6 ml-1" style={{ color: THEME.returns }}>
 <TrendingUp size={14} /> Market
 </h3>
 <InputField label="Expected Return" value={inputs.expectedReturn} onChange={v => handleInputChange('expectedReturn', v)} min={0} max={15} step={0.5} unit="%" icon={TrendingUp} tooltip="Long-term stock-heavy portfolios often assume 6-8% nominal returns." />
@@ -387,32 +398,32 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 </section>
 {/* Accounts Section */}
 <section className="space-y-4">
-<h3 className="flex items-center gap-2 text-[11px] font-black text-purple-500 uppercase tracking-widest mb-6 ml-1">
+<h3 className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest mb-6 ml-1" style={{ color: THEME.returns }}>
 <PiggyBank size={14} /> Strategy
 </h3>
 <ToggleSection label="401(k) / 403(b)" enabled={inputs.enable401k} onToggle={(v) => handleInputChange('enable401k', v)}>
 <InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" error={employeeOverCap ? 'Exceeds IRS cap. Projections use cap.' : null} />
-<div className="grid grid-cols-2 gap-4 border-t border-purple-100/60 pt-6 mt-2">
+<div className="grid grid-cols-2 gap-4 border-t border-white/[0.07] pt-6 mt-2">
 <div>
 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Match %</label>
-<input type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-white/60 bg-white/50 text-slate-700" />
+<input type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white" />
 </div>
 <div>
 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Limit %</label>
-<input type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-white/60 bg-white/50 text-slate-700" />
+<input type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white" />
 </div>
 </div>
 <div className="mt-4 text-[11px]">
-<div className={`flex items-start gap-2 ${employeeOverCap || totalOverCap ? 'text-rose-600' : 'text-slate-500'}`}>
-<Info size={14} className={employeeOverCap || totalOverCap ? 'text-rose-500' : 'text-purple-500'} />
+<div className={`flex items-start gap-2 ${employeeOverCap || totalOverCap ? 'text-rose-600' : 'text-slate-400'}`}>
+<Info size={14} className={employeeOverCap || totalOverCap ? 'text-rose-500' : 'text-[#A8A8A8]'} />
 <div className="space-y-2">
-<div className={employeeOverCap ? 'text-rose-600' : 'text-slate-500'}>
+<div className={employeeOverCap ? 'text-rose-600' : 'text-slate-400'}>
 Employee est: <span className="font-semibold">{formatCurrency(annualEmployee401k)}</span> (cap {formatCurrency(LIMITS.max401kEmployee)}).
 </div>
-<div className={totalOverCap ? 'text-rose-600' : 'text-slate-500'}>
+<div className={totalOverCap ? 'text-rose-600' : 'text-slate-400'}>
 Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k)}</span>.
 </div>
-<div className={`pt-2 border-t ${totalOverCap ? 'border-rose-200/70 text-rose-600' : 'border-slate-200/70 text-slate-500'}`}>
+<div className={`pt-2 border-t ${totalOverCap ? 'border-rose-200/70 text-rose-600' : 'border-slate-200/70 text-slate-400'}`}>
 <div className="text-[10px] font-bold uppercase tracking-widest">Total</div>
 <div className="font-semibold">
 {formatCurrency(annualTotal401k)} (cap {formatCurrency(LIMITS.max401kTotal)}).
@@ -434,23 +445,23 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 <button
 type="button"
 onClick={() => handleInputChange('rothMatch401k', !inputs.rothMatch401k)}
-className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${inputs.rothMatch401k ? 'bg-purple-700' : 'bg-slate-300'}`}
+className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${!inputs.rothMatch401k ? 'bg-slate-300' : ''}`} style={inputs.rothMatch401k ? { background: THEME.brand } : undefined}
 >
 <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${inputs.rothMatch401k ? 'translate-x-5' : ''}`} />
 </button>
 </div>
 <InputField label="Annual Amount" value={rothEffectiveContribution} onChange={v => handleInputChange('rothContribution', v)} min={0} max={LIMITS.rothAnnual} step={100} unit="$" error={rothOverCap ? 'Exceeds IRS cap. Projections use cap.' : null} disabled={inputs.rothMatch401k} />
-<div className={`mt-2 text-[11px] ${rothOverCap ? 'text-rose-600' : 'text-slate-500'}`}>IRS cap: {formatCurrency(LIMITS.rothAnnual)}.</div>
+<div className={`mt-2 text-[11px] ${rothOverCap ? 'text-rose-600' : 'text-slate-400'}`}>IRS cap: {formatCurrency(LIMITS.rothAnnual)}.</div>
 </ToggleSection>
 <ToggleSection label="HSA / Other" enabled={inputs.enableHSA} onToggle={(v) => handleInputChange('enableHSA', v)}>
 <InputField label="Annual Amount" value={inputs.hsaContribution} onChange={v => handleInputChange('hsaContribution', v)} min={0} max={LIMITS.hsaFamily} step={100} unit="$" error={hsaOverCap ? 'Exceeds family cap. Projections use cap.' : null} />
-<div className={`mt-2 text-[11px] ${hsaOverCap ? 'text-rose-600' : 'text-slate-500'}`}>Common caps: {formatCurrency(LIMITS.hsaIndividual)} individual, {formatCurrency(LIMITS.hsaFamily)} family.</div>
+<div className={`mt-2 text-[11px] ${hsaOverCap ? 'text-rose-600' : 'text-slate-400'}`}>Common caps: {formatCurrency(LIMITS.hsaIndividual)} individual, {formatCurrency(LIMITS.hsaFamily)} family.</div>
 </ToggleSection>
 </section>
 <div className="pt-8 text-center">
 <button
 onClick={() => handleInputChange('RESET', true)}
-className="text-xs font-bold text-slate-400 hover:text-purple-700 flex items-center justify-center gap-2 transition-colors mx-auto"
+className="text-xs font-bold text-slate-400 hover:text-[#00A499] flex items-center justify-center gap-2 transition-colors mx-auto"
 >
 <RotateCcw size={12} /> Reset to Defaults
 </button>
@@ -651,10 +662,10 @@ const annualNominalWithdrawal = annualReturn > 0
 const monthlyRealWithdrawalAtRetirement = realTodayToNominalAtRetirement(monthlyRealWithdrawal);
 const useThreeColumnPanels = chartSize.width >= 550;
 const legendItems = [
-{ label: 'Your Contributions', color: '#6d28d9', visible: true },
-{ label: 'Employer Match (OPM)', color: '#a855f7', visible: true },
-{ label: 'Investment Returns', color: '#f59e0b', visible: true },
-{ label: 'Start Now Total', color: '#b45309', visible: isDelayed && showImmediateLine }
+{ label: 'Your Contributions', color: THEME.brand, visible: true },
+{ label: 'Employer Match (OPM)', color: THEME.opm, visible: true },
+{ label: 'Investment Returns', color: THEME.returns, visible: true },
+{ label: 'Start Now Total', color: THEME.startNow, visible: isDelayed && showImmediateLine }
 ];
 const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }), []);
 const formatCurrency = (val: number) => currencyFormatter.format(val || 0);
@@ -732,15 +743,14 @@ return next;
 }
 };
 return (
-<div className="min-h-[100dvh] w-full max-w-[100vw] flex flex-col lg:flex-row bg-slate-100 font-sans overflow-x-clip relative">
+<div className="min-h-[100dvh] w-full max-w-[100vw] flex flex-col lg:flex-row bg-[#003D3A] font-sans overflow-x-clip relative">
 {/* VIBRANT BACKGROUND */}
 <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-<div className="absolute inset-0 bg-gradient-to-br from-[#ede6ff] via-[#fff3cf] to-[#f6e5ff]" />
-<div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-[#c7a6ff]/40 rounded-full blur-3xl" />
-<div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#ffd48a]/40 rounded-full blur-3xl" />
+<div className="absolute top-[-25%] right-[-20%] w-[380px] h-[380px] bg-[#E6C300]/35 rounded-full blur-2xl" />
+<div className="absolute bottom-[-10%] right-[-5%] w-[280px] h-[280px] bg-[#E6C300]/20 rounded-full blur-2xl hidden lg:block" />
 </div>
 {/* DESKTOP SIDEBAR (GLASS PANEL) */}
-<div className="hidden lg:flex flex-col w-[420px] bg-white/30 backdrop-blur-2xl border-r border-white/50 z-20 relative shadow-2xl shadow-purple-100/50">
+<div className="hidden lg:flex flex-col w-[420px] bg-[#004745] border-r border-black/30 z-20 relative shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
 <div className="flex-1 overflow-hidden p-8 hover:overflow-y-auto custom-scrollbar">
 <SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} />
 </div>
@@ -748,20 +758,20 @@ return (
 {/* MAIN CONTENT AREA */}
 <div className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
 {/* MOBILE HEADER */}
-<div className={`lg:hidden flex justify-between items-center px-4 bg-white/90 border-b border-white/50 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
-<div className="flex items-center gap-2 text-purple-900">
+<div className={`lg:hidden flex justify-between items-center px-4 bg-[#003D3A]/95 backdrop-blur-md border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
+<div className="flex items-center gap-2" style={{ color: THEME.brand }}>
 <div
   className="transition-transform duration-300 ease-in-out"
   style={{ transform: isScrolled ? 'scale(0.67)' : 'scale(1)', transformOrigin: 'left center' }}
 >
-  <CrownLogo className="text-purple-700 h-9 w-9" />
+  <CrownLogo className="h-9 w-9" />
 </div>
 <div className="flex flex-col">
 <div
   className="font-serif font-black tracking-tight leading-tight text-xl transition-transform duration-300 ease-in-out"
   style={{ transform: isScrolled ? 'scale(0.8)' : 'scale(1)', transformOrigin: 'left center' }}
 >Sirkis Act</div>
-<div className={`font-medium text-slate-500 leading-tight text-[10px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
+<div className={`font-medium text-slate-400 leading-tight text-[10px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
 </div>
 </div>
 </div>
@@ -770,12 +780,12 @@ return (
 <div className="max-w-[1180px] mx-auto px-4 py-4 pb-20 lg:pb-8 lg:px-10 lg:py-8 space-y-4">
 {/* BRANDING HERO SECTION */}
 <div className="text-left space-y-3 pt-2 pb-1 animate-in slide-in-from-bottom duration-700 fade-in">
-<h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black text-slate-900 tracking-tight leading-[0.92]">
-Dr. Sirkis's<br />
-<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-amber-500">High-Wire Act</span>
+<h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black tracking-tight leading-[0.92]">
+<span style={{ color: THEME.brand, textShadow: '0px 1px 0px rgba(255,255,255,0.12), 0px -1px 0px rgba(0,0,0,0.7)' }}>Dr. Sirkis's</span><br />
+<span style={{ color: THEME.returns, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>High-Wire Act</span>
 </h1>
-<p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl lg:ml-1">
-Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net</span> with{' '}<span className="inline-block">tax-advantaged compounding.</span>
+<p className="text-base sm:text-lg text-slate-300 font-medium max-w-2xl lg:ml-1">
+Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net</span> with{' '}<span className="inline-block">tax-advantaged compounding.</span>
 </p>
 {/* SIRKISM QUOTE CAROUSEL */}
 <div
@@ -802,25 +812,25 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </div>
 {isDelayed ? (
 <div className="text-center">
-<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
+<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-white tracking-tight mb-1">
 {formatCurrency(finalData['Total Nominal'])}
 </div>
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projected Nest Egg</p>
 {useThreeColumnPanels ? (
-<div className="rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/60 mt-3 text-center">
-<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Early</div>
-<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-slate-900 tracking-tight">
+<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
+<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
 {formatCurrency(comparisonData['Total Nominal'])}
 </div>
 </div>
 ) : (
 <div className="grid grid-cols-2 gap-2 mt-3">
-<div className="rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/60">
-<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Early</div>
-<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-slate-900">{formatCurrency(comparisonData['Total Nominal'])}</div>
+<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25">
+<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-white">{formatCurrency(comparisonData['Total Nominal'])}</div>
 </div>
-<div className="rounded-xl bg-rose-50/70 p-2.5 border border-rose-200/60">
-<div className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
+<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#D32F2F]/50">
+<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
 <div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-rose-600">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
 </div>
 </div>
@@ -828,7 +838,7 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </div>
 ) : (
 <div className="text-center">
-<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-slate-900 tracking-tight mb-1">
+<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-white tracking-tight mb-1">
 {formatCurrency(finalData['Total Nominal'])}
 </div>
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projected Nest Egg</p>
@@ -842,21 +852,21 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </div>
 {isDelayed ? (
 <div className="text-center">
-<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-slate-900 tracking-tight mb-1`}>
+<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`}>
 {formatCurrency(finalData['Investment Returns'])}
 </div>
 <p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Compound Interest</p>
 {useThreeColumnPanels ? (
-<div className="rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/60 mt-3 text-center">
-<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Early</div>
-<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-slate-900 tracking-tight">
+<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
+<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
 {formatCurrency(comparisonData['Investment Returns'])}
 </div>
 </div>
 ) : (
 <>
-<div className="w-full h-px bg-slate-100 mt-2 mb-1" />
-<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-emerald-600 tracking-tight">
+<div className="w-full h-px bg-white/15 mt-2 mb-1" />
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black tracking-tight" style={{ color: THEME.startNow }}>
 {formatCurrency(comparisonData['Investment Returns'])}
 </div>
 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Start Early</p>
@@ -865,7 +875,7 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </div>
 ) : (
 <div className="text-center">
-<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-slate-900 tracking-tight mb-1`}>
+<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`}>
 {formatCurrency(finalData['Investment Returns'])}
 </div>
 <p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Compound Interest</p>
@@ -879,21 +889,21 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </div>
 {isDelayed ? (
 <div className="text-center">
-<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-slate-900 tracking-tight mb-1`}>
+<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`}>
 {formatCurrency(finalData['Total Real (Today\'s $)'])}
 </div>
 <p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Purchasing Power</p>
 {useThreeColumnPanels ? (
-<div className="rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/60 mt-3 text-center">
-<div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Start Early</div>
-<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-slate-900 tracking-tight">
+<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
+<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
 {formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </div>
 </div>
 ) : (
 <>
-<div className="w-full h-px bg-slate-100 mt-2 mb-1" />
-<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-emerald-600 tracking-tight">
+<div className="w-full h-px bg-white/15 mt-2 mb-1" />
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black tracking-tight" style={{ color: THEME.startNow }}>
 {formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </div>
 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Start Early</p>
@@ -902,7 +912,7 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </div>
 ) : (
 <div className="text-center">
-<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-slate-900 tracking-tight mb-1`}>
+<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`}>
 {formatCurrency(finalData['Total Real (Today\'s $)'])}
 </div>
 <p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Purchasing Power</p>
@@ -911,41 +921,41 @@ Fall into a <span className="font-bold text-slate-700">Million-Dollar Safety Net
 </Card>
 </div>
 {isDelayed && useThreeColumnPanels && (
-<Card className="p-4 flex items-center justify-center gap-3 bg-rose-50/50 border-rose-200/40">
-<div className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Potential Loss</div>
+<Card className="p-4 flex items-center justify-center gap-3 bg-[#D32F2F]/10 border-[#D32F2F]/50">
+<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
 <div className="text-[clamp(1.1rem,2vw,1.5rem)] font-black text-rose-600">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
 </Card>
 )}
 {/* MAIN CHART CARD */}
 <GlassCard className="p-4 sm:p-5 lg:p-6 !rounded-[26px]">
 <div className="flex flex-wrap justify-between items-end mb-4 gap-3">
-<h2 className="font-serif font-black text-[1.9rem] text-slate-900">The Trajectory</h2>
+<h2 className="font-serif font-black text-[1.9rem] text-white">The Trajectory</h2>
 <div className="flex items-center justify-between gap-2 ml-auto flex-1 min-w-[200px] max-w-full sm:flex-none sm:justify-end">
 {isDelayed && (
 <button
 onClick={() => setShowImmediateLine(prev => !prev)}
-className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-white/70 text-slate-500 hover:text-slate-700' : 'bg-amber-500 text-white shadow-lg shadow-amber-200/50'}`}
+className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-transparent border border-[#00A499]/40 text-[#00A499] hover:bg-[#00A499]/10' : 'text-white shadow-lg'}`} style={!showImmediateLine ? { background: THEME.returns, boxShadow: `0 4px 6px ${THEME.returnsBg}` } : undefined}
 >
 {showImmediateLine ? 'Remove Start-Now' : 'Add Start-Now'}
 </button>
 )}
-<div className="bg-slate-100/50 p-1 rounded-xl flex text-xs font-bold shadow-inner">
+<div className="bg-black/25 p-1 rounded-xl flex text-xs font-bold shadow-inner">
 <button
 onClick={() => setActiveTab('chart')}
-className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
+className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-[#006560] shadow-sm' : 'text-slate-400 hover:text-white hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { color: THEME.brand } : undefined}
 >
 Chart
 </button>
 <button
 onClick={() => setActiveTab('table')}
-className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 shadow-none'}`}
+className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-[#006560] shadow-sm' : 'text-slate-400 hover:text-white hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { color: THEME.brand } : undefined}
 >
 Table
 </button>
 </div>
 </div>
 </div>
-<div className="mt-4 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-500">
+<div className="mt-4 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-400">
 {legendItems.filter((item) => item.visible).map((item) => (
 <div key={item.label} className="flex items-center gap-2">
 <span className="inline-flex h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
@@ -962,16 +972,16 @@ chartSize.width > 0 && chartSize.height > 0 ? (
 <AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 0, left: -2, bottom: 0 } : isMediumScreen ? { top: 10, right: 0, left: -10, bottom: 0 } : { top: 10, right: 12, left: -5, bottom: 0 }}>
 <defs>
 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
-<stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6}/>
-<stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+<stop offset="5%" stopColor={THEME.returns} stopOpacity={0.6}/>
+<stop offset="95%" stopColor={THEME.returns} stopOpacity={0}/>
 </linearGradient>
 <linearGradient id="colorUser" x1="0" y1="0" x2="0" y2="1">
-<stop offset="5%" stopColor="#6d28d9" stopOpacity={0.6}/>
-<stop offset="95%" stopColor="#6d28d9" stopOpacity={0}/>
+<stop offset="5%" stopColor={THEME.brand} stopOpacity={0.6}/>
+<stop offset="95%" stopColor={THEME.brand} stopOpacity={0}/>
 </linearGradient>
 <linearGradient id="colorEmployer" x1="0" y1="0" x2="0" y2="1">
-<stop offset="5%" stopColor="#a855f7" stopOpacity={0.6}/>
-<stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+<stop offset="5%" stopColor={THEME.opm} stopOpacity={0.6}/>
+<stop offset="95%" stopColor={THEME.opm} stopOpacity={0}/>
 </linearGradient>
 </defs>
 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.5} />
@@ -993,81 +1003,104 @@ return `$${(numericVal / 1000).toFixed(0)}k`;
 }}
 />
 <Tooltip
-contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.9)', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)', padding: '16px' }}
+contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', background: '#004745', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5)', padding: '16px', color: 'white' }}
 formatter={(value) => {
 const numericValue = typeof value === 'number' ? value : Number(value || 0);
 return [formatCurrency(numericValue), ""];
 }}
 itemSorter={(item) => -(typeof item.value === 'number' ? item.value : Number(item.value || 0))}
-labelStyle={{ color: '#0f172a', marginBottom: '8px', fontWeight: '900', fontFamily: 'serif', fontSize: '18px' }}
+labelStyle={{ color: 'rgba(255,255,255,0.9)', marginBottom: '8px', fontWeight: '900', fontFamily: 'serif', fontSize: '18px' }}
 itemStyle={{ padding: 0 }}
 separator=""
 />
-<Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke="#6d28d9" strokeWidth={3} fill="url(#colorUser)" stackId="1" />
-<Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke="#a855f7" strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
-<Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke="#f59e0b" strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
+<Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke={THEME.brand} strokeWidth={3} fill="url(#colorUser)" stackId="1" />
+<Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke={THEME.opm} strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
+<Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke={THEME.returns} strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
 {isDelayed && showImmediateLine && (
-<Line name="Start Now Total" type="monotone" dataKey="Immediate Total Nominal" stroke="#b45309" strokeDasharray="6 6" strokeWidth={2.5} dot={false} />
+<Line name="Start Now Total" type="monotone" dataKey="Immediate Total Nominal" stroke={THEME.startNow} strokeDasharray="6 6" strokeWidth={2.5} dot={false} />
 )}
 </AreaChart>
 ) : (
-<div className="h-full w-full rounded-xl bg-white/20" />
+<div className="h-full w-full rounded-xl bg-white/5" />
 )
 ): (
-<div className="h-full overflow-y-auto overflow-x-auto custom-scrollbar border border-slate-100 rounded-xl bg-white/50">
+<div className="h-full overflow-y-auto overflow-x-auto custom-scrollbar border border-white/[0.06] rounded-xl bg-[#004240]/80">
 <table className="w-full text-left text-[11px] sm:text-sm">
-<thead className="bg-slate-50/80 sticky top-0 font-bold text-slate-600 backdrop-blur z-10">
+<thead className="bg-[#003D3A]/80 sticky top-0 font-bold text-slate-400 backdrop-blur z-10">
 <tr className="text-[12px] text-center">
 <th className="p-2 align-middle text-center" rowSpan={2}>Age</th>
 <th className="p-2 text-center" colSpan={3}>Contributions</th>
-<th className="p-2 text-center text-amber-600" colSpan={2}>Growth</th>
+<th className="p-2 text-center" style={{ color: THEME.returns }} colSpan={2}>Growth</th>
 <th className="p-2 text-center" colSpan={2}>Totals</th>
 </tr>
 <tr className="text-[11px] uppercase tracking-wider text-slate-400 text-center">
 <th className="p-2 text-center">You</th>
 <th className="p-2 text-center">Employer</th>
 <th className="p-2 text-center">Total</th>
-<th className="p-2 text-center text-amber-600">Year</th>
-<th className="p-2 text-center text-amber-600">Returns</th>
+<th className="p-2 text-center" style={{ color: THEME.returns }}>Year</th>
+<th className="p-2 text-center" style={{ color: THEME.returns }}>Returns</th>
 <th className="p-2 text-center">Nominal</th>
 <th className="p-2 text-center">Real (Today)</th>
 </tr>
 </thead>
-<tbody className="divide-y divide-slate-100/50">
-{results.map((row, idx) => {
+<tbody className="divide-y divide-white/[0.06]">
+{results.flatMap((row, idx) => {
 const isStartYear = row.age === inputs.startAge && isDelayed;
 const isWaiting = row.age < inputs.startAge;
-return (
-<tr key={idx} className={`transition-colors ${isStartYear ? 'bg-purple-50/80' : 'hover:bg-white/60'} ${isWaiting ? 'opacity-50 grayscale' : ''}`}>
-<td className="p-2.5 font-bold text-slate-500 text-center">
-{row.age}
-{isStartYear && <Badge color="indigo">Start</Badge>}
+const waitingCount = inputs.startAge - inputs.currentAge;
+if (isWaiting && waitingCount >= 3) {
+if (row.age === inputs.currentAge) {
+return [(
+<tr key="waiting-summary" className="opacity-40">
+<td className="px-2.5 py-3 font-bold text-slate-400 text-center">
+<div className="flex flex-col items-center justify-center gap-0.5">
+<span>{inputs.currentAge}</span>
+<span className="text-[8px] tracking-[0.2em]">•••</span>
+<span>{inputs.startAge - 1}</span>
+</div>
 </td>
-<td className="p-2.5 font-medium text-center">{formatCurrency(row['Employee Contribution (Year)'])}</td>
-<td className="p-2.5 font-medium text-center">{formatCurrency(row['Employer Contribution (Year)'])}</td>
-<td className="p-2.5 font-medium text-center">{formatCurrency(row['Total Contribution (Year)'])}</td>
-<td className="p-2.5 text-amber-600 font-bold text-center">{formatCurrency(row['Year Growth'])}</td>
-<td className="p-2.5 text-amber-600 font-bold text-center">{formatCurrency(row['Investment Returns'])}</td>
-<td className="p-2.5 font-black text-slate-800 text-center">{formatCurrency(row['Total Nominal'])}</td>
-<td className="p-2.5 font-semibold text-slate-600 text-center">{formatCurrency(row['Total Real (Today\'s $)'])}</td>
+<td className="p-2.5 font-medium text-slate-200 text-center">{formatCurrency(0)}</td>
+<td className="p-2.5 font-medium text-slate-200 text-center">{formatCurrency(0)}</td>
+<td className="p-2.5 font-medium text-slate-200 text-center">{formatCurrency(0)}</td>
+<td className="p-2.5 font-bold text-center" style={{ color: THEME.returns }}>{formatCurrency(0)}</td>
+<td className="p-2.5 font-bold text-center" style={{ color: THEME.returns }}>{formatCurrency(0)}</td>
+<td className="p-2.5 font-black text-white/90 text-center">{formatCurrency(0)}</td>
+<td className="p-2.5 font-semibold text-slate-300 text-center">{formatCurrency(0)}</td>
 </tr>
-);
+)];
+}
+return [];
+}
+return [(
+<tr key={idx} className={`transition-colors ${isStartYear ? '' : 'hover:bg-white/[0.05]'} ${isWaiting ? 'opacity-50 grayscale' : ''}`} style={isStartYear ? { background: THEME.brandBg } : undefined}>
+<td className="p-2.5 font-bold text-slate-400 text-center">
+{row.age}
+</td>
+<td className="p-2.5 font-medium text-slate-200 text-center">{formatCurrency(row['Employee Contribution (Year)'])}</td>
+<td className="p-2.5 font-medium text-slate-200 text-center">{formatCurrency(row['Employer Contribution (Year)'])}</td>
+<td className="p-2.5 font-medium text-slate-200 text-center">{formatCurrency(row['Total Contribution (Year)'])}</td>
+<td className="p-2.5 font-bold text-center" style={{ color: THEME.returns }}>{formatCurrency(row['Year Growth'])}</td>
+<td className="p-2.5 font-bold text-center" style={{ color: THEME.returns }}>{formatCurrency(row['Investment Returns'])}</td>
+<td className="p-2.5 font-black text-white/90 text-center">{formatCurrency(row['Total Nominal'])}</td>
+<td className="p-2.5 font-semibold text-slate-300 text-center">{formatCurrency(row['Total Real (Today\'s $)'])}</td>
+</tr>
+)];
 })}
 </tbody>
 </table>
 </div>
 )}
 </div>
-<div className="mt-2 text-[11px] text-slate-500">
+<div className="mt-2 text-[11px] text-slate-400">
 Assumes contributions through the year selected, no contribution at retirement age, and returns compounded annually.
 </div>
 </GlassCard>
 {/* QUICK STATS FOOTER */}
 {(() => {
 const stats = [
-{ label: "Market Funded", value: finalData['Investment Returns'], color: "text-amber-700", bg: "bg-amber-50", icon: Coins },
-{ label: "Self Funded", value: finalData['Your Contributions'], color: "text-purple-700", bg: "bg-purple-50", icon: User },
-{ label: "Employer (OPM)", value: finalData['Employer Match'], color: "text-purple-600", bg: "bg-purple-50", icon: Building2 },
+{ label: "Market Funded", value: finalData['Investment Returns'], colorStyle: { color: THEME.returns }, bgStyle: { background: THEME.returnsBg }, icon: Coins },
+{ label: "Self Funded", value: finalData['Your Contributions'], colorStyle: { color: THEME.brand }, bgStyle: { background: THEME.brandBg }, icon: User },
+{ label: "Employer (OPM)", value: finalData['Employer Match'], colorStyle: { color: THEME.opm }, bgStyle: { background: THEME.brandBg }, icon: Building2 },
 ];
 return (
 <div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-2'} ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'} min-w-0`}>
@@ -1075,17 +1108,17 @@ return (
 const isHero = !useThreeColumnPanels && i === 0;
 return (
 <GlassCard key={i} className={`${isHero ? 'col-span-2' : ''} ${chartSize.width >= 750 ? 'p-4' : 'p-3'} group hover:scale-[1.02] transition-transform duration-300 flex flex-row items-center justify-center ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'}`}>
-<div className={`${isHero ? 'p-3.5' : chartSize.width >= 750 ? 'p-2.5' : 'p-2'} rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+<div className={`${isHero ? 'p-3.5' : chartSize.width >= 750 ? 'p-2.5' : 'p-2'} rounded-2xl group-hover:scale-110 transition-transform`} style={{ ...stat.bgStyle, ...stat.colorStyle }}>
 <stat.icon size={isHero ? 36 : chartSize.width >= 750 ? 22 : 20} />
 </div>
 <div className="min-w-0">
-<div className={`${isHero ? 'text-[clamp(2rem,6vw,2.8rem)]' : !useThreeColumnPanels ? 'text-[clamp(0.95rem,4vw,1.35rem)]' : 'text-[clamp(1.1rem,2.1vw,1.55rem)]'} leading-tight font-black tabular-nums ${stat.color}`}>{!useThreeColumnPanels && !isHero && stat.value >= 1_000_000 ? formatCompact(stat.value) : (useThreeColumnPanels && chartSize.width < 750 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value))}</div>
+<div className={`${isHero ? 'text-[clamp(2rem,6vw,2.8rem)]' : !useThreeColumnPanels ? 'text-[clamp(0.95rem,4vw,1.35rem)]' : 'text-[clamp(1.1rem,2.1vw,1.55rem)]'} leading-tight font-black tabular-nums`} style={stat.colorStyle}>{!useThreeColumnPanels && !isHero && stat.value >= 1_000_000 ? formatCompact(stat.value) : (useThreeColumnPanels && chartSize.width < 750 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value))}</div>
 {isHero ? (
-<div className="text-xs font-bold text-slate-500 uppercase tracking-wider leading-tight whitespace-nowrap">
+<div className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-tight whitespace-nowrap">
 {stat.label} · {finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%
 </div>
 ) : (
-<div className={`text-[10px] font-bold text-slate-500 uppercase ${chartSize.width >= 750 ? 'tracking-widest' : !useThreeColumnPanels ? 'tracking-wide' : 'tracking-wider'} leading-tight whitespace-nowrap`}>
+<div className={`text-[10px] font-bold text-slate-400 uppercase ${chartSize.width >= 750 ? 'tracking-widest' : !useThreeColumnPanels ? 'tracking-wide' : 'tracking-wider'} leading-tight whitespace-nowrap`}>
 <div>{stat.label}</div>
 <div>{finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%</div>
 </div>
@@ -1100,8 +1133,8 @@ return (
 <GlassCard className="p-5 lg:p-7">
 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-5">
 <div>
-<h3 className="font-serif font-black text-[1.7rem] text-slate-900">Withdrawals</h3>
-<p className="text-[11px] text-slate-500 mt-1">Growth-aware estimates from retirement through life expectancy.</p>
+<h3 className="font-serif font-black text-[1.7rem] text-white">Withdrawals</h3>
+<p className="text-[11px] text-slate-400 mt-1">Growth-aware estimates from retirement through life expectancy.</p>
 </div>
 <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400 leading-tight md:text-right">
 <div>{withdrawalYears} years</div>
@@ -1109,27 +1142,27 @@ return (
 </div>
 </div>
 <div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-3' : 'grid-cols-2 gap-3'} items-stretch min-w-0`}>
-<div className={`rounded-2xl bg-white/70 border border-white/80 ${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-3'} shadow-sm h-full flex flex-col min-w-0`}>
-<div className="text-[10px] font-black uppercase tracking-widest text-purple-600">Fixed Purchasing Power</div>
-<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
-<div className="text-[11px] text-slate-500 mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} today.</div>
+<div className={`rounded-2xl bg-[#003D3A]/60 border border-white/[0.07] ${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-3'} shadow-sm h-full flex flex-col min-w-0`}>
+<div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fixed Purchasing Power</div>
+<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-white mt-2 tabular-nums min-w-0">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
+<div className="text-[11px] text-slate-400 mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} today.</div>
 </div>
-<div className={`rounded-2xl bg-white/70 border border-white/80 ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
-<div className="text-[10px] font-black uppercase tracking-widest text-amber-600">Fixed Monthly</div>
-<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(monthlyNominalWithdrawal)}</div>
-<div className="text-[11px] text-slate-500 mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))}.</div>
+<div className={`rounded-2xl bg-[#003D3A]/60 border border-white/[0.07] ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
+<div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fixed Monthly</div>
+<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-white mt-2 tabular-nums min-w-0">{formatCurrency(monthlyNominalWithdrawal)}</div>
+<div className="text-[11px] text-slate-400 mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))}.</div>
 </div>
-<div className={`rounded-2xl bg-white/70 border border-white/80 ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
-<div className="text-[10px] font-black uppercase tracking-widest text-rose-500">Fixed Annual</div>
-<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-slate-900 mt-2 tabular-nums min-w-0">{formatCurrency(annualNominalWithdrawal)}</div>
-<div className="text-[11px] text-slate-500 mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))}.</div>
+<div className={`rounded-2xl bg-[#003D3A]/60 border border-white/[0.07] ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
+<div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fixed Annual</div>
+<div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-white mt-2 tabular-nums min-w-0">{formatCurrency(annualNominalWithdrawal)}</div>
+<div className="text-[11px] text-slate-400 mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))}.</div>
 </div>
 </div>
-<div className="mt-4 text-[11px] text-slate-500">
+<div className="mt-4 text-[11px] text-slate-400">
 Assumes constant returns during retirement and no taxes; for planning only.
 </div>
 </GlassCard>
-<footer className="mt-4 text-center text-[11px] text-slate-500">
+<footer className="mt-4 text-center text-[11px] text-slate-400">
 Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex (but IS open to sponsorship inquiries).
 </footer>
 </div>
@@ -1154,18 +1187,18 @@ peekDragStartY.current = 0;
 onPointerUp={() => { peekDragStartY.current = 0; }}
 onPointerCancel={() => { peekDragStartY.current = 0; }}
 >
-<div className="pulse-glow bg-white/90 backdrop-blur-xl border-t border-white/50 shadow-2xl rounded-t-3xl px-4 pt-2 pb-4">
+<div className="pulse-glow bg-[#003D3A]/95 backdrop-blur-xl border-t border-white/10 shadow-2xl rounded-t-3xl px-4 pt-2 pb-4">
 <div className="flex items-center justify-between">
 <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-<span className="h-1 w-6 rounded-full bg-slate-300/70" />
+<span className="h-1 w-6 rounded-full bg-white/25" />
 Inputs
 </div>
-<ChevronUp size={18} className="text-purple-700" />
+<ChevronUp size={18} className="text-[#00A499]" />
 </div>
-<div className="mt-1 text-sm font-semibold text-slate-700">
+<div className="mt-1 text-sm font-semibold text-slate-200">
 Age {inputs.currentAge} · Start {inputs.startAge} · Retire {inputs.retirementAge}
 </div>
-<div className="text-[11px] text-slate-500 font-medium">
+<div className="text-[11px] text-slate-400 font-medium">
 Salary {summarySalary} · 401(k) {summaryContribution}
 </div>
 </div>
@@ -1176,7 +1209,7 @@ Salary {summarySalary} · 401(k) {summaryContribution}
 <Drawer.Portal>
 <Drawer.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40" />
 <Drawer.Content
-className="bg-white/95 rounded-t-3xl border-t border-white/50 shadow-2xl fixed inset-x-0 bottom-0 z-50 flex flex-col outline-none"
+className="bg-[#004745] rounded-t-3xl border-t border-white/10 shadow-2xl fixed inset-x-0 bottom-0 z-50 flex flex-col outline-none"
 style={{ height: '85dvh' }}
 >
 <Drawer.Title className="sr-only">Settings</Drawer.Title>
@@ -1214,17 +1247,16 @@ onFocus={(e) => {
 	inset: 2px 8px 8px 8px;
 	border-radius: 20px;
 	box-shadow:
-		0 0 18px 4px  rgba(109,  40, 217, 0.55),
-		0 0 44px 12px rgba(245, 158, 11,  0.22),
-		0 0 72px 22px rgba(245, 158, 11,  0.16);
+		0 0 44px 12px rgba(197, 154, 23, 0.28),
+		0 0 72px 22px rgba(197, 154, 23, 0.18);
 	opacity: 0.7;
 	animation: glowPulse 3s ease-in-out infinite;
 	pointer-events: none;
 }
 @keyframes glowPulse {
-	0%   { opacity: 0.55; box-shadow: 0 0 18px 4px rgba(109,40,217,0.55),  0 0 44px 12px rgba(245,158,11,0.22),  0 0 72px 22px rgba(245,158,11,0.16); }
-	50%  { opacity: 1;    box-shadow: 0 0 26px 8px rgba(109,40,217,0.72),  0 0 60px 18px rgba(245,158,11,0.30),  0 0 92px 32px rgba(245,158,11,0.22); }
-	100% { opacity: 0.55; box-shadow: 0 0 18px 4px rgba(109,40,217,0.55),  0 0 44px 12px rgba(245,158,11,0.22),  0 0 72px 22px rgba(245,158,11,0.16); }
+	0%   { opacity: 0.55; box-shadow: 0 0 44px 12px rgba(197,154,23,0.28), 0 0 72px 22px rgba(197,154,23,0.18); }
+	50%  { opacity: 1;    box-shadow: 0 0 60px 18px rgba(197,154,23,0.40), 0 0 92px 32px rgba(197,154,23,0.26); }
+	100% { opacity: 0.55; box-shadow: 0 0 44px 12px rgba(197,154,23,0.28), 0 0 72px 22px rgba(197,154,23,0.18); }
 }
 @media (max-width: 1023px) {
 	input,
