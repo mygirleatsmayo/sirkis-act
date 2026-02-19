@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+- **Dark Mode**: Full dark Cyprus palette — solid dark panels, sidebar, header, and inputs throughout.
+- **New Color Palette**: 5-color system — Cyprus #003D3A bg, Persian Green brand, Corn gold, Persian Red loss, lightened Boulder grey for OPM.
+- **Hero**: Solid carved-text color spans replace gradient; teal "Dr. Sirkis's", gold "High-Wire Act".
+- **Table Waiting Rows**: 3+ delayed-start waiting years collapse into a single vertical age-range row (23 / ••• / 31, all $0).
+- **Recharts Tooltip**: Dark styled with matching panel background and white text.
+- **Delay Banner**: Now red instead of gold to match loss semantics.
+- **401k Panel**: Top error text removed; label bolds on cap breach; cap amount bolded; "Over IRS caps" warning centered.
+- **Withdrawal Panel**: All three heading labels unified to slate-400.
+- **Gold Blobs**: Ambient corner glows (top-right + bottom-right), desktop only.
 - **IRS Cap Enforcement**: Contributions exceeding IRS limits now clamped in projection calculations (401k, Roth IRA, HSA).
 - **Compact Mobile Panels**: Hero+two-across layout for narrow screens; merged delayed-start Target+Potential Loss; "Start Early" green sub-cards with descriptors.
 - **Responsive Stats Panels**: Smart per-value abbreviation, adaptive layout scaling, 3-column threshold lowered to 550px.
@@ -9,7 +18,7 @@
 - **Chart/Table Padding**: Fixed values matching "The Trajectory" alignment.
 - **Subheadline Fix**: Prevented orphan words with inline-block wrapping.
 - **Title/Meta**: Updated page title and added Open Graph meta tags.
-- **Theme & Branding**: Shifted to a purple-and-gold palette, crown favicon, and updated tab title.
+- **Theme & Branding**: Crown favicon and updated tab title.
 - **Quote Carousel**: Added "Sirkism" quote carousel for educational reinforcement.
 - **Responsiveness**: Enhanced scroll handling, viewport management, and mobile layout.
 - **Withdrawals**: Added life expectancy input and growth-aware withdrawal estimates.

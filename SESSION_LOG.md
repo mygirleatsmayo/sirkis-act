@@ -1,5 +1,53 @@
 # Session Log
 
+## Session 7: Dark Cyprus Palette & Visual Identity
+
+**Date:** 2026-02-18
+
+### What Was Done
+- **New 5-Color Palette**: Cyprus #003D3A bg, Persian Green #00A499 brand, Corn #E6C300 gold, Persian Red #D32F2F loss, Boulder grey #A8A8A8 OPM
+- **Full Dark Mode**: Solid dark panels (no frosted glass), dark sidebar, dark mobile header, dark inputs throughout
+- **Text Inversion**: Systematic pass — slate-900→white through slate-500→slate-400
+- **Hero**: Removed gradient; two solid carved-text spans (teal "Dr. Sirkis's", gold "High-Wire Act")
+- **THEME Const Updates**: `opm` lightened #757575→#A8A8A8 for dark bg contrast; all arbitrary values synced
+- **Palette Reference Files**: `palette-purple-gold.css`, `palette-teal-gold.css`, `palette-temp.css` saved for future theme switcher
+- **Table Waiting Rows**: 3+ waiting rows collapse into single vertical age-range summary row (e.g., 23 / ••• / 31, all columns $0)
+- **Table Colors**: Contribution columns explicit `text-slate-200`; growth stays gold; Start Badge removed from start year
+- **Recharts Tooltip**: Dark mode — `#004745` background, white text, soft border
+- **Delay Banner**: Changed from gold to red (`bg-[#D32F2F]/10`, `text-rose-400`)
+- **Potential Loss Card**: Border brightened from `/25` to `/50`; switched from `<Card>` to raw `<div>` to avoid Tailwind class conflict
+- **Real Value Card**: Removed leftover `bg-white/80`
+- **Start Now Button**: "Remove" state changed to teal outline (`bg-transparent border border-[#00A499]/40`)
+- **Withdrawal Headings**: All three unified to `text-slate-400`
+- **Gold Blobs**: Top-right (desktop only, brightened); bottom-right (desktop only, large ambient corner glow)
+- **401k Panel**: Removed redundant top error text via `errorState` prop; bold label on error; bold cap amount; "Over IRS caps" centered with `mt-3`; tightened est spacing `space-y-2→space-y-1`
+- **Tooltip Text**: Added `text-left` to all tooltip bubbles
+- **Blob Typo Fix**: `blur-3x1` → `blur-3xl` (silent Tailwind failure)
+- **InputField**: Added `errorState` boolean prop to decouple error label state from error message display
+- **Merged & Deployed**: Tagged `visual-identity-checkpoint-feb18`, merged to `main`, pushed
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/App.tsx` | Modified (major — full dark mode + palette + UX tweaks) |
+| `palette-purple-gold.css` | Created (reference snapshot for theme switcher) |
+| `palette-teal-gold.css` | Created (reference snapshot for theme switcher) |
+| `palette-temp.css` | Created (working color reference with VS Code swatches) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| GitHub webhook miss | Push to main triggered no workflow; had to manually dispatch | Low |
+| ESLint v9 config missing | Pre-existing: `npm run lint` fails due to missing `eslint.config.js` | Medium |
+| Badge emerald color | Still uses `#C59A17` instead of current `#E6C300` gold | Low |
+
+### Next Steps
+1. Typography pass — new fonts, better quote carousel styling
+2. Debossed effect — increase on hero text; add to logo and iconography
+3. iOS address bar / dynamic island color theming
+4. Drawer handle: edge-to-edge horizontal, enrich with more context
+5. Theme switcher — wire up palette reference files
+
 ## Session 6: Compact Mobile Panels
 
 **Date:** 2026-02-17
