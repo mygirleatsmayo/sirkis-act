@@ -1,3 +1,35 @@
+/* Fraunces — display font (variable, 100–900) */
+@font-face {
+  font-family: 'Fraunces';
+  src: url('./fonts/fraunces-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Fraunces';
+  src: url('./fonts/fraunces-latin-wght-italic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: italic;
+}
+
+/* Recursive Sans Linear — UI font (variable, 300–1000) */
+@font-face {
+  font-family: 'Recursive';
+  src: url('./fonts/recursive-sans-linear.woff2') format('woff2');
+  font-weight: 300 1000;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Recursive';
+  src: url('./fonts/recursive-sans-linear-oblique.woff2') format('woff2');
+  font-weight: 300 1000;
+  font-display: swap;
+  font-style: oblique 0deg 15deg;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,4 +38,3 @@
 body {
   background-color: #003D3A;
 }
-

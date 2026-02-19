@@ -299,7 +299,7 @@ return (
 <div className="flex items-center gap-2.5" style={{ color: THEME.brand }}>
 <CrownLogo className="h-9 w-9" />
 <div>
-<div className="font-serif font-black text-xl tracking-tight leading-tight">Sirkis Act</div>
+<div className="font-display font-black text-xl tracking-tight leading-tight">Sirkis Act</div>
 <div className="text-[10px] font-medium text-slate-400 leading-tight">Old-Fashioned Financial Planning</div>
 </div>
 </div>
@@ -772,7 +772,7 @@ return (
   <CrownLogo className="h-9 w-9" />
 </div>
 <div className="flex flex-col">
-<div className="font-serif font-black tracking-tight leading-tight text-2xl">Sirkis Act</div>
+<div className="font-display font-black tracking-tight leading-tight text-2xl">Sirkis Act</div>
 <div className={`font-medium text-slate-400 leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
 </div>
 </div>
@@ -782,7 +782,7 @@ return (
 <div className="max-w-[1180px] mx-auto px-4 py-4 pb-20 lg:pb-8 lg:px-10 lg:py-8 space-y-4">
 {/* BRANDING HERO SECTION */}
 <div className="text-left space-y-3 pt-2 pb-1 animate-in slide-in-from-bottom duration-700 fade-in">
-<h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-serif font-black tracking-tight leading-[0.92]">
+<h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-display font-black tracking-tight leading-[0.92]">
 <span style={{ color: THEME.brand, textShadow: '0px 1px 0px rgba(255,255,255,0.12), 0px -1px 0px rgba(0,0,0,0.7)' }}>Dr. Sirkis's</span><br />
 <span style={{ color: THEME.returns, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>High-Wire Act</span>
 </h1>
@@ -797,7 +797,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
   tabIndex={0}
   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setQuoteIndex(i => (i + 1) % SIRKISMS.length); } }}
 >
-  <p className="text-sm sm:text-base italic text-slate-400 transition-opacity duration-300">
+  <p className="text-sm sm:text-base font-display italic text-slate-400 transition-opacity duration-300">
     &ldquo;{SIRKISMS[quoteIndex]}&rdquo;
   </p>
   <p className="text-[10px] text-slate-400/60 mt-1 font-medium tracking-wide uppercase group-hover:text-slate-400 transition-colors">
@@ -931,7 +931,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 {/* MAIN CHART CARD */}
 <GlassCard className="p-4 sm:p-5 lg:p-6 !rounded-[26px]">
 <div className="flex flex-wrap justify-between items-end mb-4 gap-3">
-<h2 className="font-serif font-black text-[1.9rem] text-white">The Trajectory</h2>
+<h2 className="font-display font-black text-[1.9rem] text-white">The Trajectory</h2>
 <div className="flex items-center justify-between gap-2 ml-auto flex-1 min-w-[200px] max-w-full sm:flex-none sm:justify-end">
 {isDelayed && (
 <button
@@ -1011,7 +1011,7 @@ const numericValue = typeof value === 'number' ? value : Number(value || 0);
 return [formatCurrency(numericValue), ""];
 }}
 itemSorter={(item) => -(typeof item.value === 'number' ? item.value : Number(item.value || 0))}
-labelStyle={{ color: 'rgba(255,255,255,0.9)', marginBottom: '8px', fontWeight: '900', fontFamily: 'serif', fontSize: '18px' }}
+labelStyle={{ color: 'rgba(255,255,255,0.9)', marginBottom: '8px', fontWeight: '900', fontFamily: 'Fraunces, Georgia, serif', fontSize: '18px' }}
 itemStyle={{ padding: 0 }}
 separator=""
 />
@@ -1135,7 +1135,7 @@ return (
 <GlassCard className="p-5 lg:p-7">
 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-5">
 <div>
-<h3 className="font-serif font-black text-[1.7rem] text-white">Withdrawals</h3>
+<h3 className="font-display font-black text-[1.7rem] text-white">Withdrawals</h3>
 <p className="text-[11px] text-slate-400 mt-1">Growth-aware estimates from retirement through <span className="whitespace-nowrap">life expectancy.</span></p>
 </div>
 <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400 leading-tight md:text-right">
