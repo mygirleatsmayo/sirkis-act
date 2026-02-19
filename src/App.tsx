@@ -56,7 +56,7 @@ brand:     '#00A499',  // Your Contributions (persian green)
 opm:       '#A8A8A8',  // Employer Match (boulder grey — lightened for dark bg)
 returns:   '#E6C300',  // Investment Returns (corn gold)
 startNow:  '#0D9488',  // Start Now / Early Start (aqua teal — close to brand, watch)
-loss:      '#D32F2F',  // Delayed start / loss / errors (persian red)
+loss:      '#D32F2F',  // Delayed start / financial loss (persian red)
 brandBg:   'rgba(0,164,153,0.06)',
 returnsBg: 'rgba(230,195,0,0.08)',
 startNowBg:'rgba(13,148,136,0.08)',
@@ -82,18 +82,17 @@ const CrownLogo = ({ className = "" }: LogoProps) => (
 </g>
 </svg>
 );
-type BadgeColor = 'indigo' | 'emerald' | 'rose' | 'amber' | 'slate';
+type BadgeColor = 'brand' | 'returns' | 'loss' | 'neutral';
 type BadgeProps = { children: ReactNode; color?: BadgeColor };
-const Badge = ({ children, color = "indigo" }: BadgeProps) => {
+const Badge = ({ children, color = "brand" }: BadgeProps) => {
 const styles = {
-indigo: "bg-[#00A499]/10 text-[#00A499] border-[#00A499]/20",
-emerald: "bg-[#C59A17]/10 text-[#C59A17] border-[#C59A17]/20",
-rose: "bg-rose-500/15 text-rose-400 border-rose-500/20",
-amber: "bg-amber-500/15 text-amber-300 border-amber-400/20",
-slate: "bg-white/10 text-slate-300 border-white/15",
+brand: "bg-[#00A499]/10 text-[#00A499] border-[#00A499]/20",
+returns: "bg-[#E6C300]/10 text-[#E6C300] border-[#E6C300]/20",
+loss: "bg-[#D32F2F]/15 text-[#D32F2F] border-[#D32F2F]/20",
+neutral: "bg-white/10 text-slate-300 border-white/15",
 };
 return (
-<span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${styles[color] || styles.indigo}`}>
+<span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${styles[color] || styles.brand}`}>
 {children}
 </span>
 );
@@ -331,7 +330,7 @@ icon={Clock}
 </div>
 {inputs.startAge > inputs.currentAge && (
 <div className="px-4 pb-4 -mt-3">
-<div className="flex items-center gap-2 text-[11px] text-rose-400 font-semibold bg-[#D32F2F]/10 p-2.5 rounded-lg">
+<div className="flex items-center gap-2 text-[11px] text-[#D32F2F]/80 font-semibold bg-[#D32F2F]/10 p-2.5 rounded-lg">
 <div className="w-1.5 h-1.5 rounded-full bg-[#D32F2F] animate-pulse" />
 {inputs.startAge - inputs.currentAge} year delay active
 </div>
@@ -809,7 +808,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 {/* TARGET CARD */}
 <Card className={`${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-4'} flex flex-col justify-center`}>
 <div className="flex items-center justify-center gap-2 mb-2">
-<Badge color="indigo">Target</Badge>
+<Badge color="brand">Target</Badge>
 </div>
 {isDelayed ? (
 <div className="text-center">
@@ -832,7 +831,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 </div>
 <div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#D32F2F]/50">
 <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
-<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-rose-600">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-[#D32F2F]">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
 </div>
 </div>
 )}
@@ -849,7 +848,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 {/* GROWTH CARD */}
 <Card className={`${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center`}>
 <div className="flex items-center justify-center gap-2 mb-2">
-<Badge color="emerald">Growth</Badge>
+<Badge color="returns">Growth</Badge>
 </div>
 {isDelayed ? (
 <div className="text-center">
@@ -886,7 +885,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 {/* REAL VALUE CARD */}
 <Card className={`${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center`}>
 <div className="flex items-center justify-center gap-2 mb-2">
-<Badge color="slate">Real Value</Badge>
+<Badge color="neutral">Real Value</Badge>
 </div>
 {isDelayed ? (
 <div className="text-center">
@@ -924,7 +923,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 {isDelayed && useThreeColumnPanels && (
 <div className="p-4 flex items-center justify-center gap-3 rounded-[22px] shadow-[0_16px_32px_-24px_rgba(0,0,0,0.7)]" style={{ background: 'rgba(211,47,47,0.10)', border: '1px solid rgba(211,47,47,0.50)' }}>
 <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
-<div className="text-[clamp(1.1rem,2vw,1.5rem)] font-black text-rose-600">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
+<div className="text-[clamp(1.1rem,2vw,1.5rem)] font-black text-[#D32F2F]">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
 </div>
 )}
 {/* MAIN CHART CARD */}
