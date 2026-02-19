@@ -92,8 +92,9 @@ returns: "bg-[#E6C300]/10 text-[#E6C300] border-[#E6C300]/20",
 loss: "bg-[#D32F2F]/15 text-[#D32F2F] border-[#D32F2F]/20",
 neutral: "bg-white/10 text-slate-300 border-white/15",
 };
+// BODGE: asymmetric padding compensates for Recursive's high vertical metrics — revisit on font/theme change
 return (
-<span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${styles[color] || styles.brand}`}>
+<span className={`px-2.5 pt-[5px] pb-[3px] rounded-lg text-[10px] font-bold uppercase tracking-wider border ${styles[color] || styles.brand}`}>
 {children}
 </span>
 );
