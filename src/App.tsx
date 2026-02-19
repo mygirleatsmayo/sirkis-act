@@ -1146,17 +1146,17 @@ return (
 <div className={`rounded-2xl bg-[#003D3A]/60 border border-white/[0.07] ${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-3'} shadow-sm h-full flex flex-col min-w-0`}>
 <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fixed Purchasing Power</div>
 <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-white mt-2 tabular-nums min-w-0">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
-<div className="text-[11px] text-slate-400 mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} today.</div>
+<div className="text-[11px] text-slate-400 mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} <span className="whitespace-nowrap">today (real $ estimate).</span></div>
 </div>
 <div className={`rounded-2xl bg-[#003D3A]/60 border border-white/[0.07] ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
 <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fixed Monthly</div>
 <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-white mt-2 tabular-nums min-w-0">{formatCurrency(monthlyNominalWithdrawal)}</div>
-<div className="text-[11px] text-slate-400 mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))}.</div>
+<div className="text-[11px] text-slate-400 mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} (real)<br />At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))} (real)</div>
 </div>
 <div className={`rounded-2xl bg-[#003D3A]/60 border border-white/[0.07] ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
 <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fixed Annual</div>
 <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-white mt-2 tabular-nums min-w-0">{formatCurrency(annualNominalWithdrawal)}</div>
-<div className="text-[11px] text-slate-400 mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} today. At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))}.</div>
+<div className="text-[11px] text-slate-400 mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} (real)<br />At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))} (real)</div>
 </div>
 </div>
 <div className="mt-4 text-[11px] text-slate-400">
@@ -1164,7 +1164,8 @@ Assumes constant returns during retirement and no taxes; for planning only.
 </div>
 </GlassCard>
 <footer className="mt-4 text-center text-[11px] text-slate-400">
-Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex (but IS open to sponsorship inquiries).
+Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by, or endorsed by Rolex{' '}
+<span className="whitespace-nowrap">(but IS open to sponsorship inquiries).</span>
 </footer>
 </div>
 </div>
