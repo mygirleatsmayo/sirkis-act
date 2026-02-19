@@ -52,6 +52,7 @@ hsaIndividual: 4150,
 hsaFamily: 8300,
 };
 const THEME = {
+bg:        '#003D3A',  // App background (cyprus)
 brand:     '#00A499',  // Your Contributions (persian green)
 opm:       '#A8A8A8',  // Employer Match (boulder grey — lightened for dark bg)
 returns:   '#E6C300',  // Investment Returns (corn gold)
@@ -528,6 +529,10 @@ window.addEventListener('scroll', handleScroll, { passive: true });
 return () => window.removeEventListener('scroll', handleScroll);
 }, []);
 useEffect(() => {
+const meta = document.querySelector('meta[name="theme-color"]');
+if (meta) meta.setAttribute('content', THEME.bg);
+}, []);
+useEffect(() => {
 const container = chartContainerRef.current;
 if (!container) return;
 let frame = 0;
@@ -758,7 +763,7 @@ return (
 {/* MAIN CONTENT AREA */}
 <div className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
 {/* MOBILE HEADER */}
-<div className={`lg:hidden flex justify-between items-center px-4 bg-[#003D3A]/95 backdrop-blur-md border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
+<div className={`lg:hidden flex justify-between items-center px-4 bg-[#003D3A] border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
 <div className="flex items-center gap-2" style={{ color: THEME.brand }}>
 <div
   className="transition-transform duration-300 ease-in-out"
@@ -767,11 +772,8 @@ return (
   <CrownLogo className="h-9 w-9" />
 </div>
 <div className="flex flex-col">
-<div
-  className="font-serif font-black tracking-tight leading-tight text-xl transition-transform duration-300 ease-in-out"
-  style={{ transform: isScrolled ? 'scale(0.8)' : 'scale(1)', transformOrigin: 'left center' }}
->Sirkis Act</div>
-<div className={`font-medium text-slate-400 leading-tight text-[10px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
+<div className="font-serif font-black tracking-tight leading-tight text-2xl">Sirkis Act</div>
+<div className={`font-medium text-slate-400 leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
 </div>
 </div>
 </div>
@@ -1134,7 +1136,7 @@ return (
 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-5">
 <div>
 <h3 className="font-serif font-black text-[1.7rem] text-white">Withdrawals</h3>
-<p className="text-[11px] text-slate-400 mt-1">Growth-aware estimates from retirement through life expectancy.</p>
+<p className="text-[11px] text-slate-400 mt-1">Growth-aware estimates from retirement through <span className="whitespace-nowrap">life expectancy.</span></p>
 </div>
 <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400 leading-tight md:text-right">
 <div>{withdrawalYears} years</div>
@@ -1188,7 +1190,7 @@ peekDragStartY.current = 0;
 onPointerUp={() => { peekDragStartY.current = 0; }}
 onPointerCancel={() => { peekDragStartY.current = 0; }}
 >
-<div className="pulse-glow bg-[#003D3A]/95 backdrop-blur-xl border-t border-white/10 shadow-2xl rounded-t-3xl px-4 pt-2 pb-4">
+<div className="pulse-glow bg-[#003D3A] border-t border-white/10 shadow-2xl rounded-t-3xl px-4 pt-2 pb-2">
 <div className="flex items-center justify-between">
 <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
 <span className="h-1 w-6 rounded-full bg-white/25" />
@@ -1245,19 +1247,24 @@ onFocus={(e) => {
 .pulse-glow::after {
 	content: '';
 	position: absolute;
-	inset: 2px 8px 8px 8px;
-	border-radius: 20px;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 24px;
+	border-radius: 24px 24px 0 0;
 	box-shadow:
-		0 0 44px 12px rgba(197, 154, 23, 0.28),
-		0 0 72px 22px rgba(197, 154, 23, 0.18);
+		0 0 8px 1px rgba(230, 195, 0, 0.50),
+		0 0 28px 4px rgba(230, 195, 0, 0.32),
+		0 0 60px 12px rgba(230, 195, 0, 0.20);
+	clip-path: inset(-100px -100px 0 -100px);
 	opacity: 0.7;
 	animation: glowPulse 3s ease-in-out infinite;
 	pointer-events: none;
 }
 @keyframes glowPulse {
-	0%   { opacity: 0.55; box-shadow: 0 0 44px 12px rgba(197,154,23,0.28), 0 0 72px 22px rgba(197,154,23,0.18); }
-	50%  { opacity: 1;    box-shadow: 0 0 60px 18px rgba(197,154,23,0.40), 0 0 92px 32px rgba(197,154,23,0.26); }
-	100% { opacity: 0.55; box-shadow: 0 0 44px 12px rgba(197,154,23,0.28), 0 0 72px 22px rgba(197,154,23,0.18); }
+	0%   { opacity: 0.55; box-shadow: 0 0 8px 1px rgba(230,195,0,0.50), 0 0 28px 4px rgba(230,195,0,0.32), 0 0 60px 12px rgba(230,195,0,0.20); }
+	50%  { opacity: 1;    box-shadow: 0 0 10px 2px rgba(230,195,0,0.65), 0 0 36px 6px rgba(230,195,0,0.42), 0 0 80px 18px rgba(230,195,0,0.28); }
+	100% { opacity: 0.55; box-shadow: 0 0 8px 1px rgba(230,195,0,0.50), 0 0 28px 4px rgba(230,195,0,0.32), 0 0 60px 12px rgba(230,195,0,0.20); }
 }
 @media (max-width: 1023px) {
 	input,

@@ -63,6 +63,7 @@ src/
 - Keep `src/` flat unless component extraction is explicitly agreed upon
 - Avoid over-engineering; only make changes that are directly requested or clearly necessary
 - Do not add docstrings, comments, or type annotations to code you did not change
+- **No orphan words** in headlines, subheadlines, labels, and short UI text; use `whitespace-nowrap` on the last 2–3 words or equivalent
 
 ---
 
