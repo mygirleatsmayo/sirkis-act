@@ -554,7 +554,7 @@ window.removeEventListener('orientationchange', updateChartReady);
 };
 }, [activeTab]);
 
-const summarySalary = `$${Math.round(inputs.currentSalary / 1000)}k`;
+const summarySalary = inputs.currentSalary >= 999500 ? `$${(Math.round(inputs.currentSalary / 100000) / 10).toFixed(1)}M` : `$${Math.round(inputs.currentSalary / 1000)}k`;
 const summaryContribution = inputs.enable401k ? `${inputs.contribution401k}%` : 'Off';
 // --- CALCULATIONS ---
 const { results, chartData, comparisonData, finalData } = useMemo(() => {
@@ -1199,10 +1199,10 @@ Inputs
 <ChevronUp size={18} className="text-[#00A499]" />
 </div>
 <div className="mt-1 text-sm font-semibold text-slate-200">
-Age {inputs.currentAge} · Start {inputs.startAge} · Retire {inputs.retirementAge}
+Age {inputs.currentAge}{isDelayed && <> · <span style={{ color: THEME.loss, fontWeight: 900, fontSize: '0.925rem' }}>Start {inputs.startAge}</span></>} · Retire {inputs.retirementAge}
 </div>
 <div className="text-[11px] text-slate-400 font-medium">
-Salary {summarySalary} · 401(k) {summaryContribution}
+Salary {summarySalary} · 401(k) {summaryContribution}{inputs.enableRoth && ` · Roth $${(Math.round((inputs.rothMatch401k ? Math.min(inputs.currentSalary * (inputs.contribution401k / 100), LIMITS.rothAnnual) : inputs.rothContribution) / 100) / 10).toFixed(1)}k`}
 </div>
 </div>
 <div style={{ height: 'env(safe-area-inset-bottom)' }} />
