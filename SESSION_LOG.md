@@ -1,5 +1,47 @@
 # Session Log
 
+## Session 8: Typography Overhaul, Drawer Enrichment, iOS Theming
+
+**Date:** 2026-02-19
+
+### What Was Done
+- **Custom Font Pairing**: Fraunces (display/headings, variable 100–900) + Recursive Sans Linear (UI/body, variable 300–1000)
+- **Self-Hosted Fonts**: All woff2 files in `src/fonts/` with relative paths and `format('woff2')` for universal browser support (including iOS Safari)
+- **Font Loading Debugging**: Resolved Vite `base` path issue (absolute `/fonts/` paths 404 on GitHub Pages) and Fontsource `format('woff2-variations')` Safari incompatibility
+- **Drawer Handle Stats**: Added delayed start age in loss red, Roth IRA contribution display, smart salary formatting ($X.XM for millions)
+- **Drawer Handle Glow Fix**: Replaced broken `background` hack with `clip-path: inset(-100px -100px 0 -100px)` for directional upward glow
+- **iOS Theming**: Added `theme-color` meta tag and `apple-mobile-web-app-status-bar-style` for dynamic island/address bar
+- **Badge Vertical Centering**: Asymmetric padding bodge (`pt-[5px] pb-[3px]`) to compensate for Recursive's high vertical metrics
+- **Cleanup**: Uninstalled unused `@fontsource-variable/fraunces`, updated index.html font comment
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/App.tsx` | Modified (font classes, drawer stats, badge padding, glow CSS) |
+| `src/index.css` | Modified (@font-face for Fraunces + Recursive) |
+| `src/main.tsx` | Modified (removed Fontsource imports) |
+| `tailwind.config.js` | Modified (fontFamily.display + fontFamily.sans) |
+| `index.html` | Modified (theme-color meta, font comment) |
+| `src/fonts/fraunces-latin-wght-normal.woff2` | Created |
+| `src/fonts/fraunces-latin-wght-italic.woff2` | Created |
+| `src/fonts/recursive-sans-linear.woff2` | Created |
+| `src/fonts/recursive-sans-linear-oblique.woff2` | Created |
+| `src/fonts/general-sans-variable.woff2` | Deleted |
+| `src/fonts/general-sans-variable-italic.woff2` | Deleted |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| Badge padding bodge | Asymmetric `pt-[5px] pb-[3px]` compensates for Recursive metrics — revisit on font change | Low |
+| Font weight perception | Red (#D32F2F) on dark bg appears thinner — needs `fontWeight: 900` + `fontSize: 0.925rem` to match | Low |
+| ESLint v9 config missing | Pre-existing: `npm run lint` fails due to missing `eslint.config.js` | Medium |
+
+### Next Steps
+1. Debossed effect on hero text, logo, iconography
+2. Quote carousel font/styling refinements
+3. Theme switcher — wire up palette reference files
+4. Warp Oz codebase audit
+
 ## Session 7: Dark Cyprus Palette & Visual Identity
 
 **Date:** 2026-02-18

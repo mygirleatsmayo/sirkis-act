@@ -11,6 +11,9 @@
 - **401k Panel**: Top error text removed; label bolds on cap breach; cap amount bolded; "Over IRS caps" warning centered.
 - **Withdrawal Panel**: All three heading labels unified to slate-400.
 - **Gold Blobs**: Ambient corner glows (top-right + bottom-right), desktop only.
+- **Typography**: Custom font pairing — Fraunces (display/headings) + Recursive Sans Linear (UI/body), self-hosted variable woff2.
+- **Drawer Handle**: Delayed start age in red, Roth IRA contribution, smart salary formatting ($X.XM), directional glow via clip-path.
+- **iOS Theming**: Dynamic island and address bar color via theme-color meta tag.
 - **IRS Cap Enforcement**: Contributions exceeding IRS limits now clamped in projection calculations (401k, Roth IRA, HSA).
 - **Compact Mobile Panels**: Hero+two-across layout for narrow screens; merged delayed-start Target+Potential Loss; "Start Early" green sub-cards with descriptors.
 - **Responsive Stats Panels**: Smart per-value abbreviation, adaptive layout scaling, 3-column threshold lowered to 550px.
