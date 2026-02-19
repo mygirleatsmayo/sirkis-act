@@ -159,7 +159,7 @@ className="group inline-flex items-center text-slate-400 hover:text-[#00A499] fo
 >
 <Info size={12} />
 <span className="sr-only">Info</span>
-<span className={`pointer-events-none absolute w-64 max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-white/15 bg-[#004745] px-3 py-2 text-[11px] font-medium text-slate-300 shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
+<span className={`pointer-events-none absolute w-64 max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-white/15 bg-[#004745] px-3 py-2 text-[11px] font-medium text-slate-300 text-left shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
 {content}
 </span>
 </button>
@@ -417,7 +417,7 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <div className="mt-4 text-[11px]">
 <div className={`flex items-start gap-2 ${employeeOverCap || totalOverCap ? 'text-rose-600' : 'text-slate-400'}`}>
 <Info size={14} className={employeeOverCap || totalOverCap ? 'text-rose-500' : 'text-[#A8A8A8]'} />
-<div className="space-y-2">
+<div className="space-y-1">
 <div className={employeeOverCap ? 'text-rose-600' : 'text-slate-400'}>
 Employee est: <span className="font-semibold">{formatCurrency(annualEmployee401k)}</span> (cap <span className="font-bold">{formatCurrency(LIMITS.max401kEmployee)}</span>).
 </div>
@@ -433,7 +433,7 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 </div>
 </div>
 {(employeeOverCap || totalOverCap) && (
-<div className="text-rose-600 font-bold">Over IRS caps. Projections use capped values.</div>
+<div className="text-rose-600 font-bold mt-3 text-center">Over IRS caps. Projections use capped values.</div>
 )}
 </div>
 </ToggleSection>
@@ -747,8 +747,8 @@ return (
 <div className="min-h-[100dvh] w-full max-w-[100vw] flex flex-col lg:flex-row bg-[#003D3A] font-sans overflow-x-clip relative">
 {/* VIBRANT BACKGROUND */}
 <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-<div className="absolute top-[-25%] right-[-20%] w-[380px] h-[380px] bg-[#E6C300]/35 rounded-full blur-2xl" />
-<div className="absolute bottom-[-10%] right-[-5%] w-[280px] h-[280px] bg-[#E6C300]/20 rounded-full blur-2xl hidden lg:block" />
+<div className="absolute top-[-15%] right-[-45%] w-[520px] h-[600px] bg-[#E6C300]/10 rounded-full blur-3xl hidden lg:block" />
+<div className="absolute bottom-[-15%] right-[-15%] w-[600px] h-[520px] bg-[#E6C300]/5 rounded-full blur-3xl hidden lg:block" />
 </div>
 {/* DESKTOP SIDEBAR (GLASS PANEL) */}
 <div className="hidden lg:flex flex-col w-[420px] bg-[#004745] border-r border-black/30 z-20 relative shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
