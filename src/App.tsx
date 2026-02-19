@@ -955,7 +955,7 @@ Table
 </div>
 </div>
 </div>
-<div className="mt-4 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-400">
+<div className="mt-2 mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-semibold text-slate-400">
 {legendItems.filter((item) => item.visible).map((item) => (
 <div key={item.label} className="flex items-center gap-2">
 <span className="inline-flex h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
