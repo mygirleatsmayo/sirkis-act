@@ -152,13 +152,24 @@ Prepend newest first:
 
 ---
 
-## 7. Git Branching Workflow
+## 7. Git Branching & Worktrees
 
+### Branch Naming
 - **No `/` separators** in branch names; use hyphens instead (e.g., `ui-polish-2`, not `ui/polish-2`)
 - **Sub-branches use `/`** off a namespace that is not itself a branch (e.g., `ui-polish-2/stats-panels`, `ui-polish-2/visual-identity`)
 - **Tag checkpoints** before merging to `main` (e.g., `git tag ui-polish-checkpoint-feb15`)
 - **Workflow**: work on sub-branches → merge to `main` when ready → tag before merge
 - The namespace parent (e.g., `ui-polish-2`) should not exist as a branch; it's just a grouping prefix
+
+### Worktrees
+Use git worktrees for parallel isolated work. See `~/.claude/rules/worktrees.md` for full conventions.
+
+- **Directory naming**: `<project>--<purpose>` sibling dirs (e.g., `sirkis-act--themes`, `sirkis-act--oz`)
+- **Theme work**: always in its own worktree (`sirkis-act--themes`)
+- **Agent work** (Oz): always in its own worktree (`sirkis-act--oz`)
+- **Visual A/B**: run two dev servers on different ports for side-by-side comparison of undeployed branches
+- Each worktree needs its own `npm install`
+- Remove worktrees when done (`git worktree remove`)
 
 ---
 
