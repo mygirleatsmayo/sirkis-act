@@ -1170,7 +1170,7 @@ Assumes contributions through the year selected, no contribution at retirement a
 {(() => {
 const stats = [
 { label: "Market Funded", value: finalData['Investment Returns'], colorStyle: { color: THEME.returns }, bgStyle: { background: THEME.returnsBg }, icon: TrendingUp },
-{ label: "Self Funded", value: finalData['Your Contributions'], colorStyle: { color: THEME.brand }, bgStyle: { background: THEME.brandBg }, icon: User },
+{ label: "Self Funded", value: finalData['Your Contributions'], colorStyle: { color: THEME.brand }, bgStyle: { background: THEME.brandBg }, icon: PiggyBank },
 { label: "Employer (OPM)", value: finalData['Employer Match'], colorStyle: { color: THEME.opm }, bgStyle: { background: THEME.brandBg }, icon: Building2 },
 ];
 return (

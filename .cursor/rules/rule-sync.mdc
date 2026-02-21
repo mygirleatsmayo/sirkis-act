@@ -1,0 +1,34 @@
+---
+description: "Rule sync between Cursor and Claude Code — mirror rules when added or modified"
+alwaysApply: false
+---
+# Rule Sync — Cursor ↔ Claude Code
+
+When adding or modifying a rule in `.cursor/rules/` or Cursor User Rules, ask:
+
+> "Would you like this rule also mirrored to Claude Code?"
+
+## If yes
+
+1. **Output for `~/.claude/rules/`**: Provide a fenced code block with the full rule content as a plain `.md` file, ready to save to `~/.claude/rules/[rule-name].md`.
+
+2. **If it's a new top-level rule category** (not just an addition to an existing rule), also note that `~/.claude/CLAUDE.md` should be updated with a pointer to the new file, following the existing section format:
+   ```markdown
+   ## N. Rule Title
+   See detailed instructions in `~/.claude/rules/[rule-name].md` (auto-loaded).
+   - Key bullet summary
+   ```
+
+## What goes where
+
+| Rule type | `.cursor/rules/` | Cursor User Rules |
+|-----------|-----------------|-------------------|
+| Detailed workflow/reference (research, memory, session) | ✓ Full content | — |
+| Short hard constraint (em dash, modification policy, orphan words) | ✓ Full content | ✓ Condensed |
+
+## Parity locations
+
+- Cursor workspace rules: `/Users/mygirleatsmayo/Desktop/Dev/.cursor/rules/`
+- Claude Code rules: `~/.claude/rules/`
+- Claude Code index: `~/.claude/CLAUDE.md`
+- Cursor global (User Rules): Cursor Settings → Rules for AI (manual, cloud-stored)
