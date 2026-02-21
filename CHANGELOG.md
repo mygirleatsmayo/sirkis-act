@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+- **Loss Panel Responsive Sizing**: Fluid clamp-based font sizes for quote, number, and label across narrow and three-column layouts; targets specific problem viewports (513–564px, 616–656px, 1024–1048px, 1100–1318px).
+- **Loss Panel Ghost Marks Removed**: Quotation marks removed from potential loss dynamic quote in all layouts.
+- **Start-Now Button Layout**: Stacks below "The Trajectory" heading at cramped viewport widths (513–564px mobile and 1024–1048px desktop) using container-width detection.
+- **Fraction Labels**: Fixed `getLossFractionLabel` — removed `five sixths`; values >81% now read "nearly 90% of"; values ≥90% now read "nearly all of your retirement."
+
 - **Dark Mode**: Full dark Cyprus palette — solid dark panels, sidebar, header, and inputs throughout.
 - **New Color Palette**: 5-color system — Cyprus #003D3A bg, Persian Green brand, Corn gold, Persian Red loss, lightened Boulder grey for OPM.
 - **Hero**: Solid carved-text color spans replace gradient; teal "Dr. Sirkis's", gold "High-Wire Act".

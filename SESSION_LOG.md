@@ -1,5 +1,40 @@
 # Session Log
 
+## Session 9: Loss Panel Responsive Sizing & Fraction Labels
+
+**Date:** 2026-02-21
+
+### What Was Done
+- **Ghost Marks Removed**: Removed all quotation marks (ghost and inline) from potential loss panel in both narrow and three-column layouts; cleaned up dead code (`screenWidth`, `setScreenWidth`, `ghostSize`, `showStandaloneGhosts`, wrapper div)
+- **textShadow Carved Effect**: Halved opacity values; added 0.7px blur radius to reduce harshness on high-DPR iPhone displays
+- **Responsive Clamp Sizing — Narrow Layout**: Quote `clamp(0.7rem, 3.75vw, 1rem)`; labels `clamp(0.625rem, 2.5vw, 0.75rem)`; numbers `clamp(0.9rem, 4vw, 1.15rem)`
+- **Responsive Clamp Sizing — Three-Column Panel**: Quote `clamp(0.9rem, 1.5vw, 1.15rem)`; number `clamp(1.2rem, 2vw, 1.7rem)`; label `clamp(0.65rem, 1.1vw, 0.85rem)`; explicit `text-center` on both label and number divs
+- **Start-Now Button Layout**: Stacks below "The Trajectory" heading when `chartSize.width <= 500` (covers both 513–564px mobile and 1024–1048px desktop where sidebar shrinks content area to ~500px)
+- **getLossFractionLabel Fixes**: Removed `five sixths` entry; added explicit early returns for `> 0.81` → `"nearly 90% of"` and `>= 0.90 - tol` → `"nearly all of"`
+- **Rules & Config**: Added "Research Over Guessing" rule to user-preferences; converted all `.cursor/rules/*.md` to `.mdc` with proper frontmatter; added browsermcp to Claude Code MCP config
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/App.tsx` | Modified (loss panel layout, clamp sizing, fraction labels, button stacking) |
+| `~/.claude/rules/user-preferences.md` | Modified (Research Over Guessing section) |
+| `/Desktop/Dev/.cursor/rules/*.mdc` | Created (6 files, converted from .md with frontmatter) |
+| `~/.claude.json` | Modified (browsermcp added to mcpServers) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| `getLossFractionLabel` bodged | Original fraction/percentage rules were never written down; current implementation uses ad-hoc early returns rather than a clean rule set | High |
+| Label centering 1100–1318 | User noted label not perfectly centered over number at those widths; explicit `text-center` added but may need further investigation | Medium |
+| ESLint v9 config missing | Pre-existing: `npm run lint` fails due to missing `eslint.config.js` | Medium |
+
+### Next Steps
+1. Re-specify `getLossFractionLabel` rules from scratch — what fractions/percentages, what rounding direction, any `neverOver` behavior
+2. Debossed effect — increase on existing text; extend to logo and iconography
+3. Quote carousel refinements
+4. Theme switcher — wire up palette reference files
+5. Warp Oz codebase audit
+
 ## Session 8: Typography Overhaul, Drawer Enrichment, iOS Theming
 
 **Date:** 2026-02-19
