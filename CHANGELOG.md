@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **Stat Icon Radius**: Proportional `rounded-[27%]` replaces fixed `rounded-2xl` so icon containers maintain consistent corner proportions at all sizes.
+- **Market Funded Icon**: Swapped `Coins` → `TrendingUp` for better semantic fit.
 - **Loss Panel Responsive Sizing**: Fluid clamp-based font sizes for quote, number, and label across narrow and three-column layouts; targets specific problem viewports (513–564px, 616–656px, 1024–1048px, 1100–1318px).
 - **Loss Panel Ghost Marks Removed**: Quotation marks removed from potential loss dynamic quote in all layouts.
 - **Start-Now Button Layout**: Stacks below "The Trajectory" heading at cramped viewport widths (513–564px mobile and 1024–1048px desktop) using container-width detection.

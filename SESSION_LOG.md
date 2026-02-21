@@ -1,5 +1,33 @@
 # Session Log
 
+## Session 10: Icon Polish
+
+**Date:** 2026-02-21
+
+### What Was Done
+- **Icon border-radius**: Changed `rounded-2xl` (fixed 16px) to `rounded-[27%]` (proportional scaling) on stat footer icon containers
+- **Market Funded icon**: Swapped `Coins` → `TrendingUp` for better semantic fit
+- **Icon sizing exploration**: Attempted CSS clamp, self-stretch + aspect-ratio, chartSize-computed, and calc-from-text-clamp approaches for responsive icon sizing; all had rendering issues (invisible icons, circular flex sizing, oversized containers). Reverted to deployed fixed-size approach.
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/App.tsx` | Modified (icon border-radius, icon swap, removed unused Coins import) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| Icon sizing not fully responsive | Fixed sizes (36/22/20) work but don't scale fluidly with text; percentage-of-panel-height approach needs deeper CSS investigation | Low |
+| `getLossFractionLabel` bodged | Carried from Session 9; original rules need full re-spec | High |
+| ESLint v9 config missing | Pre-existing: `npm run lint` fails due to missing `eslint.config.js` | Medium |
+
+### Next Steps
+1. Responsive icon sizing (deeper investigation into flex + aspect-ratio interaction)
+2. `getLossFractionLabel` full rule re-spec
+3. Loss panel copy ("You traded $X for $loss...")
+
+---
+
 ## Session 9: Loss Panel Responsive Sizing & Fraction Labels
 
 **Date:** 2026-02-21
