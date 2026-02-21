@@ -63,6 +63,35 @@ returnsBg: 'rgba(230,195,0,0.08)',
 startNowBg:'rgba(13,148,136,0.08)',
 lossBg:    'rgba(211,47,47,0.07)',
 } as const;
+const getLossFractionLabel = (f: number): string => {
+  const tol = 0.008;
+  if (f >= 0.90 - tol) return 'nearly all of';
+  if (f > 0.81) return 'nearly 90% of';
+  const levels: { v: number; label: string; neverOver?: boolean; noOf?: boolean }[] = [
+    { v: 0.15, label: '15%',           neverOver: true },
+    { v: 0.20, label: '20%',           neverOver: true },
+    { v: 0.25, label: 'a quarter' },
+    { v: 1/3,  label: 'a third' },
+    { v: 0.40, label: '40%' },
+    { v: 0.50, label: 'half',          noOf: true },
+    { v: 0.60, label: '60%' },
+    { v: 2/3,  label: 'two thirds' },
+    { v: 0.75, label: 'three quarters' },
+  ];
+  const of = (l: { noOf?: boolean }) => l.noOf ? '' : ' of';
+  if (f < levels[0].v - tol) return f < 0.11 ? 'a portion of' : `nearly ${levels[0].label} of`;
+  for (let i = 0; i < levels.length; i++) {
+    const cur = levels[i];
+    const nxt = levels[i + 1];
+    if (Math.abs(f - cur.v) <= tol) return `${cur.label}${of(cur)}`;
+    if (!nxt) return `over ${cur.label}${of(cur)}`;
+    if (f > cur.v + tol && f < nxt.v - tol) {
+      if (cur.neverOver) return `nearly ${nxt.label}${of(nxt)}`;
+      return f < (cur.v + nxt.v) / 2 ? `over ${cur.label}${of(cur)}` : `nearly ${nxt.label}${of(nxt)}`;
+    }
+  }
+  return 'a portion of';
+};
 // --- HELPER COMPONENTS ---
 type CardProps = { children: ReactNode; className?: string };
 const GlassCard = ({ children, className = "" }: CardProps) => (
@@ -313,13 +342,6 @@ return (
 </h3>
 <InputField label="Current Age" value={inputs.currentAge} onChange={v => handleInputChange('currentAge', v)} min={18} max={80} icon={User} />
 <div className={`relative rounded-2xl mb-6 transition-all duration-300 ${inputs.startAge > inputs.currentAge ? 'bg-[#E6C300]/8 ring-1 ring-[#E6C300]/25' : 'bg-transparent'}`}>
-<button
-type="button"
-onClick={() => handleInputChange('startAge', inputs.currentAge)}
-className="absolute right-4 top-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-[#00A499] transition-colors"
->
-Reset to current age
-</button>
 <div className="p-4 pb-2">
 <InputField
 label="Start Investing At"
@@ -328,13 +350,23 @@ onChange={v => handleInputChange('startAge', v)}
 min={inputs.currentAge}
 max={inputs.retirementAge - 1}
 icon={Clock}
+tooltip="Dr. Sirkis started saving at 22. Can you do even better?"
 />
 </div>
 {inputs.startAge > inputs.currentAge && (
 <div className="px-4 pb-4 -mt-3">
-<div className="flex items-center gap-2 text-[11px] text-[#D32F2F]/80 font-semibold bg-[#D32F2F]/10 p-2.5 rounded-lg">
+<div className="flex items-center justify-between gap-2 text-[11px] font-semibold bg-[#D32F2F]/10 p-2.5 rounded-lg">
+<div className="flex items-center gap-2 text-[#D32F2F]/80">
 <div className="w-1.5 h-1.5 rounded-full bg-[#D32F2F] animate-pulse" />
 {inputs.startAge - inputs.currentAge} year delay active
+</div>
+<button
+type="button"
+onClick={() => handleInputChange('startAge', inputs.currentAge)}
+className="text-[#D32F2F]/60 hover:text-[#D32F2F] transition-colors font-bold uppercase tracking-widest"
+>
+Reset
+</button>
 </div>
 </div>
 )}
@@ -675,6 +707,23 @@ const legendItems = [
 ];
 const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }), []);
 const formatCurrency = (val: number) => currencyFormatter.format(val || 0);
+const delayYears = inputs.startAge - inputs.currentAge;
+const lossAmount = comparisonData && finalData
+  ? comparisonData['Total Nominal'] - finalData['Total Nominal']
+  : 0;
+const lossFraction = comparisonData && comparisonData['Total Nominal'] > 0
+  ? lossAmount / comparisonData['Total Nominal']
+  : 0;
+const missedContributions = (() => {
+  if (!inputs.enable401k || delayYears <= 0) return 0;
+  const growthRate = 1 + inputs.salaryGrowth / 100;
+  let total = 0;
+  for (let i = 0; i < delayYears; i++) {
+    total += Math.min(inputs.currentSalary * Math.pow(growthRate, i) * (inputs.contribution401k / 100), LIMITS.max401kEmployee);
+  }
+  return total;
+})();
+const lossYearLabel = delayYears === 1 ? 'year' : 'years';
 const formatCompact = (val: number) => {
   const abs = Math.abs(val || 0);
   if (abs >= 1_000_000) return `$${(val / 1_000_000).toPrecision(4)}M`;
@@ -821,22 +870,31 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projected Nest Egg</p>
 {useThreeColumnPanels ? (
 <div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
-<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
 <div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
 {formatCurrency(comparisonData['Total Nominal'])}
 </div>
 </div>
 ) : (
+<>
 <div className="grid grid-cols-2 gap-2 mt-3">
 <div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25">
-<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
 <div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-white">{formatCurrency(comparisonData['Total Nominal'])}</div>
 </div>
 <div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#D32F2F]/50">
-<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
-<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-[#D32F2F]">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
+<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black text-[#D32F2F]">-{formatCurrency(lossAmount)}</div>
 </div>
 </div>
+<p className="font-display italic font-semibold leading-snug mt-3 text-center tracking-wide"
+  style={{ fontSize: 'clamp(0.7rem, 3.75vw, 1rem)', color: THEME.loss, textShadow: '0px 1px 0.7px rgba(255,255,255,0.04), 0px -1px 0.7px rgba(0,0,0,0.25)' }}>
+{missedContributions > 0
+  ? `The cost of waiting ${delayYears} ${lossYearLabel} isn't ${formatCurrency(missedContributions)}…`
+  : `The cost of waiting ${delayYears} ${lossYearLabel}…`
+}<br />it's {getLossFractionLabel(lossFraction)} <span className="whitespace-nowrap">your retirement.</span>
+</p>
+</>
 )}
 </div>
 ) : (
@@ -861,7 +919,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 <p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Compound Interest</p>
 {useThreeColumnPanels ? (
 <div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
-<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
 <div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
 {formatCurrency(comparisonData['Investment Returns'])}
 </div>
@@ -898,7 +956,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 <p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Purchasing Power</p>
 {useThreeColumnPanels ? (
 <div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
-<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
 <div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
 {formatCurrency(comparisonData['Total Real (Today\'s $)'])}
 </div>
@@ -924,16 +982,27 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 </Card>
 </div>
 {isDelayed && useThreeColumnPanels && (
-<div className="p-4 flex items-center justify-center gap-3 rounded-[22px] shadow-[0_16px_32px_-24px_rgba(0,0,0,0.7)]" style={{ background: 'rgba(211,47,47,0.10)', border: '1px solid rgba(211,47,47,0.50)' }}>
-<div className="text-[10px] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
-<div className="text-[clamp(1.1rem,2vw,1.5rem)] font-black text-[#D32F2F]">-{formatCurrency(comparisonData['Total Nominal'] - finalData['Total Nominal'])}</div>
+<div className="px-4 py-3 grid grid-cols-3 items-center gap-4 rounded-[22px] shadow-[0_16px_32px_-24px_rgba(0,0,0,0.7)]" style={{ background: 'rgba(211,47,47,0.10)', border: '1px solid rgba(211,47,47,0.50)' }}>
+<div className="col-span-1 text-center">
+<div className="text-center text-[clamp(0.65rem,1.1vw,0.85rem)] font-black uppercase tracking-widest" style={{ color: THEME.loss }}>Potential Loss</div>
+<div className="text-center text-[clamp(1.2rem,2vw,1.7rem)] leading-none font-black text-[#D32F2F]">-{formatCurrency(lossAmount)}</div>
+</div>
+<div className="col-span-2 flex items-center justify-center">
+<p className="font-display italic font-semibold leading-snug text-center tracking-wide"
+  style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.15rem)', color: THEME.loss, textShadow: '0px 1px 0.7px rgba(255,255,255,0.04), 0px -1px 0.7px rgba(0,0,0,0.25)' }}>
+  {missedContributions > 0
+    ? `The cost of waiting ${delayYears} ${lossYearLabel} isn't ${formatCurrency(missedContributions)}…`
+    : `The cost of waiting ${delayYears} ${lossYearLabel}…`
+  }<br />it's {getLossFractionLabel(lossFraction)} <span className="whitespace-nowrap">your retirement.</span>
+</p>
+</div>
 </div>
 )}
 {/* MAIN CHART CARD */}
 <GlassCard className="p-4 sm:p-5 lg:p-6 !rounded-[26px]">
-<div className="flex flex-wrap justify-between items-end mb-4 gap-3">
+<div className={`flex mb-4 gap-2 ${chartSize.width <= 500 ? 'flex-col' : 'flex-wrap justify-between items-end gap-3'}`}>
 <h2 className="font-display font-black text-[1.9rem] text-white">The Trajectory</h2>
-<div className="flex items-center justify-between gap-2 ml-auto flex-1 min-w-[200px] max-w-full sm:flex-none sm:justify-end">
+<div className={`flex items-center gap-2 ${chartSize.width <= 500 ? 'justify-between w-full' : 'justify-between ml-auto flex-1 min-w-[200px] max-w-full sm:flex-none sm:justify-end'}`}>
 {isDelayed && (
 <button
 onClick={() => setShowImmediateLine(prev => !prev)}
