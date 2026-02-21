@@ -1180,7 +1180,7 @@ return (
 const isHero = !useThreeColumnPanels && i === 0;
 return (
 <GlassCard key={i} className={`${isHero ? 'col-span-2' : ''} ${chartSize.width >= 750 ? 'p-4' : 'p-3'} group hover:scale-[1.02] transition-transform duration-300 flex flex-row items-center justify-center ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'}`}>
-<div className={`${isHero ? 'p-3.5' : chartSize.width >= 750 ? 'p-2.5' : 'p-2'} rounded-2xl group-hover:scale-110 transition-transform`} style={{ ...stat.bgStyle, ...stat.colorStyle }}>
+<div className={`${isHero ? 'p-3.5' : chartSize.width >= 750 ? 'p-2.5' : 'p-2'} rounded-[27%] group-hover:scale-110 transition-transform`} style={{ ...stat.bgStyle, ...stat.colorStyle }}>
 <stat.icon size={isHero ? 36 : chartSize.width >= 750 ? 22 : 20} />
 </div>
 <div className="min-w-0">
