@@ -340,7 +340,7 @@ return (
 <CrownLogo className="h-9 w-9" />
 <div>
 <div className="font-display font-black text-xl tracking-tight leading-tight">Sirkis Act</div>
-<div className="text-[10px] font-medium text-slate-400 leading-tight">Old-Fashioned Financial Planning · tooltip-fix</div>
+<div className="text-[10px] font-medium text-slate-400 leading-tight">Old-Fashioned Financial Planning</div>
 </div>
 </div>
 </div>
@@ -833,7 +833,7 @@ return (
 </div>
 <div className="flex flex-col">
 <div className="font-display font-black tracking-tight leading-tight text-2xl">Sirkis Act</div>
-<div className={`font-medium text-slate-400 leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning · tooltip-fix</div>
+<div className={`font-medium text-slate-400 leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
 </div>
 </div>
 </div>
@@ -844,7 +844,7 @@ return (
 <div className="text-left space-y-3 pt-2 pb-1 animate-in slide-in-from-bottom duration-700 fade-in">
 <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-display font-black tracking-tight leading-[0.92]">
 <span style={{ color: THEME.brand, textShadow: '0px 1px 0px rgba(255,255,255,0.12), 0px -1px 0px rgba(0,0,0,0.7)' }}>Dr. Sirkis's</span><br />
-<span style={{ color: THEME.returns, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>High-Wire Act*</span>
+<span style={{ color: THEME.returns, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>High-Wire Act</span>
 </h1>
 <p className="text-base sm:text-lg text-slate-300 font-medium max-w-2xl lg:ml-1">
 Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net</span> with{' '}<span className="inline-block">tax-advantaged compounding.</span>
