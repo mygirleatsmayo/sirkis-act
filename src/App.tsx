@@ -1243,7 +1243,7 @@ Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by
 <div className="lg:hidden">
 {!isSettingsOpen && (
 <div
-className="fixed inset-x-0 bottom-0 z-40 cursor-pointer select-none touch-none"
+className="fixed inset-x-0 bottom-0 z-40 cursor-pointer select-none touch-none bg-[#003D3A]"
 onClick={() => setIsSettingsOpen(true)}
 role="button"
 tabIndex={0}
