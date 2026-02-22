@@ -152,6 +152,7 @@ placement?: 'top' | 'bottom';
 const TooltipIcon = ({ content, className = "", align = 'center', placement = 'top' }: TooltipIconProps) => {
 const [isTouch, setIsTouch] = useState(false);
 const [isOpen, setIsOpen] = useState(false);
+const containerRef = useRef<HTMLDivElement>(null);
 useEffect(() => {
 if (typeof window === 'undefined') return;
 const media = window.matchMedia('(hover: none) and (pointer: coarse)');
@@ -160,6 +161,16 @@ updateTouch();
 media.addEventListener('change', updateTouch);
 return () => media.removeEventListener('change', updateTouch);
 }, []);
+useEffect(() => {
+if (!isOpen || !isTouch) return;
+const handleOutside = (e: Event) => {
+if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+setIsOpen(false);
+}
+};
+document.addEventListener('pointerdown', handleOutside);
+return () => document.removeEventListener('pointerdown', handleOutside);
+}, [isOpen, isTouch]);
 const alignClass = align === 'left'
 ? 'left-0 translate-x-0'
 : align === 'right'
@@ -170,7 +181,7 @@ const visibilityClass = isTouch
 ? (isOpen ? 'opacity-100' : 'opacity-0')
 : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100';
 return (
-<div className={`relative flex items-center overflow-visible ${className}`}>
+<div ref={containerRef} className={`relative flex items-center overflow-visible ${className}`}>
 <button
 type="button"
 aria-expanded={isTouch ? isOpen : undefined}
@@ -329,7 +340,7 @@ return (
 <CrownLogo className="h-9 w-9" />
 <div>
 <div className="font-display font-black text-xl tracking-tight leading-tight">Sirkis Act</div>
-<div className="text-[10px] font-medium text-slate-400 leading-tight">Old-Fashioned Financial Planning</div>
+<div className="text-[10px] font-medium text-slate-400 leading-tight">Old-Fashioned Financial Planning · tooltip-fix</div>
 </div>
 </div>
 </div>
@@ -435,14 +446,14 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <PiggyBank size={14} /> Strategy
 </h3>
 <ToggleSection label="401(k) / 403(b)" enabled={inputs.enable401k} onToggle={(v) => handleInputChange('enable401k', v)}>
-<InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" errorState={employeeOverCap} />
+<InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" errorState={employeeOverCap} tooltip="Percentage of your salary (pre-tax) contributed each pay period." />
 <div className="grid grid-cols-2 gap-4 border-t border-white/[0.07] pt-6 mt-2">
 <div>
-<label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Match %</label>
+<label className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">Match % <TooltipIcon placement="top" align="left" content="Your employer's match rate, e.g., 50% means they contribute $0.50 for every $1.00 you put in." /></label>
 <input type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white" />
 </div>
 <div>
-<label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Limit %</label>
+<label className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">Limit % <TooltipIcon placement="top" align="right" content="Employer matches up to this percentage of your salary. Contributions above this threshold get no additional match." /></label>
 <input type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white" />
 </div>
 </div>
@@ -483,11 +494,11 @@ className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-
 <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${inputs.rothMatch401k ? 'translate-x-5' : ''}`} />
 </button>
 </div>
-<InputField label="Annual Amount" value={rothEffectiveContribution} onChange={v => handleInputChange('rothContribution', v)} min={0} max={LIMITS.rothAnnual} step={100} unit="$" error={rothOverCap ? 'Exceeds IRS cap. Projections use cap.' : null} disabled={inputs.rothMatch401k} />
+<InputField label="Annual Amount" value={rothEffectiveContribution} onChange={v => handleInputChange('rothContribution', v)} min={0} max={LIMITS.rothAnnual} step={100} unit="$" error={rothOverCap ? 'Exceeds IRS cap. Projections use cap.' : null} disabled={inputs.rothMatch401k} tooltip="After-tax contributions that grow and withdraw tax-free in retirement." />
 <div className={`mt-2 text-[11px] ${rothOverCap ? 'text-rose-600' : 'text-slate-400'}`}>IRS cap: {formatCurrency(LIMITS.rothAnnual)}.</div>
 </ToggleSection>
 <ToggleSection label="HSA / Other" enabled={inputs.enableHSA} onToggle={(v) => handleInputChange('enableHSA', v)}>
-<InputField label="Annual Amount" value={inputs.hsaContribution} onChange={v => handleInputChange('hsaContribution', v)} min={0} max={LIMITS.hsaFamily} step={100} unit="$" error={hsaOverCap ? 'Exceeds family cap. Projections use cap.' : null} />
+<InputField label="Annual Amount" value={inputs.hsaContribution} onChange={v => handleInputChange('hsaContribution', v)} min={0} max={LIMITS.hsaFamily} step={100} unit="$" error={hsaOverCap ? 'Exceeds family cap. Projections use cap.' : null} tooltip="Triple-tax-advantaged: contributions, growth, and qualified medical withdrawals are all tax-free." />
 <div className={`mt-2 text-[11px] ${hsaOverCap ? 'text-rose-600' : 'text-slate-400'}`}>Common caps: {formatCurrency(LIMITS.hsaIndividual)} individual, {formatCurrency(LIMITS.hsaFamily)} family.</div>
 </ToggleSection>
 </section>
@@ -822,7 +833,7 @@ return (
 </div>
 <div className="flex flex-col">
 <div className="font-display font-black tracking-tight leading-tight text-2xl">Sirkis Act</div>
-<div className={`font-medium text-slate-400 leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning</div>
+<div className={`font-medium text-slate-400 leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>Old-Fashioned Financial Planning · tooltip-fix</div>
 </div>
 </div>
 </div>
@@ -833,7 +844,7 @@ return (
 <div className="text-left space-y-3 pt-2 pb-1 animate-in slide-in-from-bottom duration-700 fade-in">
 <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-display font-black tracking-tight leading-[0.92]">
 <span style={{ color: THEME.brand, textShadow: '0px 1px 0px rgba(255,255,255,0.12), 0px -1px 0px rgba(0,0,0,0.7)' }}>Dr. Sirkis's</span><br />
-<span style={{ color: THEME.returns, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>High-Wire Act</span>
+<span style={{ color: THEME.returns, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>High-Wire Act*</span>
 </h1>
 <p className="text-base sm:text-lg text-slate-300 font-medium max-w-2xl lg:ml-1">
 Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net</span> with{' '}<span className="inline-block">tax-advantaged compounding.</span>
