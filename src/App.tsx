@@ -1081,57 +1081,6 @@ onFocus={(e) => {
 </Drawer.Root>
 </div>
 </div>
-<style>{`
-.recharts-surface { overflow: visible; }
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
-.pulse-glow {
-	position: relative;
-}
-.pulse-glow::after {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 24px;
-	border-radius: 24px 24px 0 0;
-	box-shadow:
-		0 0 8px 1px rgba(230, 195, 0, 0.50),
-		0 0 28px 4px rgba(230, 195, 0, 0.32),
-		0 0 60px 12px rgba(230, 195, 0, 0.20);
-	clip-path: inset(-100px -100px 0 -100px);
-	opacity: 0.7;
-	animation: glowPulse 3s ease-in-out infinite;
-	pointer-events: none;
-}
-@keyframes glowPulse {
-	0%   { opacity: 0.55; box-shadow: 0 0 8px 1px rgba(230,195,0,0.50), 0 0 28px 4px rgba(230,195,0,0.32), 0 0 60px 12px rgba(230,195,0,0.20); }
-	50%  { opacity: 1;    box-shadow: 0 0 10px 2px rgba(230,195,0,0.65), 0 0 36px 6px rgba(230,195,0,0.42), 0 0 80px 18px rgba(230,195,0,0.28); }
-	100% { opacity: 0.55; box-shadow: 0 0 8px 1px rgba(230,195,0,0.50), 0 0 28px 4px rgba(230,195,0,0.32), 0 0 60px 12px rgba(230,195,0,0.20); }
-}
-@media (max-width: 1023px) {
-	input,
-	select,
-	textarea {
-		font-size: 16px !important;
-	}
-}
-html,
-body {
-	-webkit-text-size-adjust: 100%;
-}
-.main-scroll {
-	overflow-x: clip;
-	max-width: 100vw;
-}
-.drawer-scroll {
-	overscroll-behavior: contain;
-	touch-action: pan-y;
-}
-`}</style>
 </div>
 );
 };

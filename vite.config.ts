@@ -5,4 +5,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   base: "/sirkis-act/",
   plugins: [react()],
+  build: {
+    chunkSizeWarningLimit: 1000,
+  },
 });
