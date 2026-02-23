@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, type ComponentType, type ReactNode } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import {
 XAxis,
 YAxis,
@@ -22,77 +22,23 @@ ChevronUp,
 Info
 } from 'lucide-react';
 import { Drawer } from 'vaul';
-// --- CONSTANTS ---
-const DEFAULT_INPUTS = {
-currentAge: 23,
-startAge: 23,
-retirementAge: 67,
-lifeExpectancy: 83,
-currentSalary: 68870,
-salaryGrowth: 3,
-expectedReturn: 7,
-inflationRate: 2.5,
-enable401k: true,
-enableRoth: false,
-enableHSA: false,
-contribution401k: 10,
-matchPercent: 50,
-matchLimit: 6,
-rothMatch401k: true,
-rothContribution: 7000,
-hsaContribution: 4150,
-contributionTiming: 'start',
-};
-const LIMITS = {
-max401kEmployee: 23000,
-max401kTotal: 69000,
-rothAnnual: 7500,
-hsaIndividual: 4150,
-hsaFamily: 8300,
-};
-const THEME = {
-bg:        '#003D3A',  // App background (cyprus)
-brand:     '#00A499',  // Your Contributions (persian green)
-opm:       '#A8A8A8',  // Employer Match (boulder grey — lightened for dark bg)
-returns:   '#E6C300',  // Investment Returns (corn gold)
-startNow:  '#0D9488',  // Start Now / Early Start (aqua teal — close to brand, watch)
-loss:      '#D32F2F',  // Delayed start / financial loss (persian red)
-brandBg:   'rgba(0,164,153,0.06)',
-returnsBg: 'rgba(230,195,0,0.08)',
-startNowBg:'rgba(13,148,136,0.08)',
-lossBg:    'rgba(211,47,47,0.07)',
-} as const;
-const getLossFractionLabel = (f: number): string => {
-  const tol = 0.008;
-  if (f >= 0.90 - tol) return 'nearly all of';
-  if (f > 0.81) return 'nearly 90% of';
-  const levels: { v: number; label: string; neverOver?: boolean; noOf?: boolean }[] = [
-    { v: 0.15, label: '15%',           neverOver: true },
-    { v: 0.20, label: '20%',           neverOver: true },
-    { v: 0.25, label: 'a quarter' },
-    { v: 1/3,  label: 'a third' },
-    { v: 0.40, label: '40%' },
-    { v: 0.50, label: 'half',          noOf: true },
-    { v: 0.60, label: '60%' },
-    { v: 2/3,  label: 'two thirds' },
-    { v: 0.75, label: 'three quarters' },
-  ];
-  const of = (l: { noOf?: boolean }) => l.noOf ? '' : ' of';
-  if (f < levels[0].v - tol) return f < 0.11 ? 'a portion of' : `nearly ${levels[0].label} of`;
-  for (let i = 0; i < levels.length; i++) {
-    const cur = levels[i];
-    const nxt = levels[i + 1];
-    if (Math.abs(f - cur.v) <= tol) return `${cur.label}${of(cur)}`;
-    if (!nxt) return `over ${cur.label}${of(cur)}`;
-    if (f > cur.v + tol && f < nxt.v - tol) {
-      if (cur.neverOver) return `nearly ${nxt.label}${of(nxt)}`;
-      return f < (cur.v + nxt.v) / 2 ? `over ${cur.label}${of(cur)}` : `nearly ${nxt.label}${of(nxt)}`;
-    }
-  }
-  return 'a portion of';
-};
+import { DEFAULT_INPUTS, LIMITS, THEME, SIRKISMS, INPUT_BOUNDS } from './constants';
+import type {
+  CardProps,
+  LogoProps,
+  BadgeProps,
+  InputFieldProps,
+  TooltipIconProps,
+  ToggleSectionProps,
+  SettingsPanelProps,
+  InputKey,
+  NumericInputKey,
+  BooleanInputKey,
+  InputValue,
+} from './types';
+import { getLossFractionLabel, clampNumber, formatCurrency, formatCompact } from './utils/format';
+import { runProjection } from './utils/projection';
 // --- HELPER COMPONENTS ---
-type CardProps = { children: ReactNode; className?: string };
 const GlassCard = ({ children, className = "" }: CardProps) => (
 <div className={`bg-[#004745] border border-white/[0.07] shadow-[0_22px_55px_-38px_rgba(0,0,0,0.8)] rounded-[28px] ${className}`}>
 {children}
@@ -103,7 +49,6 @@ const Card = ({ children, className = "" }: CardProps) => (
 {children}
 </div>
 );
-type LogoProps = { className?: string };
 const CrownLogo = ({ className = "" }: LogoProps) => (
 <svg className={className} viewBox="0 0 2823 2906" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" xmlSpace="preserve" style={{ fillRule: 'evenodd', clipRule: 'evenodd', strokeLinejoin: 'round', strokeMiterlimit: 2 }}>
 <g>
@@ -111,8 +56,6 @@ const CrownLogo = ({ className = "" }: LogoProps) => (
 </g>
 </svg>
 );
-type BadgeColor = 'brand' | 'returns' | 'loss' | 'neutral';
-type BadgeProps = { children: ReactNode; color?: BadgeColor };
 const Badge = ({ children, color = "brand" }: BadgeProps) => {
 const styles = {
 brand: "bg-[#00A499]/10 text-[#00A499] border-[#00A499]/20",
@@ -126,28 +69,6 @@ return (
 {children}
 </span>
 );
-};
-type IconType = ComponentType<{ size?: number; className?: string }>;
-type InputFieldProps = {
-label: string;
-value: number;
-onChange: (value: number) => void;
-min: number;
-max: number;
-step?: number;
-icon?: IconType;
-unit?: string;
-error?: string | null;
-errorState?: boolean;
-helper?: string;
-tooltip?: string;
-disabled?: boolean;
-};
-type TooltipIconProps = {
-content: string;
-className?: string;
-align?: 'left' | 'center' | 'right';
-placement?: 'top' | 'bottom';
 };
 const TooltipIcon = ({ content, className = "", align = 'center', placement = 'top' }: TooltipIconProps) => {
 const [isTouch, setIsTouch] = useState(false);
@@ -279,7 +200,6 @@ ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
 </div>
 );
 };
-type ToggleSectionProps = { label: string; enabled: boolean; onToggle: (value: boolean) => void; children: ReactNode };
 const ToggleSection = ({ label, enabled, onToggle, children }: ToggleSectionProps) => (
 <div className={`p-1 rounded-3xl transition-all duration-300 ${enabled ? 'bg-[#003D3A]/40 border border-white/[0.06]' : 'bg-[#003D3A]/30 border border-transparent opacity-80'}`}>
 <div
@@ -298,27 +218,7 @@ onClick={() => onToggle(!enabled)}
 </div>
 </div>
 );
-const clampNumber = (value: number, min: number | undefined, max: number | undefined, fallback: number) => {
-if (!Number.isFinite(value)) {
-return fallback;
-}
-let next = value;
-if (typeof min === 'number') {
-next = Math.max(min, next);
-}
-if (typeof max === 'number') {
-next = Math.min(max, next);
-}
-return next;
-};
 // --- SETTINGS PANEL ---
-type Inputs = typeof DEFAULT_INPUTS;
-type SettingsPanelProps = {
-inputs: Inputs;
-handleInputChange: (key: keyof Inputs | 'RESET', value: number | string | boolean) => void;
-formatCurrency: (value: number) => string;
-isMobile?: boolean;
-};
 const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = false }: SettingsPanelProps) => {
 const annualEmployee401k = inputs.enable401k ? inputs.currentSalary * (inputs.contribution401k / 100) : 0;
 const matchBase = Math.min(inputs.contribution401k, inputs.matchLimit) / 100;
@@ -514,28 +414,6 @@ className="text-xs font-bold text-slate-400 hover:text-[#00A499] flex items-cent
 </div>
 );
 };
-const SIRKISMS = [
-  "I am a capitalist. I love money. No shame.",
-  "You don't lose the money from the early years. You lose all the money from the later years.",
-  "Drive the truck yourself.",
-  "How did most American millionaires achieve their wealth? They saved it. That's it.",
-  "Dollar sign goes in FRONT!",
-  "This is one of the most important things I could possibly pass on to you.",
-  "Careers on TV are fake. Fake. Fake.",
-  "I'm old-fashioned.",
-  "There are stupid questions.",
-  "The secret to wealth is… compound interest.",
-  "If you don't find a career, a career will find you.",
-  "You look like a jackass if you refer to yourself with lowercase i.",
-  "C's get degrees.",
-  "A W is better than a D. A D is better than an F. But a C is better than all of them.",
-  "The cost of waiting is not $8,000. It's half your retirement.",
-  "Work until 74, or start now. Your choice.",
-  "If you can't pay cash for the car, you can't afford the car.",
-  "Professors are human beings. They have sides.",
-  "Don't show up late with a Duncan Donuts cup.",
-  "Horror stories exist for a reason.",
-];
 
 const App = () => {
 const [inputs, setInputs] = useState(DEFAULT_INPUTS);
@@ -601,79 +479,8 @@ const summarySalary = inputs.currentSalary >= 999500 ? `$${(Math.round(inputs.cu
 const summaryContribution = inputs.enable401k ? `${inputs.contribution401k}%` : 'Off';
 // --- CALCULATIONS ---
 const { results, chartData, comparisonData, finalData } = useMemo(() => {
-// Helper to run a projection
-const runProjection = (startAgeOverride: number) => {
-const data = [];
-let balance401k = 0;
-let balanceRoth = 0;
-let balanceHSA = 0;
-let cumUserCont = 0;
-let cumEmployerCont = 0;
-let cumReturns = 0;
-let currentSalary = inputs.currentSalary;
-const retirementYears = Math.max(0, inputs.retirementAge - inputs.currentAge);
-const projectionYears = Math.max(0, retirementYears - 1);
-const returnRate = inputs.expectedReturn / 100;
-const inflationRate = inputs.inflationRate / 100;
-const salaryGrowthRate = inputs.salaryGrowth / 100;
-const timingFactor = inputs.contributionTiming === 'mid' ? 0.5 : 1;
-for (let i = 0; i <= projectionYears; i++) {
-const age = inputs.currentAge + i;
-const isContributing = age >= startAgeOverride;
-let my401kCont = 0;
-let employerMatch = 0;
-if (isContributing) {
-if (inputs.enable401k) {
-const rawEmployee401k = currentSalary * (inputs.contribution401k / 100);
-my401kCont = Math.min(rawEmployee401k, LIMITS.max401kEmployee);
-const matchBase = Math.min(inputs.contribution401k, inputs.matchLimit) / 100;
-const rawEmployerMatch = currentSalary * matchBase * (inputs.matchPercent / 100);
-// Clamp total 401k to IRS limit
-employerMatch = Math.min(rawEmployerMatch, Math.max(0, LIMITS.max401kTotal - my401kCont));
-}
-}
-const rothMatchBase = inputs.enable401k ? currentSalary * (inputs.contribution401k / 100) : 0;
-const rothMatchedAmount = Math.min(rothMatchBase, LIMITS.rothAnnual);
-const rawRothCont = (isContributing && inputs.enableRoth)
-? (inputs.rothMatch401k ? rothMatchedAmount : inputs.rothContribution)
-: 0;
-const myRothCont = Math.min(rawRothCont, LIMITS.rothAnnual);
-const rawHSACont = (isContributing && inputs.enableHSA) ? inputs.hsaContribution : 0;
-const myHSACont = Math.min(rawHSACont, LIMITS.hsaFamily);
-const totalNewUserCont = my401kCont + myRothCont + myHSACont;
-const totalNewEmployerCont = employerMatch;
-const startBalance = balance401k + balanceRoth + balanceHSA;
-const yearGrowth = (startBalance * returnRate) + ((totalNewUserCont + totalNewEmployerCont) * returnRate * timingFactor);
-balance401k = (balance401k * (1 + returnRate)) + ((my401kCont + employerMatch) * (1 + returnRate * timingFactor));
-balanceRoth = (balanceRoth * (1 + returnRate)) + (myRothCont * (1 + returnRate * timingFactor));
-balanceHSA = (balanceHSA * (1 + returnRate)) + (myHSACont * (1 + returnRate * timingFactor));
-cumUserCont += totalNewUserCont;
-cumEmployerCont += totalNewEmployerCont;
-cumReturns += yearGrowth;
-const totalNominal = balance401k + balanceRoth + balanceHSA;
-const totalReal = totalNominal / Math.pow(1 + inflationRate, i);
-const totalRealAtRetirement = totalNominal * Math.pow(1 + inflationRate, retirementYears - i);
-data.push({
-age,
-isContributing,
-'Your Contributions': Math.round(cumUserCont),
-'Employer Match': Math.round(cumEmployerCont),
-'Employee Contribution (Year)': Math.round(totalNewUserCont),
-'Employer Contribution (Year)': Math.round(totalNewEmployerCont),
-'Total Contribution (Year)': Math.round(totalNewUserCont + totalNewEmployerCont),
-'Year Growth': Math.round(yearGrowth),
-'Investment Returns': Math.round(cumReturns),
-'Total Nominal': Math.round(totalNominal),
-'Total Real (Today\'s $)': Math.round(totalReal),
-'Total Real (Retirement $)': Math.round(totalRealAtRetirement),
-salary: Math.round(currentSalary)
-});
-currentSalary *= (1 + salaryGrowthRate);
-}
-return data;
-};
-const mainResults = runProjection(inputs.startAge);
-const immediateResults = runProjection(inputs.currentAge); // Potential scenario (Start Now)
+const mainResults = runProjection(inputs, inputs.startAge);
+const immediateResults = runProjection(inputs, inputs.currentAge);
 const mergedResults = mainResults.map((row, index) => ({
 ...row,
 'Immediate Total Nominal': immediateResults[index] ? immediateResults[index]['Total Nominal'] : null,
@@ -681,7 +488,7 @@ const mergedResults = mainResults.map((row, index) => ({
 return {
 results: mainResults,
 chartData: mergedResults,
-comparisonData: immediateResults[immediateResults.length - 1], // Final data point for immediate start
+comparisonData: immediateResults[immediateResults.length - 1],
 finalData: mainResults[mainResults.length - 1]
 };
 }, [inputs]);
@@ -715,8 +522,6 @@ const legendItems = [
 { label: 'Investment Returns', color: THEME.returns, visible: true },
 { label: 'Start Now Total', color: THEME.startNow, visible: isDelayed && showImmediateLine }
 ];
-const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }), []);
-const formatCurrency = (val: number) => currencyFormatter.format(val || 0);
 const delayYears = inputs.startAge - inputs.currentAge;
 const lossAmount = comparisonData && finalData
   ? comparisonData['Total Nominal'] - finalData['Total Nominal']
@@ -734,45 +539,6 @@ const missedContributions = (() => {
   return total;
 })();
 const lossYearLabel = delayYears === 1 ? 'year' : 'years';
-const formatCompact = (val: number) => {
-  const abs = Math.abs(val || 0);
-  if (abs >= 1_000_000) return `$${(val / 1_000_000).toPrecision(4)}M`;
-  if (abs >= 1_000) return `$${(val / 1_000).toPrecision(4)}K`;
-  return formatCurrency(val);
-};
-type InputKey = keyof Inputs;
-type NumericInputKey =
-| 'currentAge'
-| 'startAge'
-| 'retirementAge'
-| 'lifeExpectancy'
-| 'currentSalary'
-| 'salaryGrowth'
-| 'expectedReturn'
-| 'inflationRate'
-| 'contribution401k'
-| 'matchPercent'
-| 'matchLimit'
-| 'rothContribution'
-| 'hsaContribution';
-type BooleanInputKey = 'enable401k' | 'enableRoth' | 'enableHSA' | 'rothMatch401k';
-type InputBounds = Record<NumericInputKey, { min: number; max: number }>;
-const INPUT_BOUNDS: InputBounds = {
-currentAge: { min: 18, max: 80 },
-startAge: { min: 18, max: 100 },
-retirementAge: { min: 19, max: 100 },
-lifeExpectancy: { min: 40, max: 120 },
-currentSalary: { min: 0, max: 1000000 },
-salaryGrowth: { min: 0, max: 10 },
-expectedReturn: { min: 0, max: 15 },
-inflationRate: { min: 0, max: 10 },
-contribution401k: { min: 0, max: 100 },
-matchPercent: { min: 0, max: 100 },
-matchLimit: { min: 0, max: 100 },
-rothContribution: { min: 0, max: LIMITS.rothAnnual },
-hsaContribution: { min: 0, max: LIMITS.hsaFamily },
-};
-type InputValue = Inputs[InputKey] | number | string | boolean;
 const handleInputChange = (key: InputKey | 'RESET', value: InputValue) => {
 if (key === 'RESET') {
 setInputs(DEFAULT_INPUTS);
