@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, memo } from 'react';
+import type { ReactNode } from 'react';
 import {
 XAxis,
 YAxis,
@@ -27,6 +28,7 @@ import type {
   CardProps,
   LogoProps,
   BadgeProps,
+  BadgeColor,
   InputFieldProps,
   TooltipIconProps,
   ToggleSectionProps,
@@ -70,6 +72,66 @@ return (
 </span>
 );
 };
+interface MetricCardProps {
+badgeLabel: string;
+badgeColor: BadgeColor;
+value: string;
+label: string;
+isHero?: boolean;
+isDelayed: boolean;
+useThreeColumnPanels: boolean;
+comparisonValue?: string;
+twoColumnDelayedContent?: ReactNode;
+}
+const MetricCard = memo(({ badgeLabel, badgeColor, value, label, isHero = false, isDelayed, useThreeColumnPanels, comparisonValue, twoColumnDelayedContent }: MetricCardProps) => {
+const cardClassName = isHero
+? `${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-4'} flex flex-col justify-center`
+: `${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center`;
+const valueClassName = isHero
+? 'text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-white tracking-tight mb-1'
+: `${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`;
+const labelClassName = isHero
+? 'text-xs font-bold text-slate-400 uppercase tracking-wider'
+: `${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`;
+return (
+<Card className={cardClassName}>
+<div className="flex items-center justify-center gap-2 mb-2">
+<Badge color={badgeColor}>{badgeLabel}</Badge>
+</div>
+{isDelayed ? (
+<div className="text-center">
+<div className={valueClassName}>{value}</div>
+<p className={labelClassName}>{label}</p>
+{useThreeColumnPanels ? (
+comparisonValue != null && (
+<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
+<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
+<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
+{comparisonValue}
+</div>
+</div>
+)
+) : twoColumnDelayedContent != null ? (
+twoColumnDelayedContent
+) : comparisonValue != null ? (
+<>
+<div className="w-full h-px bg-white/15 mt-2 mb-1" />
+<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black tracking-tight" style={{ color: THEME.startNow }}>
+{comparisonValue}
+</div>
+<p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Start Early</p>
+</>
+) : null}
+</div>
+) : (
+<div className="text-center">
+<div className={valueClassName}>{value}</div>
+<p className={labelClassName}>{label}</p>
+</div>
+)}
+</Card>
+);
+});
 const TooltipIcon = ({ content, className = "", align = 'center', placement = 'top' }: TooltipIconProps) => {
 const [isTouch, setIsTouch] = useState(false);
 const [isOpen, setIsOpen] = useState(false);
@@ -634,24 +696,16 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 {/* TOP METRICS GRID (COMPARISON AWARE) */}
 <div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-5' : 'grid-cols-2 gap-3'} min-w-0`}>
 {/* TARGET CARD */}
-<Card className={`${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-4'} flex flex-col justify-center`}>
-<div className="flex items-center justify-center gap-2 mb-2">
-<Badge color="brand">Target</Badge>
-</div>
-{isDelayed ? (
-<div className="text-center">
-<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-white tracking-tight mb-1">
-{formatCurrency(finalData['Total Nominal'])}
-</div>
-<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projected Nest Egg</p>
-{useThreeColumnPanels ? (
-<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
-<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
-<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
-{formatCurrency(comparisonData['Total Nominal'])}
-</div>
-</div>
-) : (
+<MetricCard
+badgeLabel="Target"
+badgeColor="brand"
+value={formatCurrency(finalData['Total Nominal'])}
+label="Projected Nest Egg"
+isHero
+isDelayed={isDelayed}
+useThreeColumnPanels={useThreeColumnPanels}
+comparisonValue={isDelayed ? formatCurrency(comparisonData['Total Nominal']) : undefined}
+twoColumnDelayedContent={isDelayed ? (
 <>
 <div className="grid grid-cols-2 gap-2 mt-3">
 <div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25">
@@ -671,91 +725,28 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 }<br />it's {getLossFractionLabel(lossFraction)} <span className="whitespace-nowrap">your retirement.</span>
 </p>
 </>
-)}
-</div>
-) : (
-<div className="text-center">
-<div className="text-[clamp(1.5rem,2.5vw,2.8rem)] leading-tight font-black text-white tracking-tight mb-1">
-{formatCurrency(finalData['Total Nominal'])}
-</div>
-<p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projected Nest Egg</p>
-</div>
-)}
-</Card>
+) : undefined}
+/>
 {/* GROWTH CARD */}
-<Card className={`${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center`}>
-<div className="flex items-center justify-center gap-2 mb-2">
-<Badge color="returns">Growth</Badge>
-</div>
-{isDelayed ? (
-<div className="text-center">
-<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`}>
-{formatCurrency(finalData['Investment Returns'])}
-</div>
-<p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Compound Interest</p>
-{useThreeColumnPanels ? (
-<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
-<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
-<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
-{formatCurrency(comparisonData['Investment Returns'])}
-</div>
-</div>
-) : (
-<>
-<div className="w-full h-px bg-white/15 mt-2 mb-1" />
-<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black tracking-tight" style={{ color: THEME.startNow }}>
-{formatCurrency(comparisonData['Investment Returns'])}
-</div>
-<p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Start Early</p>
-</>
-)}
-</div>
-) : (
-<div className="text-center">
-<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`}>
-{formatCurrency(finalData['Investment Returns'])}
-</div>
-<p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Compound Interest</p>
-</div>
-)}
-</Card>
+<MetricCard
+badgeLabel="Growth"
+badgeColor="returns"
+value={formatCurrency(finalData['Investment Returns'])}
+label="Compound Interest"
+isDelayed={isDelayed}
+useThreeColumnPanels={useThreeColumnPanels}
+comparisonValue={isDelayed ? formatCurrency(comparisonData['Investment Returns']) : undefined}
+/>
 {/* REAL VALUE CARD */}
-<Card className={`${useThreeColumnPanels ? 'p-4' : 'p-3'} flex flex-col justify-center`}>
-<div className="flex items-center justify-center gap-2 mb-2">
-<Badge color="neutral">Real Value</Badge>
-</div>
-{isDelayed ? (
-<div className="text-center">
-<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`}>
-{formatCurrency(finalData['Total Real (Today\'s $)'])}
-</div>
-<p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Purchasing Power</p>
-{useThreeColumnPanels ? (
-<div className="rounded-xl bg-[#003D3A]/60 p-2.5 border border-[#00A499]/25 mt-3 text-center">
-<div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: THEME.startNow }}>Start Early</div>
-<div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black text-white tracking-tight">
-{formatCurrency(comparisonData['Total Real (Today\'s $)'])}
-</div>
-</div>
-) : (
-<>
-<div className="w-full h-px bg-white/15 mt-2 mb-1" />
-<div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black tracking-tight" style={{ color: THEME.startNow }}>
-{formatCurrency(comparisonData['Total Real (Today\'s $)'])}
-</div>
-<p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Start Early</p>
-</>
-)}
-</div>
-) : (
-<div className="text-center">
-<div className={`${useThreeColumnPanels ? 'text-[clamp(1.5rem,2.5vw,2.8rem)]' : 'text-[clamp(1.2rem,5vw,1.6rem)]'} leading-tight font-black text-white tracking-tight mb-1`}>
-{formatCurrency(finalData['Total Real (Today\'s $)'])}
-</div>
-<p className={`${useThreeColumnPanels ? 'text-xs' : 'text-[10px]'} font-bold text-slate-400 uppercase tracking-wider`}>Purchasing Power</p>
-</div>
-)}
-</Card>
+<MetricCard
+badgeLabel="Real Value"
+badgeColor="neutral"
+value={formatCurrency(finalData['Total Real (Today\'s $)'])}
+label="Purchasing Power"
+isDelayed={isDelayed}
+useThreeColumnPanels={useThreeColumnPanels}
+comparisonValue={isDelayed ? formatCurrency(comparisonData['Total Real (Today\'s $)']) : undefined}
+/>
 </div>
 {isDelayed && useThreeColumnPanels && (
 <div className="px-4 py-3 grid grid-cols-3 items-center gap-4 rounded-[22px] shadow-[0_16px_32px_-24px_rgba(0,0,0,0.7)]" style={{ background: 'rgba(211,47,47,0.10)', border: '1px solid rgba(211,47,47,0.50)' }}>
