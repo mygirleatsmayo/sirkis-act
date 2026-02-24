@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, memo, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef, memo, useCallback, useId } from 'react';
 import type { ReactNode } from 'react';
 import {
 XAxis,
@@ -190,6 +190,7 @@ className="group inline-flex items-center text-slate-400 hover:text-[#00A499] fo
 );
 };
 const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", error, errorState = false, helper, tooltip, disabled = false }: InputFieldProps) => {
+const fieldId = useId();
 const [draftValue, setDraftValue] = useState(Number.isFinite(value) ? String(value) : "");
 useEffect(() => {
 setDraftValue(Number.isFinite(value) ? String(value) : "");
@@ -202,7 +203,7 @@ const hasError = Boolean(error) || errorState;
 return (
 <div className="mb-8 group">
 <div className="flex justify-between items-center mb-3">
-<label className={`text-sm flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600 font-bold' : 'text-slate-200 font-semibold group-hover:text-[#00A499]'}`}>
+<label htmlFor={fieldId} className={`text-sm flex items-center gap-2 transition-colors ${hasError ? 'text-rose-600 font-bold' : 'text-slate-200 font-semibold group-hover:text-[#00A499]'}`}>
 {Icon && <Icon size={16} className="text-slate-400 group-hover:text-[#A8A8A8] transition-colors" />}
 {label}
 {tooltip && <TooltipIcon content={tooltip} />}
@@ -222,6 +223,7 @@ setDraftValue(String(next));
 onChange(next);
 }}
 disabled={disabled}
+aria-label={`${label} slider`}
 className={`flex-grow h-1.5 bg-white/15 rounded-lg appearance-none transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer accent-[#00A499] hover:accent-[#0D9488]'}`}
 />
 <div className="relative flex items-center group-focus-within:scale-105 transition-transform flex-shrink-0 shadow-sm rounded-xl">
@@ -230,6 +232,7 @@ className={`flex-grow h-1.5 bg-white/15 rounded-lg appearance-none transition-al
 )}
 <input
 type="text"
+id={fieldId}
 inputMode="decimal"
 value={draftValue}
 placeholder="0"
@@ -255,7 +258,7 @@ ${unit === "%" ? "pr-8 pl-3" : "pr-3"}`}
 </div>
 </div>
 {(helper || error) && (
-<div className={`mt-2 text-[11px] font-medium ${hasError ? 'text-rose-600' : 'text-slate-400'}`}>
+<div className={`mt-2 text-[11px] font-medium ${hasError ? 'text-rose-600' : 'text-slate-400'}`} aria-live="polite" role={hasError ? 'alert' : undefined}>
 {error || helper}
 </div>
 )}
@@ -267,9 +270,13 @@ const ToggleSection = ({ label, enabled, onToggle, children }: ToggleSectionProp
 <div
 className={`flex items-center justify-between p-4 cursor-pointer rounded-2xl transition-colors ${enabled ? '' : 'hover:bg-white/[0.05]'}`} style={enabled ? { background: THEME.brandBg } : undefined}
 onClick={() => onToggle(!enabled)}
+role="switch"
+aria-checked={enabled}
+tabIndex={0}
+onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(!enabled); } }}
 >
 <span className={`font-bold text-sm ${enabled ? '' : 'text-slate-400'}`} style={enabled ? { color: THEME.brand } : undefined}>{label}</span>
-<div className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${!enabled ? 'bg-slate-300' : ''}`} style={enabled ? { background: THEME.brand } : undefined}>
+<div className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${!enabled ? 'bg-slate-300' : ''}`} style={enabled ? { background: THEME.brand } : undefined} aria-hidden="true">
 <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${enabled ? 'translate-x-5' : ''}`} />
 </div>
 </div>
@@ -348,11 +355,12 @@ Reset
 <InputField label="Current Salary" value={inputs.currentSalary} onChange={v => handleInputChange('currentSalary', v)} min={0} max={1000000} step={1000} unit="$" icon={DollarSign} />
 <div className="-mt-3 mb-6">
 <div className="flex items-center gap-2 mb-2">
-<label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Average Starting Salary by Major</label>
+<label htmlFor="salary-major-select" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Average Starting Salary by Major</label>
 <TooltipIcon className="text-[10px]" align="right" placement="top" content="Average starting salaries sourced from the National Association of Colleges and Employers (NACE) 2025 and 2026 reports." />
 </div>
 <div className="relative">
 <select
+id="salary-major-select"
 value=""
 onChange={(e) => {
 const next = parseFloat(e.target.value);
@@ -385,6 +393,7 @@ className="w-full appearance-none text-[16px] sm:text-sm font-bold p-3 pr-10 rou
 <button
 key={option}
 onClick={() => handleInputChange('contributionTiming', option)}
+aria-pressed={inputs.contributionTiming === option}
 className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-white/10'}`} style={inputs.contributionTiming === option ? { background: THEME.brand } : undefined}
 >
 {option === 'start' ? 'Start of Year' : 'Mid Year'}
@@ -411,12 +420,12 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" errorState={employeeOverCap} tooltip="Percentage of your salary (pre-tax) contributed each pay period." />
 <div className="grid grid-cols-2 gap-4 border-t border-white/[0.07] pt-6 mt-2">
 <div>
-<label className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">Match % <TooltipIcon placement="top" align="left" content="Your employer's match rate, e.g., 50% means they contribute $0.50 for every $1.00 you put in." /></label>
-<input type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white" />
+<label htmlFor="match-percent" className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">Match % <TooltipIcon placement="top" align="left" content="Your employer's match rate, e.g., 50% means they contribute $0.50 for every $1.00 you put in." /></label>
+<input id="match-percent" type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white" />
 </div>
 <div>
-<label className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">Limit % <TooltipIcon placement="top" align="right" content="Employer matches up to this percentage of your salary. Contributions above this threshold get no additional match." /></label>
-<input type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white" />
+<label htmlFor="match-limit" className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">Limit % <TooltipIcon placement="top" align="right" content="Employer matches up to this percentage of your salary. Contributions above this threshold get no additional match." /></label>
+<input id="match-limit" type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-[#006560]/50 bg-[#002E2B] text-white" />
 </div>
 </div>
 <div className="mt-4 text-[11px]">
@@ -438,7 +447,7 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 </div>
 </div>
 {(employeeOverCap || totalOverCap) && (
-<div className="text-rose-600 font-bold mt-3 text-center">Over IRS caps. Projections use capped values.</div>
+<div className="text-rose-600 font-bold mt-3 text-center" role="alert">Over IRS caps. Projections use capped values.</div>
 )}
 </div>
 </ToggleSection>
@@ -450,10 +459,13 @@ Employer est: <span className="font-semibold">{formatCurrency(annualEmployer401k
 </div>
 <button
 type="button"
+role="switch"
+aria-checked={inputs.rothMatch401k}
+aria-label="Match 401(k) / 403(b)"
 onClick={() => handleInputChange('rothMatch401k', !inputs.rothMatch401k)}
 className={`w-12 h-7 flex items-center rounded-full p-1 transition-all duration-300 ${!inputs.rothMatch401k ? 'bg-slate-300' : ''}`} style={inputs.rothMatch401k ? { background: THEME.brand } : undefined}
 >
-<div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${inputs.rothMatch401k ? 'translate-x-5' : ''}`} />
+<div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${inputs.rothMatch401k ? 'translate-x-5' : ''}`} aria-hidden="true" />
 </button>
 </div>
 <InputField label="Annual Amount" value={rothEffectiveContribution} onChange={v => handleInputChange('rothContribution', v)} min={0} max={LIMITS.rothAnnual} step={100} unit="$" error={rothOverCap ? 'Exceeds IRS cap. Projections use cap.' : null} disabled={inputs.rothMatch401k} tooltip="After-tax contributions that grow and withdraw tax-free in retirement." />
@@ -667,21 +679,22 @@ return next;
 }, []);
 return (
 <div className="min-h-[100dvh] w-full max-w-[100vw] flex flex-col lg:flex-row bg-[#003D3A] font-sans overflow-x-clip relative">
+<a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-[#004745] focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00A499]">Skip to content</a>
 {/* VIBRANT BACKGROUND */}
 <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
 <div className="absolute top-[-15%] right-[-45%] w-[520px] h-[600px] bg-[#E6C300]/10 rounded-full blur-3xl hidden lg:block" />
 <div className="absolute bottom-[-15%] right-[-15%] w-[600px] h-[520px] bg-[#E6C300]/5 rounded-full blur-3xl hidden lg:block" />
 </div>
 {/* DESKTOP SIDEBAR (GLASS PANEL) */}
-<div className="hidden lg:flex flex-col w-[420px] bg-[#004745] border-r border-black/30 z-20 relative shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
+<div role="complementary" aria-label="Settings" className="hidden lg:flex flex-col w-[420px] bg-[#004745] border-r border-black/30 z-20 relative shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
 <div className="flex-1 overflow-hidden p-8 hover:overflow-y-auto custom-scrollbar">
 <SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} />
 </div>
 </div>
 {/* MAIN CONTENT AREA */}
-<div className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
+<div role="main" id="main-content" className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
 {/* MOBILE HEADER */}
-<div className={`lg:hidden flex justify-between items-center px-4 bg-[#003D3A] border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
+<div role="banner" className={`lg:hidden flex justify-between items-center px-4 bg-[#003D3A] border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
 <div className="flex items-center gap-2" style={{ color: THEME.brand }}>
 <div
   className="transition-transform duration-300 ease-in-out"
@@ -712,6 +725,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
   onClick={() => setQuoteIndex(i => (i + 1) % SIRKISMS.length)}
   className="group cursor-pointer select-none max-w-2xl lg:ml-1"
   role="button"
+  aria-label="Show next quote"
   tabIndex={0}
   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setQuoteIndex(i => (i + 1) % SIRKISMS.length); } }}
 >
@@ -724,7 +738,7 @@ Fall into a <span className="font-bold text-slate-200">Million-Dollar Safety Net
 </div>
 </div>
 {/* TOP METRICS GRID (COMPARISON AWARE) */}
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-5' : 'grid-cols-2 gap-3'} min-w-0`}>
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-5' : 'grid-cols-2 gap-3'} min-w-0`} aria-live="polite">
 {/* TARGET CARD */}
 <MetricCard
 badgeLabel="Target"
@@ -803,19 +817,26 @@ comparisonValue={isDelayed ? formatCurrency(comparisonData['Total Real (Today\'s
 {isDelayed && (
 <button
 onClick={() => setShowImmediateLine(prev => !prev)}
+aria-pressed={showImmediateLine}
 className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${showImmediateLine ? 'bg-transparent border border-[#00A499]/40 text-[#00A499] hover:bg-[#00A499]/10' : 'text-white shadow-lg'}`} style={!showImmediateLine ? { background: THEME.returns, boxShadow: `0 4px 6px ${THEME.returnsBg}` } : undefined}
 >
 {showImmediateLine ? 'Remove Start-Now' : 'Add Start-Now'}
 </button>
 )}
-<div className="bg-black/25 p-1 rounded-xl flex text-xs font-bold shadow-inner">
+<div role="tablist" aria-label="View toggle" className="bg-black/25 p-1 rounded-xl flex text-xs font-bold shadow-inner">
 <button
+role="tab"
+aria-selected={activeTab === 'chart'}
+aria-controls="projection-tabpanel"
 onClick={() => setActiveTab('chart')}
 className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'bg-[#006560] shadow-sm' : 'text-slate-400 hover:text-white hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { color: THEME.brand } : undefined}
 >
 Chart
 </button>
 <button
+role="tab"
+aria-selected={activeTab === 'table'}
+aria-controls="projection-tabpanel"
 onClick={() => setActiveTab('table')}
 className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'bg-[#006560] shadow-sm' : 'text-slate-400 hover:text-white hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { color: THEME.brand } : undefined}
 >
@@ -834,6 +855,9 @@ Table
 </div>
 <div
 ref={chartContainerRef}
+id="projection-tabpanel"
+role="tabpanel"
+aria-label={activeTab === 'chart' ? 'Chart view' : 'Table view'}
 className="h-[320px] sm:h-[360px] min-h-[320px] min-w-0 w-full overflow-visible"
 >
 {activeTab === 'chart' ? (
@@ -894,7 +918,7 @@ separator=""
 )
 ): (
 <div className="h-full overflow-y-auto overflow-x-auto custom-scrollbar border border-white/[0.06] rounded-xl bg-[#004240]/80">
-<table className="w-full text-left text-[11px] sm:text-sm">
+<table className="w-full text-left text-[11px] sm:text-sm" aria-label="Projection data">
 <thead className="bg-[#003D3A]/80 sticky top-0 font-bold text-slate-400 backdrop-blur z-10">
 <tr className="text-[12px] text-center">
 <th className="p-2 align-middle text-center" rowSpan={2}>Age</th>
@@ -965,7 +989,7 @@ Assumes contributions through the year selected, no contribution at retirement a
 </div>
 </GlassCard>
 {/* QUICK STATS FOOTER */}
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-2'} ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'} min-w-0`}>
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-2'} ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'} min-w-0`} aria-live="polite">
 {quickStats.map((stat, i) => {
 const isHero = !useThreeColumnPanels && i === 0;
 return (
@@ -1001,7 +1025,7 @@ return (
 <div>Age {startWithdrawAge} to {inputs.lifeExpectancy}</div>
 </div>
 </div>
-<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-3' : 'grid-cols-2 gap-3'} items-stretch min-w-0`}>
+<div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-3' : 'grid-cols-2 gap-3'} items-stretch min-w-0`} aria-live="polite">
 <div className={`rounded-2xl bg-[#003D3A]/60 border border-white/[0.07] ${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-3'} shadow-sm h-full flex flex-col min-w-0`}>
 <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fixed Purchasing Power</div>
 <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black text-white mt-2 tabular-nums min-w-0">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
@@ -1035,6 +1059,9 @@ Rolex is a registered trademark. Sirkis Act is not affiliated with, sponsored by
 className="fixed inset-x-0 bottom-0 z-40 cursor-pointer select-none touch-none"
 onClick={() => setIsSettingsOpen(true)}
 role="button"
+aria-label="Open settings"
+aria-expanded={false}
+aria-controls="settings-drawer"
 tabIndex={0}
 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsSettingsOpen(true); }}
 onPointerDown={(e) => { peekDragStartY.current = e.clientY; }}
@@ -1070,6 +1097,7 @@ Salary {summarySalary} · 401(k) {summaryContribution}{inputs.enableRoth && ` ·
 <Drawer.Portal>
 <Drawer.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40" />
 <Drawer.Content
+id="settings-drawer"
 className="bg-[#004745] rounded-t-3xl border-t border-white/10 shadow-2xl fixed inset-x-0 bottom-0 z-50 flex flex-col outline-none"
 style={{ height: '85dvh' }}
 >
