@@ -1,5 +1,87 @@
 # Session Log
 
+## Session 12: Oz Agent Tasks & v1.0 Release
+
+**Date:** 2026-02-22 to 2026-02-24
+
+### What Was Done
+- **Oz Roadmap**: Full rewrite of Warp Oz notes with 8 sequenced tasks, model/reasoning recommendations, review workflow, credit budget, and AUDIT.md references
+- **Oz Task Execution**: Ran and merged all 8 Oz agent tasks:
+  1. ESLint v9 flat config (Codex, fix/eslint-v9-config)
+  2. Meta tags and SEO (Codex, improve/meta-tags) — fixed stale theme-color value
+  3. Extract constants/types/utils into modules (Codex, refactor/extract-modules)
+  4. Move inline styles to index.css (Codex, refactor/move-styles)
+  5. Extract MetricCard component (Codex, refactor/metric-card)
+  6. Unit tests for projection math — 24 tests, 3 files (Codex, improve/unit-tests)
+  7. Performance optimization — useMemo, useCallback, module-scope constants (Codex, improve/performance)
+  8. Accessibility audit — ARIA, landmarks, focus-visible, skip-to-content (Codex, improve/accessibility)
+- **Audit Merged**: `audit/codebase-review` branch merged to main; AUDIT.md available as reference for agents
+- **Worktree Setup**: Created `sirkis-act--oz` worktree for reviewing Oz branches locally
+- **v1.0.0 Release**: Retroactive version tags (v0.1.0–v0.9.0), CHANGELOG.md rewrite, v1.0.0 tag on current HEAD
+- **Git Fixes**: Repaired corrupted worktree (missing HEAD file) and corrupted remote ref (`origin/HEAD 2`)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `eslint.config.js` | Created |
+| `src/constants.ts` | Created |
+| `src/types.ts` | Created |
+| `src/utils/format.ts` | Created |
+| `src/utils/projection.ts` | Created |
+| `src/components/MetricCard.tsx` | Created |
+| `src/__tests__/format.test.ts` | Created |
+| `src/__tests__/projection.test.ts` | Created |
+| `src/__tests__/constants.test.ts` | Created |
+| `AUDIT.md` | Created |
+| `src/App.tsx` | Modified (module imports, MetricCard usage, useMemo/useCallback, ARIA, style tag removed) |
+| `src/index.css` | Modified (inline styles moved here) |
+| `index.html` | Modified (meta tags, theme-color fix) |
+| `package.json` | Modified (vitest, eslint deps, test script) |
+| `CHANGELOG.md` | Modified (full rewrite with versioned sections) |
+| `SESSION_LOG.md` | Modified |
+| Obsidian `wAPP-sirkis-act-Warp-Oz.md` | Modified (full rewrite) |
+| Obsidian `wAPP-Sirkis-High-wire-Act-TODO.md` | Modified (audit complete, release strategy added) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| Salary presets in App.tsx | SALARY_PRESETS (named as majors array) not moved to constants.ts during extraction; cosmetic, not functional | Low |
+| Chunk size warning | Vite warns JS chunk >500 kB; consider code-splitting in future | Low |
+
+### Next Steps
+1. Move salary presets array from App.tsx to constants.ts
+2. Visual polish tasks (debossed effect, Rolex disclaimer, quote carousel)
+3. Typography & color exploration (alt fonts, better red)
+4. Feature work (theme switcher, retirement goal, onboarding)
+
+---
+
+## Session 11: Drawer Investigation & Tooltip Fix
+
+**Date:** 2026-02-22
+
+### What Was Done
+- **Drawer Handle Bisect**: Investigated two visible slits in deployed drawer handle via git bisect across GitHub Pages deployments with visual markers (asterisk, commit hash). Tested commits from Feb 18–21. Original severe slits could not be reproduced; re-diagnosed as minor iOS Safari address-bar bounce artifact (subpixel gap from `dvh` + `fixed` positioning during toolbar animation). Marked as low-priority future fix.
+- **Tooltip Outside Dismiss**: Added `pointerdown` document listener to `TooltipIcon` component so tooltips close on tap anywhere outside. Uses `useRef` + `useEffect` cleanup pattern.
+- **Account Tooltips**: Added tooltips to 401(k) Contribution %, Match %, Limit %, Roth Annual Amount, and HSA Annual Amount input fields.
+- **Merge to Main**: Tooltip branch merged, test markers stripped, deployed.
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/App.tsx` | Modified (TooltipIcon outside dismiss, new account tooltips) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| Drawer bottom-edge slit | Faint gap on iOS Safari during address-bar bounce; extend peek handle background below viewport floor | Low |
+
+### Next Steps
+1. Warp Oz codebase audit
+2. Oz agent task roadmap and execution
+
+---
+
 ## Session 10: Icon Polish
 
 **Date:** 2026-02-21
