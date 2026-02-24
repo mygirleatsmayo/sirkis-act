@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, memo } from 'react';
+import { useState, useMemo, useEffect, useRef, memo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import {
 XAxis,
@@ -58,16 +58,16 @@ const CrownLogo = ({ className = "" }: LogoProps) => (
 </g>
 </svg>
 );
-const Badge = ({ children, color = "brand" }: BadgeProps) => {
-const styles = {
+const BADGE_STYLES: Record<BadgeColor, string> = {
 brand: "bg-[#00A499]/10 text-[#00A499] border-[#00A499]/20",
 returns: "bg-[#E6C300]/10 text-[#E6C300] border-[#E6C300]/20",
 loss: "bg-[#D32F2F]/15 text-[#D32F2F] border-[#D32F2F]/20",
 neutral: "bg-white/10 text-slate-300 border-white/15",
 };
+const Badge = ({ children, color = "brand" }: BadgeProps) => {
 // BODGE: asymmetric padding compensates for Recursive's high vertical metrics — revisit on font/theme change
 return (
-<span className={`px-2.5 pt-[5px] pb-[3px] rounded-lg text-[10px] font-bold uppercase tracking-wider border ${styles[color] || styles.brand}`}>
+<span className={`px-2.5 pt-[5px] pb-[3px] rounded-lg text-[10px] font-bold uppercase tracking-wider border ${BADGE_STYLES[color] || BADGE_STYLES.brand}`}>
 {children}
 </span>
 );
@@ -477,6 +477,24 @@ className="text-xs font-bold text-slate-400 hover:text-[#00A499] flex items-cent
 );
 };
 
+// --- MODULE-SCOPE STYLE OBJECTS (stable references for Recharts shallow-compare) ---
+const TOOLTIP_CONTENT_STYLE = {
+borderRadius: '16px',
+border: '1px solid rgba(255,255,255,0.1)',
+background: '#004745',
+boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5)',
+padding: '16px',
+color: 'white',
+};
+const TOOLTIP_LABEL_STYLE = {
+color: 'rgba(255,255,255,0.9)',
+marginBottom: '8px',
+fontWeight: '900',
+fontFamily: 'Fraunces, Georgia, serif',
+fontSize: '18px',
+};
+const TOOLTIP_ITEM_STYLE = { padding: 0 };
+
 const App = () => {
 const [inputs, setInputs] = useState(DEFAULT_INPUTS);
 const [activeTab, setActiveTab] = useState('chart');
@@ -578,12 +596,19 @@ const annualNominalWithdrawal = annualReturn > 0
 : nominalAtRetirement / withdrawalYears;
 const monthlyRealWithdrawalAtRetirement = realTodayToNominalAtRetirement(monthlyRealWithdrawal);
 const useThreeColumnPanels = chartSize.width >= 550;
-const legendItems = [
+const legendItems = useMemo(() => [
 { label: 'Your Contributions', color: THEME.brand, visible: true },
 { label: 'Employer Match (OPM)', color: THEME.opm, visible: true },
 { label: 'Investment Returns', color: THEME.returns, visible: true },
 { label: 'Start Now Total', color: THEME.startNow, visible: isDelayed && showImmediateLine }
-];
+], [isDelayed, showImmediateLine]);
+const chartMargin = useMemo(() =>
+isNarrowScreen
+  ? { top: 6, right: 0, left: -2, bottom: 0 }
+  : isMediumScreen
+    ? { top: 10, right: 0, left: -10, bottom: 0 }
+    : { top: 10, right: 12, left: -5, bottom: 0 },
+[isNarrowScreen, isMediumScreen]);
 const delayYears = inputs.startAge - inputs.currentAge;
 const lossAmount = comparisonData && finalData
   ? comparisonData['Total Nominal'] - finalData['Total Nominal']
@@ -591,7 +616,7 @@ const lossAmount = comparisonData && finalData
 const lossFraction = comparisonData && comparisonData['Total Nominal'] > 0
   ? lossAmount / comparisonData['Total Nominal']
   : 0;
-const missedContributions = (() => {
+const missedContributions = useMemo(() => {
   if (!inputs.enable401k || delayYears <= 0) return 0;
   const growthRate = 1 + inputs.salaryGrowth / 100;
   let total = 0;
@@ -599,9 +624,14 @@ const missedContributions = (() => {
     total += Math.min(inputs.currentSalary * Math.pow(growthRate, i) * (inputs.contribution401k / 100), LIMITS.max401kEmployee);
   }
   return total;
-})();
+}, [inputs.enable401k, inputs.salaryGrowth, inputs.currentSalary, inputs.contribution401k, delayYears]);
 const lossYearLabel = delayYears === 1 ? 'year' : 'years';
-const handleInputChange = (key: InputKey | 'RESET', value: InputValue) => {
+const quickStats = useMemo(() => [
+{ label: "Market Funded", value: finalData['Investment Returns'], colorStyle: { color: THEME.returns }, bgStyle: { background: THEME.returnsBg }, icon: TrendingUp },
+{ label: "Self Funded", value: finalData['Your Contributions'], colorStyle: { color: THEME.brand }, bgStyle: { background: THEME.brandBg }, icon: PiggyBank },
+{ label: "Employer (OPM)", value: finalData['Employer Match'], colorStyle: { color: THEME.opm }, bgStyle: { background: THEME.brandBg }, icon: Building2 },
+], [finalData]);
+const handleInputChange = useCallback((key: InputKey | 'RESET', value: InputValue) => {
 if (key === 'RESET') {
 setInputs(DEFAULT_INPUTS);
 } else {
@@ -634,7 +664,7 @@ next.lifeExpectancy = Math.max(next.lifeExpectancy, next.retirementAge + 1);
 return next;
 });
 }
-};
+}, []);
 return (
 <div className="min-h-[100dvh] w-full max-w-[100vw] flex flex-col lg:flex-row bg-[#003D3A] font-sans overflow-x-clip relative">
 {/* VIBRANT BACKGROUND */}
@@ -808,7 +838,7 @@ className="h-[320px] sm:h-[360px] min-h-[320px] min-w-0 w-full overflow-visible"
 >
 {activeTab === 'chart' ? (
 chartSize.width > 0 && chartSize.height > 0 ? (
-<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={isNarrowScreen ? { top: 6, right: 0, left: -2, bottom: 0 } : isMediumScreen ? { top: 10, right: 0, left: -10, bottom: 0 } : { top: 10, right: 12, left: -5, bottom: 0 }}>
+<AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={chartMargin}>
 <defs>
 <linearGradient id="colorReturns" x1="0" y1="0" x2="0" y2="1">
 <stop offset="5%" stopColor={THEME.returns} stopOpacity={0.6}/>
@@ -842,14 +872,14 @@ return `$${(numericVal / 1000).toFixed(0)}k`;
 }}
 />
 <Tooltip
-contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', background: '#004745', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5)', padding: '16px', color: 'white' }}
+contentStyle={TOOLTIP_CONTENT_STYLE}
 formatter={(value) => {
 const numericValue = typeof value === 'number' ? value : Number(value || 0);
 return [formatCurrency(numericValue), ""];
 }}
 itemSorter={(item) => -(typeof item.value === 'number' ? item.value : Number(item.value || 0))}
-labelStyle={{ color: 'rgba(255,255,255,0.9)', marginBottom: '8px', fontWeight: '900', fontFamily: 'Fraunces, Georgia, serif', fontSize: '18px' }}
-itemStyle={{ padding: 0 }}
+labelStyle={TOOLTIP_LABEL_STYLE}
+itemStyle={TOOLTIP_ITEM_STYLE}
 separator=""
 />
 <Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke={THEME.brand} strokeWidth={3} fill="url(#colorUser)" stackId="1" />
@@ -935,15 +965,8 @@ Assumes contributions through the year selected, no contribution at retirement a
 </div>
 </GlassCard>
 {/* QUICK STATS FOOTER */}
-{(() => {
-const stats = [
-{ label: "Market Funded", value: finalData['Investment Returns'], colorStyle: { color: THEME.returns }, bgStyle: { background: THEME.returnsBg }, icon: TrendingUp },
-{ label: "Self Funded", value: finalData['Your Contributions'], colorStyle: { color: THEME.brand }, bgStyle: { background: THEME.brandBg }, icon: PiggyBank },
-{ label: "Employer (OPM)", value: finalData['Employer Match'], colorStyle: { color: THEME.opm }, bgStyle: { background: THEME.brandBg }, icon: Building2 },
-];
-return (
 <div className={`grid ${useThreeColumnPanels ? 'grid-cols-3' : 'grid-cols-2'} ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'} min-w-0`}>
-{stats.map((stat, i) => {
+{quickStats.map((stat, i) => {
 const isHero = !useThreeColumnPanels && i === 0;
 return (
 <GlassCard key={i} className={`${isHero ? 'col-span-2' : ''} ${chartSize.width >= 750 ? 'p-4' : 'p-3'} group hover:scale-[1.02] transition-transform duration-300 flex flex-row items-center justify-center ${chartSize.width >= 750 ? 'gap-5' : 'gap-3'}`}>
@@ -967,8 +990,6 @@ return (
 );
 })}
 </div>
-);
-})()}
 <GlassCard className="p-5 lg:p-7">
 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-5">
 <div>
