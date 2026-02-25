@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.0-rc.1] - 2026-02-25 — Theme Architecture & Theme Lab
+
 - **Runtime Theme Architecture**: `ThemeProvider` with CSS variable sync, Tailwind semantic tokens (38 colors), `useTheme` hook, Cyprus + Playground theme configs.
 - **Theme Lab**: Floating live-editor panel for colors (with family linking), fonts, SVG logo upload, branding text, glow/blob effects, and theme export.
 - **SVG Sanitization**: DOMPurify replaces hand-rolled sanitizer for uploaded SVG logos.
