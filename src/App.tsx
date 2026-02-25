@@ -20,10 +20,11 @@ Building2,
 Clock,
 ChevronDown,
 ChevronUp,
-Info
+Info,
+Settings as SettingsIcon
 } from 'lucide-react';
 import { Drawer } from 'vaul';
-import { DEFAULT_INPUTS, LIMITS, SIRKISMS, INPUT_BOUNDS } from './constants';
+import { DEFAULT_INPUTS, LIMITS, SIRKISMS, INPUT_BOUNDS, SALARY_PRESETS } from './constants';
 import type {
   CardProps,
   BadgeProps,
@@ -291,7 +292,7 @@ onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault()
 );
 };
 // --- SETTINGS PANEL ---
-const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = false }: SettingsPanelProps) => {
+const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = false, onOpenSettings }: SettingsPanelProps) => {
 const { theme } = useTheme();
 const Logo = theme.branding.logo;
 const annualEmployee401k = inputs.enable401k ? inputs.currentSalary * (inputs.contribution401k / 100) : 0;
@@ -310,12 +311,24 @@ return (
 {/* Branding in Sidebar (Desktop) */}
 {!isMobile && (
 <div className="mb-8 pt-2">
+<div className="flex items-center justify-between">
 <div className="flex items-center gap-2.5" style={{ color: theme.colors.brand }}>
 <Logo className="h-9 w-9" />
 <div>
 <div className="font-display font-black text-xl tracking-tight leading-tight">{theme.branding.appName}</div>
 <div className="text-[10px] font-medium text-content-subtle leading-tight">{theme.branding.tagline}</div>
 </div>
+</div>
+{onOpenSettings && (
+  <button
+    type="button"
+    onClick={onOpenSettings}
+    aria-label="Open settings"
+    className="p-2 rounded-xl text-content-subtle hover:text-white hover:bg-white/10 transition-colors"
+  >
+    <SettingsIcon size={18} />
+  </button>
+)}
 </div>
 </div>
 )}
@@ -376,14 +389,9 @@ handleInputChange('currentSalary', next);
 className="w-full appearance-none text-[16px] sm:text-sm font-bold p-3 pr-10 rounded-xl border border-theme/50 bg-surface-input text-white shadow-sm"
 >
 <option value="" disabled>Select a major</option>
-<option value="81535">Computer Science - $81,535</option>
-<option value="78731">Engineering - $78,731</option>
-<option value="68870">Business - $68,870</option>
-<option value="69709">Math and Sciences - $69,709</option>
-<option value="67316">Social Sciences - $67,316</option>
-<option value="63122">Agriculture/Natural Resources - $63,122</option>
-<option value="60353">Communications - $60,353</option>
-<option value="59410">Humanities/Liberal Arts - $59,410</option>
+{SALARY_PRESETS.map(p => (
+<option key={p.salary} value={p.salary}>{p.label} - ${p.salary.toLocaleString()}</option>
+))}
 </select>
 <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-content-subtle" size={16} />
 </div>
@@ -503,7 +511,7 @@ const BLOB_POSITIONS: Record<string, string> = {
 'top-left': 'top-[-15%] left-[-45%] w-[520px] h-[600px]',
 };
 
-const App = () => {
+const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
 const { theme } = useTheme();
 const Logo = theme.branding.logo;
 const [inputs, setInputs] = useState(DEFAULT_INPUTS);
@@ -702,7 +710,7 @@ style={{ backgroundColor: blob.color, opacity: blob.opacity }}
 {/* DESKTOP SIDEBAR (GLASS PANEL) */}
 <div role="complementary" aria-label="Settings" className="hidden lg:flex flex-col w-[420px] bg-surface-glass border-r border-black/30 z-20 relative shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
 <div className="flex-1 overflow-hidden p-8 hover:overflow-y-auto custom-scrollbar">
-<SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} />
+<SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} onOpenSettings={onOpenSettings} />
 </div>
 </div>
 {/* MAIN CONTENT AREA */}
@@ -721,6 +729,16 @@ style={{ backgroundColor: blob.color, opacity: blob.opacity }}
 <div className={`font-medium text-content-subtle leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>{theme.branding.tagline}</div>
 </div>
 </div>
+{onOpenSettings && (
+  <button
+    type="button"
+    onClick={onOpenSettings}
+    aria-label="Open settings"
+    className="p-2 rounded-xl text-content-subtle hover:text-white hover:bg-white/10 transition-colors"
+  >
+    <SettingsIcon size={20} />
+  </button>
+)}
 </div>
 {/* SCROLLABLE DASHBOARD */}
 <div className="overflow-x-clip custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
@@ -1130,7 +1148,7 @@ onFocus={(e) => {
   }
 }}
 >
-<SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} isMobile={true} />
+<SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} isMobile={true} onOpenSettings={onOpenSettings} />
 </div>
 </Drawer.Content>
 </Drawer.Portal>

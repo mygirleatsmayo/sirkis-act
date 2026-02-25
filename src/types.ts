@@ -73,6 +73,7 @@ export type SettingsPanelProps = {
   handleInputChange: (key: keyof Inputs | 'RESET', value: number | string | boolean) => void;
   formatCurrency: (value: number) => string;
   isMobile?: boolean;
+  onOpenSettings?: () => void;
 };
 export type InputKey = keyof Inputs;
 export type NumericInputKey =
@@ -90,5 +91,6 @@ export type NumericInputKey =
   | 'rothContribution'
   | 'hsaContribution';
 export type BooleanInputKey = 'enable401k' | 'enableRoth' | 'enableHSA' | 'rothMatch401k';
+export type SalaryPreset = { label: string; salary: number };
 export type InputBounds = Record<NumericInputKey, { min: number; max: number }>;
 export type InputValue = Inputs[InputKey] | number | string | boolean;
