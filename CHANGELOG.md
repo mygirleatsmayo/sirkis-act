@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+- **Runtime Theme Architecture**: `ThemeProvider` with CSS variable sync, Tailwind semantic tokens (38 colors), `useTheme` hook, Cyprus + Playground theme configs.
+- **Theme Lab**: Floating live-editor panel for colors (with family linking), fonts, SVG logo upload, branding text, glow/blob effects, and theme export.
+- **SVG Sanitization**: DOMPurify replaces hand-rolled sanitizer for uploaded SVG logos.
+- **TypeScript Project References**: `tsc -b` build with `tsconfig.app.json` + `tsconfig.node.json`; prevents emit artifacts.
+- **`hexAlpha` Hardening**: Safely handles non-hex color strings (rgba, named colors) instead of producing garbage.
+- **New Tests**: `hexAlpha` (5 tests) and `hexToChannels` (4 tests) added to format test suite.
+- **CrownLogo Extraction**: Logo component extracted from `App.tsx` into `src/components/CrownLogo.tsx`.
+
 ## [1.0.0] - 2026-02-24 — Code Quality & Infrastructure
 
 - **Codebase Audit**: Comprehensive 43-finding audit via Warp Oz (GPT-5.3 Codex high); report saved as AUDIT.md.

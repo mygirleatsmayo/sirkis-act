@@ -1,5 +1,76 @@
 # Session Log
 
+## Session 13: Theme Architecture, Theme Lab & Review Fixes
+
+**Date:** 2026-02-25
+
+### What Was Done
+- **Runtime Theme Architecture**: Built `ThemeConfig` types, Cyprus + Playground themes, `ThemeProvider` with CSS variable sync, Tailwind semantic token mapping (38 color tokens), `useTheme` hook, and `ThemeContext`.
+- **Theme Lab**: Floating live-editing panel (`Ctrl+Shift+T` or FAB) with color family detection/linking, font selectors, SVG logo upload, branding text fields, glow/blob effect controls, and theme export (download .ts or copy to clipboard).
+- **App.tsx Migration**: Replaced all hardcoded hex/THEME references with semantic CSS variable tokens. Extracted `CrownLogo` component.
+- **Root.tsx**: New app root wrapping `ThemeProvider` + `App` + `ThemeLab` together.
+- **SVG XSS Fix**: Replaced hand-rolled SVG sanitizer with DOMPurify (`USE_PROFILES: { svg: true, svgFilters: true }`).
+- **tsconfig Project References**: Restructured to `tsconfig.json` (root) → `tsconfig.app.json` + `tsconfig.node.json`. Added `noEmit: true` to node config to prevent artifact emission. Build command now `tsc -b && vite build`.
+- **Oz Cloud Agent Review**: Dispatched independent Oz review (intelligence level 4). Received 2 important + 4 minor findings.
+- **Review Fix-ups** (from Oz findings + self-review):
+  - `hexAlpha` hardened: early-return for non-hex input; tightened to only parse valid `#RRGGBB`
+  - Extracted `prepareSvgHtml` helper to DRY duplicated SVG post-processing in ThemeLab
+  - Removed dead `LogoProps` export from `types.ts`
+  - Added 9 new tests for `hexAlpha` (5) and `hexToChannels` (4)
+- **Docs Updated**: `AGENTS.md` and `CLAUDE.md` updated for theme system, DOMPurify, `tsc -b`, and source structure.
+- **Design Docs**: Added `docs/plans/2026-02-25-theme-architecture.md`.
+- **File Reorganization**: Moved palette CSS files into `docs/reference/`.
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/themes/types.ts` | Created |
+| `src/themes/cyprus.ts` | Created |
+| `src/themes/playground.ts` | Created |
+| `src/themes/ThemeProvider.tsx` | Created |
+| `src/themes/ThemeContext.ts` | Created |
+| `src/themes/useTheme.ts` | Created |
+| `src/themes/syncCssVars.ts` | Created |
+| `src/themes/index.ts` | Created |
+| `src/ThemeLab.tsx` | Created |
+| `src/Root.tsx` | Created |
+| `src/components/CrownLogo.tsx` | Created |
+| `tsconfig.app.json` | Created |
+| `docs/plans/2026-02-25-theme-architecture.md` | Created |
+| `docs/plans/2026-02-24-onboarding-and-settings-design.md` | Created |
+| `docs/plans/custom-fonts-via-url.md` | Created |
+| `docs/reference/palette-*.css` | Moved (from project root) |
+| `src/App.tsx` | Modified (theme migration, semantic tokens) |
+| `src/main.tsx` | Modified (Root wrapper) |
+| `src/index.css` | Modified (CSS var fallbacks, font-face) |
+| `src/constants.ts` | Modified (removed THEME constant) |
+| `src/types.ts` | Modified (removed dead LogoProps) |
+| `src/utils/format.ts` | Modified (hexAlpha added + hardened) |
+| `src/__tests__/format.test.ts` | Modified (9 new tests) |
+| `tailwind.config.js` | Modified (semantic token mapping) |
+| `index.html` | Modified (meta theme-color) |
+| `package.json` / `package-lock.json` | Modified (dompurify dependency) |
+| `tsconfig.json` | Modified (project references root) |
+| `tsconfig.node.json` | Modified (noEmit: true) |
+| `AGENTS.md` | Modified (theme system docs) |
+| `CLAUDE.md` | Modified (theme system docs) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| Ctrl+Shift+T collision | Theme Lab shortcut overrides browser "reopen closed tab"; design trade-off, not a bug | Low |
+| tsconfig test exclusion | Test files only type-checked by Vitest, not `tsc -b`; standard trade-off with project references | Low |
+| Chunk size warning | Vite warns JS chunk >500 kB; Theme Lab adds to bundle | Low |
+
+### Next Steps
+1. Merge `features-theme-architecture` to `main` (PR or direct)
+2. Theme Lab enhancements: undo/redo, preset gallery
+3. CCP and Catppuccin theme variants
+4. Move salary presets from App.tsx to constants.ts
+5. Visual polish tasks (debossed effect, Rolex disclaimer, quote carousel)
+
+---
+
 ## Session 12: Oz Agent Tasks & v1.0 Release
 
 **Date:** 2026-02-22 to 2026-02-24
