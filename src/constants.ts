@@ -1,4 +1,4 @@
-import type { Inputs, InputBounds } from './types';
+import type { Inputs, InputBounds, SalaryPreset } from './types';
 
 export const DEFAULT_INPUTS: Inputs = {
   currentAge: 23,
@@ -48,6 +48,16 @@ export const SIRKISMS = [
   "Professors are human beings. They have sides.",
   "Don't show up late with a Duncan Donuts cup.",
   "Horror stories exist for a reason.",
+];
+export const SALARY_PRESETS: SalaryPreset[] = [
+  { label: 'Computer Science', salary: 81535 },
+  { label: 'Engineering', salary: 78731 },
+  { label: 'Math and Sciences', salary: 69709 },
+  { label: 'Business', salary: 68870 },
+  { label: 'Social Sciences', salary: 67316 },
+  { label: 'Agriculture/Natural Resources', salary: 63122 },
+  { label: 'Communications', salary: 60353 },
+  { label: 'Humanities/Liberal Arts', salary: 59410 },
 ];
 export const INPUT_BOUNDS: InputBounds = {
   currentAge: { min: 18, max: 80 },

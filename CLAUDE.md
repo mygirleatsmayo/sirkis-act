@@ -9,7 +9,7 @@
 - **Stack:** React 19 + TypeScript 5.7 (strict) + Vite 6 + Tailwind CSS 3.4 + Recharts 3.7 + Vaul (drawer) + DOMPurify + Vitest
 - **Deployed to:** GitHub Pages at `https://mygirleatsmayo.github.io/sirkis-act/`
 - **CI/CD:** GitHub Actions (`.github/`)
-- **Current version:** 1.0.0 (tagged 2026-02-24)
+- **Current version:** 1.1.0-rc.1 (tagged 2026-02-25; stable release: 1.0.0, 2026-02-24)
 
 ### Commands
 
@@ -26,9 +26,10 @@ npm run preview    # preview production build
 ```
 src/
   App.tsx              # main component (~1,100 lines): helper components, state, layout, chart/table
-  Root.tsx             # wraps App + ThemeLab + FAB toggle in ThemeProvider
+  Root.tsx             # wraps App + ThemeLab + SettingsModal + FAB toggle in ThemeProvider
+  SettingsModal.tsx    # settings modal (gear icon trigger, Theme Lab launch, changelog, stubs)
   ThemeLab.tsx         # floating theme editor panel (SVG upload sanitized via DOMPurify)
-  constants.ts         # DEFAULT_INPUTS, LIMITS (IRS caps), SIRKISMS, INPUT_BOUNDS
+  constants.ts         # DEFAULT_INPUTS, LIMITS (IRS caps), SIRKISMS, INPUT_BOUNDS, SALARY_PRESETS
   types.ts             # all TypeScript interfaces and type aliases
   index.css            # global Tailwind styles, @font-face declarations
   main.tsx             # React entry point (renders Root)
