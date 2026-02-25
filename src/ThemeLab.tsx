@@ -40,6 +40,13 @@ const sanitizeSvg = (raw: string): string =>
     RETURN_DOM: false,
   }) as string;
 
+/** Prepare a sanitized SVG string for inline rendering — inherit color and fill container */
+const prepareSvgHtml = (svg: string): string =>
+  svg
+    .replace(/fill="[^"]*"/g, 'fill="currentColor"')
+    .replace(/stroke="[^"]*"/g, 'stroke="currentColor"')
+    .replace(/<svg/, '<svg style="width:100%;height:100%"');
+
 /** Shallow-clone a ThemeConfig (preserves logo component ref) */
 const cloneTheme = (t: ThemeConfig): ThemeConfig => ({
   ...t,
@@ -545,12 +552,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <div
           className={className}
           style={{ color: 'inherit' }}
-          dangerouslySetInnerHTML={{
-            __html: clean
-              .replace(/fill="[^"]*"/g, 'fill="currentColor"')
-              .replace(/stroke="[^"]*"/g, 'stroke="currentColor"')
-              .replace(/<svg/, '<svg style="width:100%;height:100%"'),
-          }}
+          dangerouslySetInnerHTML={{ __html: prepareSvgHtml(clean) }}
         />
       );
       setThemeLocal(prev => ({
@@ -748,12 +750,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
             {customSvg ? (
               <div
                 className="w-8 h-8"
-                dangerouslySetInnerHTML={{
-                  __html: customSvg
-                    .replace(/fill="[^"]*"/g, 'fill="currentColor"')
-                    .replace(/stroke="[^"]*"/g, 'stroke="currentColor"')
-                    .replace(/<svg/, '<svg style="width:100%;height:100%"'),
-                }}
+                dangerouslySetInnerHTML={{ __html: prepareSvgHtml(customSvg) }}
               />
             ) : (
               <span className="text-[10px] text-white/30 font-bold">SVG</span>

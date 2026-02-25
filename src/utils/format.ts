@@ -59,6 +59,7 @@ export const formatCompact = (val: number): string => {
 
 /** Convert a hex color (#RRGGBB) to an rgba string with the given alpha */
 export const hexAlpha = (hex: string, alpha: number): string => {
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return hex;
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
