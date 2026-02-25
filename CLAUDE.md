@@ -6,16 +6,18 @@
 
 ## Project Quick Reference
 
-- **Stack:** React 19 + TypeScript 5.7 (strict) + Vite 6 + Tailwind CSS 3.4 + Recharts 3.7
+- **Stack:** React 19 + TypeScript 5.7 (strict) + Vite 6 + Tailwind CSS 3.4 + Recharts 3.7 + Vaul (drawer) + DOMPurify + Vitest
 - **Deployed to:** GitHub Pages at `https://mygirleatsmayo.github.io/sirkis-act/`
 - **CI/CD:** GitHub Actions (`.github/`)
+- **Current version:** 1.0.0 (tagged 2026-02-24)
 
 ### Commands
 
 ```
 npm run dev        # local dev server
-npm run build      # tsc && vite build
+npm run build      # tsc -b && vite build (project references)
 npm run lint       # eslint (ts,tsx, zero warnings)
+npm run test       # vitest run (all tests, single pass)
 npm run preview    # preview production build
 ```
 
@@ -23,10 +25,33 @@ npm run preview    # preview production build
 
 ```
 src/
-  App.tsx          # main application logic, UI, salary presets
-  index.css        # global Tailwind styles
-  main.tsx         # React entry point
-  vite-env.d.ts    # Vite type declarations
+  App.tsx              # main component (~1,100 lines): helper components, state, layout, chart/table
+  Root.tsx             # wraps App + ThemeLab + FAB toggle in ThemeProvider
+  ThemeLab.tsx         # floating theme editor panel (SVG upload sanitized via DOMPurify)
+  constants.ts         # DEFAULT_INPUTS, LIMITS (IRS caps), SIRKISMS, INPUT_BOUNDS
+  types.ts             # all TypeScript interfaces and type aliases
+  index.css            # global Tailwind styles, @font-face declarations
+  main.tsx             # React entry point (renders Root)
+  vite-env.d.ts        # Vite type declarations
+  components/
+    CrownLogo.tsx      # SVG crown logo component (referenced by themes)
+  themes/
+    types.ts           # ThemeConfig, ThemeColors, ThemeBranding, ThemeFonts, ThemeEffects
+    cyprus.ts          # default theme definition
+    playground.ts      # ThemeLab working copy (deep clone of Cyprus)
+    index.ts           # theme registry, getTheme(), defaultThemeId
+    ThemeProvider.tsx   # context provider, localStorage persistence, override support
+    ThemeContext.ts     # React context definition
+    useTheme.ts         # useTheme() hook
+    syncCssVars.ts      # syncs ThemeConfig → CSS custom properties
+  utils/
+    format.ts          # formatCurrency, formatCompact, getLossFractionLabel, clampNumber, hexAlpha
+    projection.ts      # runProjection() — core financial engine
+  __tests__/
+    constants.test.ts  # LIMITS and DEFAULT_INPUTS validation
+    format.test.ts     # formatCurrency, formatCompact edge cases
+    projection.test.ts # IRS cap clamping, employer match, inflation, delayed vs. immediate
+  fonts/               # self-hosted variable woff2 (Fraunces display, Recursive Sans Linear UI)
 ```
 
 ### Key Config
@@ -34,9 +59,14 @@ src/
 | File | Purpose |
 |------|---------|
 | `vite.config.ts` | Vite config, `base: "/sirkis-act/"`, React plugin |
-| `tsconfig.json` | ES2020 target, strict mode, `noUnusedLocals`, `noUnusedParameters` |
-| `tailwind.config.js` | Tailwind content paths |
+| `tsconfig.json` | Root config with project references (app + node) |
+| `tsconfig.app.json` | App source: ES2020 target, strict mode, excludes tests |
+| `tsconfig.node.json` | Vite config: composite, noEmit |
+| `tailwind.config.js` | Tailwind content paths, `fontFamily.display` (Fraunces), `fontFamily.sans` (Recursive) |
 | `postcss.config.js` | PostCSS + Tailwind + Autoprefixer |
+| `eslint.config.js` | ESLint v9 flat config with TypeScript + React |
+| `AGENTS.md` | Warp agent guidance (architecture, conventions, commands) |
+| `AUDIT.md` | 43-finding codebase audit for agent reference |
 
 ---
 
@@ -58,9 +88,9 @@ src/
 - **TypeScript strict mode** is enforced; do not use `any` or suppress type errors without justification
 - **Zero lint warnings** policy; run `npm run lint` before considering work complete
 - **Tailwind CSS** for all styling; avoid inline styles or separate CSS files unless necessary
-- **Recharts** for all chart/visualization work
-- **Lucide React** for icons
-- Keep `src/` flat unless component extraction is explicitly agreed upon
+- **Recharts** for all chart/visualization work; **Lucide React** for icons; **Vaul** for mobile drawer
+- Extracted modules exist (`constants.ts`, `types.ts`, `utils/`), but keep `src/` flat unless further extraction is explicitly agreed upon
+- Unused variables prefixed with `_` (ESLint rule: `argsIgnorePattern: "^_"`)
 - Avoid over-engineering; only make changes that are directly requested or clearly necessary
 - Do not add docstrings, comments, or type annotations to code you did not change
 - **No orphan words** in headlines, subheadlines, labels, and short UI text; use `whitespace-nowrap` on the last 2–3 words or equivalent

@@ -50,7 +50,12 @@ export interface ThemeBranding {
   tagline: string;              // e.g. 'Old-Fashioned Financial Planning'
   heroLine1: string;            // e.g. "Dr. Sirkis's"
   heroLine2: string;            // e.g. 'High-Wire Act'
-  heroSubhead: string;          // e.g. 'Fall into a Million-Dollar Safety Net...'
+  heroSubhead: string;          // plain-text fallback for SEO / accessibility
+  heroSubheadParts?: {          // structured rendering with emphasis span
+    leading: string;
+    emphasis: string;
+    trailing: string;
+  };
   heroLine1Color: string;       // color for hero line 1
   heroLine2Color: string;       // color for hero line 2
 }

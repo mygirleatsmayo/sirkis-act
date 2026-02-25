@@ -68,6 +68,7 @@ body {
 	0%   { opacity: 0.55; box-shadow: 0 0 8px 1px var(--glow-color-0), 0 0 28px 4px var(--glow-color-1), 0 0 60px 12px var(--glow-color-2); }
 	50%  { opacity: 1;    box-shadow: 0 0 10px 2px var(--glow-color-0), 0 0 36px 6px var(--glow-color-1), 0 0 80px 18px var(--glow-color-2); }
 	100% { opacity: 0.55; box-shadow: 0 0 8px 1px var(--glow-color-0), 0 0 28px 4px var(--glow-color-1), 0 0 60px 12px var(--glow-color-2); }
+}
 @media (max-width: 1023px) {
 	input,
 	select,
@@ -94,17 +95,17 @@ button:focus-visible,
 [role="tab"]:focus-visible,
 [role="button"]:focus-visible,
 select:focus-visible {
-	outline: 2px solid var(--color-focus-ring);
+	outline: 2px solid rgb(var(--color-focus-ring));
 	outline-offset: 2px;
 	border-radius: 4px;
 }
 input[type="range"]:focus-visible {
-	outline: 2px solid var(--color-focus-ring);
+	outline: 2px solid rgb(var(--color-focus-ring));
 	outline-offset: 4px;
 	border-radius: 4px;
 }
 input[type="number"]:focus-visible {
-	outline: 2px solid var(--color-focus-ring);
+	outline: 2px solid rgb(var(--color-focus-ring));
 	outline-offset: 1px;
 	border-radius: 12px;
 }

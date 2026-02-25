@@ -27,18 +27,6 @@ export const LIMITS = {
   hsaIndividual: 4150,
   hsaFamily: 8300,
 };
-export const THEME = {
-  bg:        '#003D3A',
-  brand:     '#00A499',
-  opm:       '#A8A8A8',
-  returns:   '#E6C300',
-  startNow:  '#0D9488',
-  loss:      '#D32F2F',
-  brandBg:   'rgba(0,164,153,0.06)',
-  returnsBg: 'rgba(230,195,0,0.08)',
-  startNowBg:'rgba(13,148,136,0.08)',
-  lossBg:    'rgba(211,47,47,0.07)',
-} as const;
 export const SIRKISMS = [
   "I am a capitalist. I love money. No shame.",
   "You don't lose the money from the early years. You lose all the money from the later years.",

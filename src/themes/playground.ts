@@ -1,9 +1,9 @@
 import type { ThemeConfig } from './types';
 import { CrownLogo } from '../components/CrownLogo';
 
-export const cyprusTheme: ThemeConfig = {
-  id: 'cyprus',
-  name: 'Sirkis Cyprus',
+export const playgroundTheme: ThemeConfig = {
+  id: 'playground',
+  name: 'Playground',
   colors: {
     bg: '#003D3A',
     bgGlass: '#004745',

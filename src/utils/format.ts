@@ -56,3 +56,11 @@ export const formatCompact = (val: number): string => {
   if (abs >= 1_000) return `$${(val / 1_000).toPrecision(4)}K`;
   return formatCurrency(val);
 };
+
+/** Convert a hex color (#RRGGBB) to an rgba string with the given alpha */
+export const hexAlpha = (hex: string, alpha: number): string => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+};

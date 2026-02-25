@@ -12,7 +12,7 @@ Live: https://mygirleatsmayo.github.io/sirkis-act/
 
 ```
 npm run dev          # Vite dev server (default port 5173)
-npm run build        # tsc && vite build (type-check then bundle)
+npm run build        # tsc -b && vite build (type-check via project references, then bundle)
 npm run lint         # ESLint, zero warnings enforced (--max-warnings 0)
 npm run test         # vitest run (all tests, single pass)
 npm run preview      # serve production build locally
@@ -26,7 +26,7 @@ npx vitest run src/__tests__/projection.test.ts
 ## Stack
 
 - React 19, TypeScript 5.7 (strict), Vite 6, Tailwind CSS 3.4, Recharts 3.7
-- Vaul (mobile drawer), Lucide React (icons)
+- Vaul (mobile drawer), Lucide React (icons), DOMPurify (SVG sanitization)
 - Vitest for testing
 - Deployed via GitHub Actions to GitHub Pages on push to `main`
 
@@ -36,16 +36,16 @@ npx vitest run src/__tests__/projection.test.ts
 
 All UI lives in `src/App.tsx` (~1,100 lines). This is intentional; the codebase is kept flat unless component extraction is explicitly agreed upon. The file contains:
 
-- **Helper components** (lines 44–490): `GlassCard`, `Card`, `CrownLogo`, `Badge`, `MetricCard`, `TooltipIcon`, `InputField`, `ToggleSection`, `SettingsPanel` — all defined at module scope, not extracted to separate files.
-- **Main `App` component** (line 510+): state management, projection calculations, withdrawal math, responsive layout logic, chart/table rendering, and the mobile drawer (Vaul).
+- **Helper components** (lines 44–490): `GlassCard`, `Card`, `Badge`, `MetricCard`, `TooltipIcon`, `InputField`, `ToggleSection`, `SettingsPanel` — all defined at module scope, not extracted to separate files.
+- **Main `App` component** (line 506+): state management, projection calculations, withdrawal math, responsive layout logic, chart/table rendering, and the mobile drawer (Vaul).
 - **Layout pattern**: Desktop uses a fixed-width sidebar (420px) with a scrollable main area. Mobile uses a bottom-sheet drawer (Vaul `Drawer.Root`) for settings.
 
 ### Extracted modules
 
 - `src/types.ts` — All TypeScript interfaces and type aliases (`Inputs`, `ProjectionRow`, component prop types, input key unions).
-- `src/constants.ts` — `DEFAULT_INPUTS`, `LIMITS` (IRS contribution caps), `THEME` (color palette), `SIRKISMS` (rotating quotes), `INPUT_BOUNDS` (slider min/max).
+- `src/constants.ts` — `DEFAULT_INPUTS`, `LIMITS` (IRS contribution caps), `SIRKISMS` (rotating quotes), `INPUT_BOUNDS` (slider min/max).
 - `src/utils/projection.ts` — `runProjection(inputs, startAgeOverride)`: the core financial engine. Year-by-year loop computing 401(k)/Roth/HSA balances with employer match, IRS cap clamping, contribution timing factor, and inflation adjustment.
-- `src/utils/format.ts` — `formatCurrency`, `formatCompact`, `getLossFractionLabel`, `clampNumber`.
+- `src/utils/format.ts` — `formatCurrency`, `formatCompact`, `getLossFractionLabel`, `clampNumber`, `hexAlpha`.
 
 ### Data flow
 
@@ -54,10 +54,15 @@ All UI lives in `src/App.tsx` (~1,100 lines). This is intentional; the codebase 
 3. Results feed into `MetricCard` grid, `AreaChart` / data table, quick stats footer, and withdrawal calculations.
 4. The delayed-start comparison shows a loss banner with `getLossFractionLabel` producing human-readable fractions ("half of", "a third of").
 
-### Theme and fonts
+### Theme system
 
-- Dark teal palette defined in `THEME` constant (`constants.ts`). Background color (`#003D3A`) must stay in sync across `index.html` meta theme-color, `index.css` body background, and the `THEME.bg` constant.
-- Self-hosted variable fonts in `src/fonts/`: Fraunces (display/serif) and Recursive Sans Linear (UI/sans). Registered in `src/index.css` via `@font-face`, mapped in `tailwind.config.js` as `font-display` and `font-sans`.
+- **Runtime theme architecture** with CSS variable sync. Themes are defined in `src/themes/` as `ThemeConfig` objects (colors, branding, fonts, effects). The active theme is resolved by `ThemeProvider` and synced to CSS custom properties via `syncCssVars`.
+- **Key files:** `src/themes/types.ts` (interfaces), `src/themes/cyprus.ts` (default theme), `src/themes/playground.ts` (ThemeLab clone), `src/themes/ThemeProvider.tsx` (context + localStorage persistence), `src/themes/ThemeContext.ts`, `src/themes/useTheme.ts` (hook), `src/themes/syncCssVars.ts` (CSS var sync), `src/themes/index.ts` (registry).
+- **Theme Lab** (`src/ThemeLab.tsx`): floating panel for live theme editing. Activated via FAB button or `Ctrl+Shift+T`. Renders alongside `<App />` in `src/Root.tsx`. SVG uploads sanitized via DOMPurify.
+- `src/components/CrownLogo.tsx` — extracted logo component referenced by themes.
+- Tailwind uses semantic tokens mapped to CSS vars (e.g., `surface-card`, `accent-brand`, `content-muted`). Hex tokens are stored as space-separated RGB channels for Tailwind alpha support; rgba tokens are passed through as-is.
+- Self-hosted variable fonts in `src/fonts/`: Fraunces (display/serif) and Recursive Sans Linear (UI/sans). Registered in `src/index.css` via `@font-face`, mapped in `tailwind.config.js` as `font-display`, `font-sans`, and `font-mono`.
+- Background color (`#003D3A`) synced at runtime by `ThemeProvider`; `index.html` meta theme-color and `index.css` body background provide pre-JS fallbacks.
 
 ### Responsive strategy
 
@@ -73,6 +78,7 @@ All UI lives in `src/App.tsx` (~1,100 lines). This is intentional; the codebase 
 - **Tailwind CSS** for all styling; avoid inline styles or separate CSS files unless necessary.
 - Keep `src/` flat unless component extraction is explicitly agreed upon.
 - **No orphan words** in headlines, subheadlines, labels, and short UI text (use `whitespace-nowrap` on last 2–3 words).
+- **Non-breaking hyphens** (`\u2011`) for compound words in headlines, labels, and short UI text (e.g., `tax\u2011advantaged`, `Million\u2011Dollar`). Browsers treat regular hyphens as valid break points; `\u2011` prevents mid-word line breaks.
 - Do not add docstrings, comments, or type annotations to code you did not change.
 - Unused variables prefixed with `_` (ESLint rule: `argsIgnorePattern: "^_"`).
 
