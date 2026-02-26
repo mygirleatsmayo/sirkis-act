@@ -322,7 +322,7 @@ return (
 {onOpenSettings && (
   <button
     type="button"
-    onClick={onOpenSettings}
+    onClick={(e) => { (e.currentTarget as HTMLButtonElement).blur(); onOpenSettings(); }}
     aria-label="Open settings"
     className="p-2 rounded-xl text-content-subtle hover:text-white hover:bg-white/10 transition-colors"
   >
@@ -732,9 +732,9 @@ style={{ backgroundColor: blob.color, opacity: blob.opacity }}
 {onOpenSettings && (
   <button
     type="button"
-    onClick={onOpenSettings}
+    onClick={(e) => { (e.currentTarget as HTMLButtonElement).blur(); onOpenSettings(); }}
     aria-label="Open settings"
-    className="p-2 rounded-xl text-content-subtle hover:text-white hover:bg-white/10 transition-colors"
+    className="p-2 rounded-xl text-content-subtle"
   >
     <SettingsIcon size={20} />
   </button>
