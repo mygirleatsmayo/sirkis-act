@@ -51,7 +51,7 @@ export interface ThemeBranding {
   heroLine1: string;            // e.g. "Dr. Sirkis's"
   heroLine2: string;            // e.g. 'High-Wire Act'
   heroSubhead: string;          // plain-text fallback for SEO / accessibility
-  heroSubheadParts?: {          // structured rendering with emphasis span
+  heroSubheadParts: {           // structured rendering with emphasis span
     leading: string;
     emphasis: string;
     trailing: string;

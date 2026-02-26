@@ -36,7 +36,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo(
     () => ({ theme, themeId, setThemeId, setThemeOverride }),
-    [theme, themeId, setThemeId],
+    [theme, themeId, setThemeId, setThemeOverride],
   );
 
   return (

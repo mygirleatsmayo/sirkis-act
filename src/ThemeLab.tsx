@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Link2, Unlink, RotateCcw, X, Upload, Palette, Download, Copy } from 'lucide-react';
+import { Link2, Unlink, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDown } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
 import { playgroundTheme } from './themes/playground';
@@ -337,6 +337,33 @@ const LinkToggle = ({ linked, onToggle }: { linked: boolean; onToggle: () => voi
   </button>
 );
 
+// ─── Lab Instructions ─────────────────────────────────────────────────────
+
+const LabInstructions = () => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mb-3">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white/60 transition-colors"
+      >
+        <ChevronDown size={10} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        How to use Theme Lab
+      </button>
+      {open && (
+        <ul className="mt-2 space-y-1 text-[10px] text-white/40 leading-relaxed pl-4">
+          <li><strong className="text-white/55">Color Families</strong> group tokens that share a base color. Linked families update together.</li>
+          <li><strong className="text-white/55">Token Sections</strong> let you fine-tune individual colors (surfaces, text, accents, etc.).</li>
+          <li><strong className="text-white/55">Branding</strong> controls hero copy, subheadline parts, and hero line colors.</li>
+          <li><strong className="text-white/55">Logo</strong> accepts any SVG upload; stroke color syncs with Brand accent.</li>
+          <li><strong className="text-white/55">Save</strong> exports a TypeScript theme file you can submit to the developer for inclusion in a future release.</li>
+        </ul>
+      )}
+    </div>
+  );
+};
+
 // ─── Save / Export ────────────────────────────────────────────────────────
 
 const generateThemeSource = (theme: ThemeConfig, name: string): string => {
@@ -605,8 +632,8 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
   return (
     <div
-      className="fixed top-0 right-0 bottom-0 z-[9999] flex flex-col bg-[#0a1a19]/95 backdrop-blur-xl border-l border-white/10 shadow-2xl"
-      style={{ width: 'min(380px, 100vw)' }}
+      className="fixed top-0 right-0 bottom-0 z-[9999] flex flex-col bg-[#0a1a19]/50 backdrop-blur-xl border-l border-white/10 shadow-2xl w-[min(380px,100vw)]
+        max-sm:top-auto max-sm:left-0 max-sm:w-full max-sm:h-[50dvh] max-sm:rounded-t-3xl max-sm:border-l-0 max-sm:border-t"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
@@ -650,7 +677,10 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       )}
 
       {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto px-4 pb-8 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-4 pt-3 pb-8 custom-scrollbar">
+
+        {/* ── Instructions ── */}
+        <LabInstructions />
 
         {/* ── Color Families ── */}
         <SectionHeader label="Color Families" />
@@ -790,7 +820,10 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
         {/* ── Effects ── */}
         <SectionHeader label="Effects" />
-        <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-1">Glow Colors</div>
+        <div className="flex items-baseline gap-2 mb-1">
+          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Glow Colors</div>
+          <span className="text-[8px] text-white/25 uppercase tracking-wider">Mobile only</span>
+        </div>
         {theme.effects.glowColors.map((gc, i) => {
           const path = `effects.glowColors.${i}`;
           const familyId = pathToFamily.get(path);
@@ -806,7 +839,10 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           );
         })}
 
-        <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-3 mb-1">Background Blobs</div>
+        <div className="flex items-baseline gap-2 mt-3 mb-1">
+          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Background Blobs</div>
+          <span className="text-[8px] text-white/25 uppercase tracking-wider">Desktop only</span>
+        </div>
         {theme.effects.blobs.map((blob, i) => {
           const path = `effects.blobs.${i}.color`;
           const familyId = pathToFamily.get(path);
