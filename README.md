@@ -16,4 +16,4 @@ Plan for your future as an elderly millionaire with Dr. Sirkis's interactive ret
 
 URL: https://mygirleatsmayo.github.io/sirkis-act/
 
-* While some attribute this quotation to Einstein, the evidence he ever said it is relativity thin. But he did say other smart things from time to time, and his legacy remains intact. 
+*While some attribute this quotation to Einstein, the evidence he ever said it is relativity thin. But he did say other smart things from time to time, and his legacy remains intact. 
