@@ -2,7 +2,7 @@
 
 **A million bucks? Nothing could be easier!**  Because just like Einstein* said: *"Compound interest is the eighth worder of the world!"*
 
-Plan for your future as an elderly millionaire with Dr. Sirkis's interactive retirement and savings planner. It includes contribution timing, employer match, inflation-adjusted projections, withdrawal modeling, and more.
+Plan for your future as an old-fashioned millionaire with Dr. Sirkis's interactive retirement and savings planner. It includes contribution timing, employer match, inflation-adjusted projections, withdrawal modeling, and more.
 
 ## Features
 - 401(k)/403(b), Roth IRA, and HSA toggles with IRS cap helpers
