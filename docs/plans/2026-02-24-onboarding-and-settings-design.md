@@ -66,7 +66,7 @@ The Tour tab is **never visible** in Updates mode. The modal shows one mode at a
 
 1. **Theme Switcher** — select from available themes (architecture TBD in feature-dev phase)
 2. **Replay Welcome Tour** — opens the onboarding modal in Tour mode
-3. **Changelog** — full version history, scrollable; includes current version number at top
+3. **Changelog** — 3 most recent releases only; latest visible with the oldest two folded behind expand/collapse, includes current version number at top
 4. **PWA Update Button** — placeholder for future PWA work; hidden until implemented
 
 ---

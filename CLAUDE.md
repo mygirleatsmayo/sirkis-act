@@ -29,6 +29,7 @@ src/
   Root.tsx             # wraps App + ThemeLab + SettingsModal + FAB toggle in ThemeProvider
   SettingsModal.tsx    # settings modal (gear icon trigger, Theme Lab launch, changelog, stubs)
   ThemeLab.tsx         # floating theme editor panel (SVG upload sanitized via DOMPurify)
+  changelog.ts         # structured changelog entries for SettingsModal
   constants.ts         # DEFAULT_INPUTS, LIMITS (IRS caps), SIRKISMS, INPUT_BOUNDS, SALARY_PRESETS
   types.ts             # all TypeScript interfaces and type aliases
   index.css            # global Tailwind styles, @font-face declarations

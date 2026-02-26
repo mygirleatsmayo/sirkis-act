@@ -42,7 +42,8 @@
 
 - Section header: "Changelog"
 - Current version displayed at top (e.g., "v1.1.0")
-- Scrollable list of version entries, constrained height with overflow scroll
+- Cap to the 3 most recent entries
+- Show the latest entry by default; keep the two older entries folded behind an expand/collapse control
 - Content sourced from a constant or inline JSX (no external fetch)
 
 ### 3. Welcome Tour (stub)

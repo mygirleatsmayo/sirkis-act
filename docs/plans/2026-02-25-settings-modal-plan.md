@@ -471,7 +471,8 @@ Verify:
 - Clicking "Open Theme Studio" closes Settings, opens Theme Lab
 - Enabling "Show floating button" toggle shows FAB on main app
 - FAB opens Theme Lab directly
-- Changelog section shows version entries with scrollable area
+- Changelog section shows only the 3 most recent entries
+- Latest changelog entry is always visible; two older entries are folded behind expand/collapse
 - "Replay Tour" button is disabled with "(Coming soon)" text
 - Escape key and backdrop click close the modal
 - Focus stays trapped inside the modal
