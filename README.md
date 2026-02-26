@@ -1,6 +1,8 @@
 # Sirkis Act Financial Planning
 
-Interactive retirement and savings planner with contribution timing, employer match, inflation-adjusted projections, and withdrawal modeling.
+**A million bucks? Nothing could be easier!**  Because just like Einstein* said: *"Compound interest is the eighth worder of the world!"*
+
+Plan for your future as an elderly millionaire with Dr. Sirkis's interactive retirement and savings planner. It includes contribution timing, employer match, inflation-adjusted projections, withdrawal modeling, and more.
 
 ## Features
 - 401(k)/403(b), Roth IRA, and HSA toggles with IRS cap helpers
@@ -8,20 +10,10 @@ Interactive retirement and savings planner with contribution timing, employer ma
 - Inflation-adjusted and nominal projections with chart + table
 - Withdrawal estimates through life expectancy
 - Curated salary presets by major
+- Sirkisms
+- Theme Lab (beta)
 
-## Local Development
-```bash
-npm install
-npm run dev
-```
-
-## Build
-```bash
-npm run build
-```
-
-## Deploy (GitHub Pages)
-GitHub Actions deploys to Pages on push to `main`.
 
 URL: https://mygirleatsmayo.github.io/sirkis-act/
 
+* While some attribute this quotation to Einstein, the evidence he ever said it is relativity thin. But he did say other smart things from time to time, and his legacy remains intact. 
