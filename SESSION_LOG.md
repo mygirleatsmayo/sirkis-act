@@ -1,5 +1,70 @@
 # Session Log
 
+## Session 14: Settings Modal & Theme Lab Polish, Merge to Main
+
+**Date:** 2026-02-26
+
+### What Was Done
+- **Branch Rename**: Renamed `features-theme-architecture` to `features/1theme-2settings` to reflect expanded scope (theme + settings work)
+- **Settings Modal Polish** (10 items):
+  - Body scroll lock when modal is open
+  - Changelog extracted to `src/changelog.ts`; `APP_VERSION` derived from latest entry
+  - Changelog section: 3 most recent entries, latest always visible, older 2 folded behind expand/collapse toggle
+  - Renamed "Theme Studio" to "Theme Lab" throughout
+  - Welcome Tour section: centered button with "Coming soon" below
+  - `aria-hidden="true"` on backdrop div
+  - Documented `requestAnimationFrame` sequencing hack (modal close then Theme Lab open)
+  - Removed dead animation classes (`animate-in`, `fade-in`, `zoom-in-95`) from uninstalled `tailwindcss-animate`
+  - Removed orphaned `transition-opacity duration-200` (CSS transitions don't fire on mount/unmount)
+- **Theme Lab Polish**:
+  - Instructions section (folded by default) between header and Color Families
+  - Mobile bottom sheet: 50dvh, full width, rounded top edges matching Vaul drawer
+  - Background opacity reduced to 50% (`bg-[#0a1a19]/50`)
+  - Width moved from inline style to Tailwind class (`w-[min(380px,100vw)]`) so `max-sm:w-full` can override
+  - Device-only labels: "Mobile only" on Glow Colors, "Desktop only" on Background Blobs
+  - Save instruction updated: "...file you can submit to the developer for inclusion in a future release."
+- **Code Review Fixes** (from parallel agent):
+  - `playground.ts`: DRY refactor spreading from `cyprusTheme`
+  - `syncCssVars.ts`: Hex validation guard on `hexToChannels`
+  - `types.ts`: `heroSubheadParts` changed from optional to required
+  - `ThemeProvider.tsx`: `setThemeOverride` added to `useMemo` dependency array
+- **iOS Gear Button Fix**: Mobile settings gear made fully stateless (removed `hover:bg-white/10`, `hover:text-white`, `transition-colors`); `blur()` on click for both gear buttons
+- **Salary Presets**: `SALARY_PRESETS` extracted from `App.tsx` to `constants.ts`
+- **Docs**: Updated `CLAUDE.md` (version, source structure), design doc and plan doc spec alignment
+- **Merge**: All 12 commits fast-forward merged from `features/1theme-2settings` to `main` and pushed
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/SettingsModal.tsx` | Modified (scroll lock, changelog extraction, fold, rename, welcome tour, aria, dead class removal) |
+| `src/ThemeLab.tsx` | Modified (instructions, mobile bottom sheet, transparency, device labels, save copy) |
+| `src/changelog.ts` | Created (extracted changelog entries + interface) |
+| `src/App.tsx` | Modified (gear button stateless mobile, blur on click) |
+| `src/themes/playground.ts` | Modified (DRY refactor) |
+| `src/themes/syncCssVars.ts` | Modified (hex validation guard) |
+| `src/themes/types.ts` | Modified (heroSubheadParts required) |
+| `src/themes/ThemeProvider.tsx` | Modified (useMemo deps fix) |
+| `src/constants.ts` | Modified (SALARY_PRESETS added) |
+| `CLAUDE.md` | Modified (version, source structure) |
+| `docs/plans/2026-02-25-settings-modal-design.md` | Modified (spec alignment) |
+| `docs/plans/2026-02-25-settings-modal-plan.md` | Modified (spec alignment) |
+| `docs/plans/2026-02-24-onboarding-and-settings-design.md` | Modified (spec alignment) |
+
+### Known Issues / Snags
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| Theme Lab mobile scroll | Users must scroll past Theme Lab bottom sheet to see app content below; acceptable trade-off for live editing | Low |
+| Chunk size warning | Vite warns JS chunk >500 kB; Theme Lab + Settings Modal add to bundle | Low |
+
+### Next Steps
+1. Theme Lab enhancements: toggle deboss effect, get fonts working (curated selection)
+2. Theme switcher UI (user-facing theme selector)
+3. CCP and Catppuccin theme variants
+4. Onboarding dialog/flow
+5. Visual polish (debossed effect, Rolex disclaimer, new logo)
+
+---
+
 ## Session 13: Theme Architecture, Theme Lab & Review Fixes
 
 **Date:** 2026-02-25
@@ -19,6 +84,7 @@
   - Added 9 new tests for `hexAlpha` (5) and `hexToChannels` (4)
 - **Docs Updated**: `AGENTS.md` and `CLAUDE.md` updated for theme system, DOMPurify, `tsc -b`, and source structure.
 - **Design Docs**: Added `docs/plans/2026-02-25-theme-architecture.md`.
+- **Spec Alignment Checkpoint**: Updated settings-related design docs to explicitly define changelog behavior as "3 most recent entries" with latest visible and the two older entries folded behind expand/collapse (to prevent false review flags).
 - **File Reorganization**: Moved palette CSS files into `docs/reference/`.
 
 ### Files Changed
@@ -37,7 +103,9 @@
 | `src/components/CrownLogo.tsx` | Created |
 | `tsconfig.app.json` | Created |
 | `docs/plans/2026-02-25-theme-architecture.md` | Created |
-| `docs/plans/2026-02-24-onboarding-and-settings-design.md` | Created |
+| `docs/plans/2026-02-24-onboarding-and-settings-design.md` | Created; later wording aligned to capped changelog behavior |
+| `docs/plans/2026-02-25-settings-modal-design.md` | Modified (changelog behavior clarified: 3 recent, oldest two folded) |
+| `docs/plans/2026-02-25-settings-modal-plan.md` | Modified (verification criteria updated for folded changelog behavior) |
 | `docs/plans/custom-fonts-via-url.md` | Created |
 | `docs/reference/palette-*.css` | Moved (from project root) |
 | `src/App.tsx` | Modified (theme migration, semantic tokens) |

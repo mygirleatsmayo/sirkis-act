@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+- **Settings Modal**: Gear icon trigger in mobile header and desktop sidebar; Theme Lab launch, FAB toggle, changelog display (3 recent entries with fold), Welcome Tour stub.
+- **Settings Modal A11y**: Focus trap, body scroll lock, `aria-modal`, `aria-hidden` backdrop, Escape key close.
+- **Theme Lab Instructions**: Folded instructions section explaining Theme Lab workflow.
+- **Theme Lab Mobile**: Bottom sheet layout (50dvh, full width, rounded top edges) for mobile viewports.
+- **Theme Lab Transparency**: Reduced background opacity to 50% for better app visibility.
+- **Device-Only Labels**: Glow Colors marked "Mobile only", Background Blobs marked "Desktop only" in Theme Lab.
+- **Playground DRY**: Theme Lab working copy spreads from Cyprus theme instead of duplicating values.
+- **Hex Validation**: `hexToChannels` guards against non-hex color strings.
+- **Mobile Gear Fix**: Settings gear button made stateless on mobile (no stuck hover states on iOS).
+- **Salary Presets**: `SALARY_PRESETS` extracted from `App.tsx` to `constants.ts`.
+
 ## [1.1.0-rc.1] - 2026-02-25 — Theme Architecture & Theme Lab
 
 - **Runtime Theme Architecture**: `ThemeProvider` with CSS variable sync, Tailwind semantic tokens (38 colors), `useTheme` hook, Cyprus + Playground theme configs.
