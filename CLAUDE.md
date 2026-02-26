@@ -9,7 +9,7 @@
 - **Stack:** React 19 + TypeScript 5.7 (strict) + Vite 6 + Tailwind CSS 3.4 + Recharts 3.7 + Vaul (drawer) + DOMPurify + Vitest
 - **Deployed to:** GitHub Pages at `https://mygirleatsmayo.github.io/sirkis-act/`
 - **CI/CD:** GitHub Actions (`.github/`)
-- **Current version:** 1.1.0-rc.1 (tagged 2026-02-25; stable release: 1.0.0, 2026-02-24)
+- **Current version:** 1.2.0 (2026-02-26; prior: 1.1.0-rc.1, 1.0.0)
 
 ### Commands
 

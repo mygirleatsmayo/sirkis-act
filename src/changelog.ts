@@ -7,6 +7,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    version: '1.2.0',
+    date: '2026-02-26',
+    title: 'Settings Modal & Theme Lab Polish',
+    items: [
+      'Settings modal with changelog, Theme Lab launch, and Welcome Tour stub',
+      'Theme Lab: instructions section, mobile bottom sheet, 50% transparency',
+      'Device-only labels, playground DRY refactor, hex validation guard',
+      'Mobile gear button made stateless for iOS; salary presets extracted',
+    ],
+  },
+  {
     version: '1.1.0-rc.1',
     date: '2026-02-25',
     title: 'Theme Architecture & Theme Lab',

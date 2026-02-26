@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-26 — Settings Modal & Theme Lab Polish
+
 - **Settings Modal**: Gear icon trigger in mobile header and desktop sidebar; Theme Lab launch, FAB toggle, changelog display (3 recent entries with fold), Welcome Tour stub.
 - **Settings Modal A11y**: Focus trap, body scroll lock, `aria-modal`, `aria-hidden` backdrop, Escape key close.
 - **Theme Lab Instructions**: Folded instructions section explaining Theme Lab workflow.
