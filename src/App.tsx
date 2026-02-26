@@ -133,7 +133,7 @@ twoColumnDelayedContent
 </Card>
 );
 });
-const TooltipIcon = ({ content, className = "", align = 'center', placement = 'top' }: TooltipIconProps) => {
+const TooltipIcon = ({ content, className = "", align = 'center', placement = 'top', width = 'w-64' }: TooltipIconProps) => {
 const [isTouch, setIsTouch] = useState(false);
 const [isOpen, setIsOpen] = useState(false);
 const containerRef = useRef<HTMLDivElement>(null);
@@ -183,7 +183,7 @@ className="group inline-flex items-center text-content-subtle hover:text-accent-
 >
 <Info size={12} />
 <span className="sr-only">Info</span>
-<span className={`pointer-events-none absolute w-64 max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-white/15 bg-surface-glass px-3 py-2 text-[11px] font-medium text-content-muted text-left shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
+<span className={`pointer-events-none absolute ${width} max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-white/15 bg-surface-glass px-3 py-2 text-[11px] font-medium text-content-muted text-left shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
 {content}
 </span>
 </button>
@@ -374,7 +374,7 @@ Reset
 <div className="-mt-3 mb-6">
 <div className="flex items-center gap-2 mb-2">
 <label htmlFor="salary-major-select" className="text-[10px] font-black text-content-subtle uppercase tracking-widest">Average Starting Salary by Major</label>
-<TooltipIcon className="text-[10px]" align="right" placement="top" content="Average starting salaries sourced from the National Association of Colleges and Employers (NACE) 2025 and 2026 reports." />
+<TooltipIcon className="text-[10px]" align="right" placement="top" width="w-56" content="Average starting salaries sourced from the National Association of Colleges and Employers (NACE) 2025 and 2026 reports." />
 </div>
 <div className="relative">
 <select
@@ -437,7 +437,7 @@ className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg t
 <input id="match-percent" type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-theme/50 bg-surface-input text-white" />
 </div>
 <div>
-<label htmlFor="match-limit" className="text-[10px] font-bold text-content-subtle uppercase mb-2 flex items-center gap-1">Limit % <TooltipIcon placement="top" align="right" content="Employer matches up to this percentage of your salary. Contributions above this threshold get no additional match." /></label>
+<label htmlFor="match-limit" className="text-[10px] font-bold text-content-subtle uppercase mb-2 flex items-center gap-1">Limit % <TooltipIcon placement="top" align="right" width="w-56" content="Employer matches up to this percentage of your salary. Contributions above this threshold get no additional match." /></label>
 <input id="match-limit" type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-theme/50 bg-surface-input text-white" />
 </div>
 </div>

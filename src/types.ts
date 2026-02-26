@@ -61,6 +61,7 @@ export type TooltipIconProps = {
   className?: string;
   align?: 'left' | 'center' | 'right';
   placement?: 'top' | 'bottom';
+  width?: string;
 };
 export type ToggleSectionProps = {
   label: string;
