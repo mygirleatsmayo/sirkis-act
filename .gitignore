@@ -12,3 +12,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 *.local
+
+# AI tooling config
+.claude/
+.cursor/
+
+# Dev docs (local only)
+CLAUDE.md
+SESSION_LOG.md
+AGENTS.md
+AUDIT.md
