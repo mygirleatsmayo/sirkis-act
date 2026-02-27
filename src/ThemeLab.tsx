@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Link2, Unlink, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDown } from 'lucide-react';
+import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDown, Sun, Moon, Zap } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
 import { playgroundTheme } from './themes/playground';
 import { useTheme } from './themes/useTheme';
-import { hexToRgb, parseRgba, toHex } from './utils/colorMath';
+import { hexToRgb, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
+import { applyDerivations, extractPrimaries, getModeStatics } from './themes/derivationRules';
+import type { Primaries, ThemeMode } from './themes/derivationRules';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -47,56 +49,6 @@ const setNested = (obj: unknown, path: string, value: unknown): void => {
   const last = keys.pop()!;
   const target = keys.reduce((o: unknown, k) => (o as Record<string, unknown>)[k], obj);
   (target as Record<string, unknown>)[last] = value;
-};
-
-// ─── Color Family Detection ───────────────────────────────────────────────
-
-interface FamilyMember {
-  path: string;
-  label: string;
-  isRgba: boolean;
-  alpha: number;
-}
-
-interface ColorFamily {
-  id: string;
-  hex: string;
-  members: FamilyMember[];
-}
-
-const detectFamilies = (theme: ThemeConfig): ColorFamily[] => {
-  const map = new Map<string, FamilyMember[]>();
-
-  const add = (rawValue: string, path: string, label: string) => {
-    const hex = toHex(rawValue).toLowerCase();
-    const rgba = parseRgba(rawValue);
-    const member: FamilyMember = {
-      path,
-      label,
-      isRgba: !!rgba,
-      alpha: rgba ? rgba[3] : 1,
-    };
-    const arr = map.get(hex) ?? [];
-    arr.push(member);
-    map.set(hex, arr);
-  };
-
-  for (const [k, v] of Object.entries(theme.colors)) add(v, `colors.${k}`, camelToLabel(k));
-  add(theme.branding.heroLine1Color, 'branding.heroLine1Color', 'Hero Line 1 Color');
-  add(theme.branding.heroLine2Color, 'branding.heroLine2Color', 'Hero Line 2 Color');
-  theme.effects.glowColors.forEach((v, i) => add(v, `effects.glowColors.${i}`, `Glow ${i + 1}`));
-  theme.effects.blobs.forEach((b, i) => add(b.color, `effects.blobs.${i}.color`, `Blob ${i + 1}`));
-
-  return [...map.entries()]
-    .filter(([_, members]) => members.length >= 2)
-    .map(([hex, members]) => ({ id: hex, hex: hex.toUpperCase(), members }))
-    .sort((a, b) => b.members.length - a.members.length);
-};
-
-const buildPathToFamily = (families: ColorFamily[]): Map<string, string> => {
-  const m = new Map<string, string>();
-  for (const f of families) for (const mem of f.members) m.set(mem.path, f.id);
-  return m;
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────
@@ -169,6 +121,9 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
   },
 ];
 
+/** Keys that are primaries (not derived) — skip lock/unlock UI for these */
+const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'returns', 'loss', 'startNow', 'opm']);
+
 // ─── Sub-components ───────────────────────────────────────────────────────
 
 const SectionHeader = ({ label }: { label: string }) => (
@@ -182,13 +137,17 @@ interface ColorInputProps {
   value: string;
   defaultValue: string;
   onChange: (hex: string) => void;
-  familyHex?: string;
+  locked?: boolean;
+  onUnlock?: () => void;
+  onRelock?: () => void;
 }
 
-const ColorInput = ({ label, value, defaultValue, onChange, familyHex }: ColorInputProps) => {
+const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock }: ColorInputProps) => {
   const hex = toHex(value);
   const isDefault = value === defaultValue;
   const [hexDraft, setHexDraft] = useState(hex);
+  const isLocked = locked === true;
+  const hasLockBehavior = locked !== undefined;
 
   useEffect(() => { setHexDraft(toHex(value)); }, [value]);
 
@@ -203,18 +162,21 @@ const ColorInput = ({ label, value, defaultValue, onChange, familyHex }: ColorIn
 
   return (
     <div className="flex items-center gap-1.5 py-0.5 group/row">
-      {familyHex && (
-        <span
-          className="w-1.5 h-1.5 rounded-full shrink-0"
-          style={{ backgroundColor: familyHex }}
-          title={`Family ${familyHex}`}
-        />
+      {hasLockBehavior && (
+        <button
+          type="button"
+          onClick={() => { if (isLocked && onUnlock) onUnlock(); else if (!isLocked && onRelock) onRelock(); }}
+          className={`p-0.5 shrink-0 transition-colors ${isLocked ? 'text-white/20 hover:text-white/40' : 'text-teal-400/70 hover:text-teal-400'}`}
+          title={isLocked ? 'Unlock for manual editing' : 'Re-lock (snap to derived value)'}
+        >
+          {isLocked ? <Lock size={10} /> : <Unlock size={10} />}
+        </button>
       )}
       <input
         type="color"
         value={hex}
         onChange={(e) => onChange(e.target.value)}
-        className="w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0"
+        className={`w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0 ${isLocked ? 'pointer-events-none opacity-50' : ''}`}
       />
       <div className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight">
         {label}
@@ -225,17 +187,30 @@ const ColorInput = ({ label, value, defaultValue, onChange, familyHex }: ColorIn
         onChange={(e) => setHexDraft(e.target.value)}
         onBlur={commitHex}
         onKeyDown={(e) => { if (e.key === 'Enter') commitHex(); }}
-        className="w-[72px] text-[10px] font-mono text-white/60 bg-white/5 border border-white/10 rounded px-1.5 py-0.5 outline-none focus:border-white/30 shrink-0"
+        className={`w-[72px] text-[10px] font-mono text-white/60 bg-white/5 border border-white/10 rounded px-1.5 py-0.5 outline-none focus:border-white/30 shrink-0 ${isLocked ? 'pointer-events-none opacity-50' : ''}`}
       />
-      <button
-        type="button"
-        onClick={() => { if (!isDefault) onChange(defaultValue); }}
-        className={`p-0.5 shrink-0 transition-colors ${isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
-        title="Reset to default"
-        aria-disabled={isDefault}
-      >
-        <RotateCcw size={10} />
-      </button>
+      {!hasLockBehavior && (
+        <button
+          type="button"
+          onClick={() => { if (!isDefault) onChange(defaultValue); }}
+          className={`p-0.5 shrink-0 transition-colors ${isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
+          title="Reset to default"
+          aria-disabled={isDefault}
+        >
+          <RotateCcw size={10} />
+        </button>
+      )}
+      {hasLockBehavior && !isLocked && (
+        <button
+          type="button"
+          onClick={() => { if (!isDefault) onChange(defaultValue); }}
+          className={`p-0.5 shrink-0 transition-colors ${isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
+          title="Reset to default"
+          aria-disabled={isDefault}
+        >
+          <RotateCcw size={10} />
+        </button>
+      )}
     </div>
   );
 };
@@ -305,17 +280,6 @@ const FontSelect = ({ label, value, defaultValue, onChange }: TextInputProps) =>
   );
 };
 
-const LinkToggle = ({ linked, onToggle }: { linked: boolean; onToggle: () => void }) => (
-  <button
-    type="button"
-    onClick={onToggle}
-    className="p-1 rounded-md transition-colors hover:bg-white/10"
-    title={linked ? 'Unlink (edit independently)' : 'Link (change together)'}
-  >
-    {linked ? <Link2 size={11} className="text-teal-400" /> : <Unlink size={11} className="text-white/30" />}
-  </button>
-);
-
 // ─── Lab Instructions ─────────────────────────────────────────────────────
 
 const LabInstructions = () => {
@@ -332,7 +296,7 @@ const LabInstructions = () => {
       </button>
       {open && (
         <ul className="mt-2 space-y-1 text-[10px] text-white/40 leading-relaxed pl-4">
-          <li><strong className="text-white/55">Color Families</strong> group tokens that share a base color. Linked families update together.</li>
+          <li><strong className="text-white/55">Primaries</strong> set the 6 base colors. Derived tokens auto-update unless manually unlocked.</li>
           <li><strong className="text-white/55">Token Sections</strong> let you fine-tune individual colors (surfaces, text, accents, etc.).</li>
           <li><strong className="text-white/55">Branding</strong> controls hero copy, subheadline parts, and hero line colors.</li>
           <li><strong className="text-white/55">Logo</strong> accepts any SVG upload; stroke color syncs with Brand accent.</li>
@@ -382,19 +346,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   // Editable theme
   const [theme, setThemeLocal] = useState<ThemeConfig>(() => cloneTheme(playgroundTheme));
 
-  // Color families (detected once from defaults)
-  const families = useMemo(() => detectFamilies(playgroundTheme), []);
-  const pathToFamily = useMemo(() => buildPathToFamily(families), [families]);
-
-  // Family link states
-  const [familyLinks, setFamilyLinks] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    families.forEach(f => { init[f.id] = true; });
-    return init;
-  });
-  const familyLinksRef = useRef(familyLinks);
-  familyLinksRef.current = familyLinks;
-
   // Logo state
   const [customSvg, setCustomSvg] = useState<string | null>(null);
 
@@ -402,6 +353,36 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const [showSave, setShowSave] = useState(false);
   const [saveName, setSaveName] = useState('');
   const [copyFeedback, setCopyFeedback] = useState(false);
+
+  // Dark/Light/Auto mode
+  const [themeMode, setThemeMode] = useState<'dark' | 'light' | 'auto'>('dark');
+
+  // Per-token lock state: absence = locked; stored as false = unlocked
+  const [tokenLocks, setTokenLocks] = useState<Record<string, boolean>>(() => ({}));
+
+  const isTokenLocked = useCallback((path: string): boolean => {
+    return tokenLocks[path] !== false;
+  }, [tokenLocks]);
+
+  const unlockToken = useCallback((path: string) => {
+    setTokenLocks(prev => ({ ...prev, [path]: false }));
+  }, []);
+
+  const relockToken = useCallback((path: string) => {
+    setTokenLocks(prev => {
+      const next = { ...prev };
+      delete next[path];
+      return next;
+    });
+  }, []);
+
+  // Compute effective mode
+  const effectiveMode: ThemeMode = useMemo(() => {
+    if (themeMode === 'auto') {
+      return relativeLuminance(theme.colors.bg) >= 0.5 ? 'light' : 'dark';
+    }
+    return themeMode;
+  }, [themeMode, theme.colors.bg]);
 
   // ── Sync to ThemeProvider ──
 
@@ -420,68 +401,75 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
   // ── Value setters ──
 
-  /** Set a color at a dot-path, respecting family links and rgba alpha */
+  /** Set a color at a dot-path, preserving rgba alpha */
   const setColorAtPath = useCallback((path: string, newHex: string) => {
     setThemeLocal(prev => {
       const next = cloneTheme(prev);
-      const familyId = pathToFamily.get(path);
-
-      if (familyId && familyLinksRef.current[familyId]) {
-        // Propagate to all family members
-        const family = families.find(f => f.id === familyId);
-        if (family) {
-          const hex = newHex.startsWith('#') ? newHex : toHex(newHex);
-          const [r, g, b] = hexToRgb(hex);
-          for (const mem of family.members) {
-            if (mem.isRgba) {
-              const cur = getNested(next, mem.path) as string;
-              const curAlpha = parseRgba(cur)?.[3] ?? mem.alpha;
-              setNested(next, mem.path, `rgba(${r}, ${g}, ${b}, ${curAlpha})`);
-            } else {
-              setNested(next, mem.path, hex);
-            }
-          }
-        }
+      const cur = getNested(prev, path) as string;
+      if (typeof cur === 'string' && cur.startsWith('rgba')) {
+        const curAlpha = parseRgba(cur)?.[3] ?? 1;
+        const hex = newHex.startsWith('#') ? newHex : toHex(newHex);
+        const [r, g, b] = hexToRgb(hex);
+        setNested(next, path, `rgba(${r}, ${g}, ${b}, ${curAlpha})`);
       } else {
-        // Single token — preserve alpha if rgba
-        const cur = getNested(prev, path) as string;
-        if (typeof cur === 'string' && cur.startsWith('rgba')) {
-          const curAlpha = parseRgba(cur)?.[3] ?? 1;
-          const hex = newHex.startsWith('#') ? newHex : toHex(newHex);
-          const [r, g, b] = hexToRgb(hex);
-          setNested(next, path, `rgba(${r}, ${g}, ${b}, ${curAlpha})`);
-        } else {
-          setNested(next, path, newHex);
-        }
+        setNested(next, path, newHex);
       }
-
       return next;
     });
-  }, [pathToFamily, families]);
+  }, []);
 
-  /** Set a family color (always propagates to all members) */
-  const setFamilyColor = useCallback((familyId: string, newHex: string) => {
-    const family = families.find(f => f.id === familyId);
-    if (!family) return;
+  /** Change a primary color and auto-update all locked derived tokens */
+  const setPrimaryColor = useCallback((primaryKey: keyof Primaries, newHex: string) => {
     setThemeLocal(prev => {
       const next = cloneTheme(prev);
-      const [r, g, b] = hexToRgb(newHex);
-      for (const mem of family.members) {
-        if (mem.isRgba) {
-          const cur = getNested(next, mem.path) as string;
-          const curAlpha = parseRgba(cur)?.[3] ?? mem.alpha;
-          setNested(next, mem.path, `rgba(${r}, ${g}, ${b}, ${curAlpha})`);
-        } else {
-          setNested(next, mem.path, newHex);
+      (next.colors as unknown as Record<string, string>)[primaryKey] = newHex;
+
+      if (primaryKey === 'opm') return next; // standalone, no derivations
+
+      const primaries = extractPrimaries(next.colors);
+      const derived = applyDerivations(primaries, effectiveMode);
+
+      // Apply derived values only to LOCKED tokens
+      for (const [key, value] of Object.entries(derived.colors)) {
+        if (PRIMARY_KEYS.has(key as keyof ThemeColors)) continue;
+        if (isTokenLocked(`colors.${key}`)) {
+          (next.colors as unknown as Record<string, string>)[key] = value;
         }
       }
+
+      // branding
+      if (isTokenLocked('branding.heroLine1Color')) {
+        next.branding.heroLine1Color = derived.heroLine1Color;
+      }
+      if (isTokenLocked('branding.heroLine2Color')) {
+        next.branding.heroLine2Color = derived.heroLine2Color;
+      }
+
+      // glow colors
+      derived.glowColors.forEach((gc, i) => {
+        if (isTokenLocked(`effects.glowColors.${i}`)) {
+          next.effects.glowColors[i] = gc;
+        }
+      });
+
+      // blob colors
+      derived.blobColors.forEach((bc, i) => {
+        if (isTokenLocked(`effects.blobs.${i}.color`)) {
+          next.effects.blobs[i] = { ...next.effects.blobs[i], color: bc };
+        }
+      });
+
+      // mode-dependent statics
+      const statics = getModeStatics(effectiveMode);
+      for (const [key, value] of Object.entries(statics)) {
+        if (isTokenLocked(`colors.${key}`)) {
+          (next.colors as unknown as Record<string, string>)[key] = value as string;
+        }
+      }
+
       return next;
     });
-  }, [families]);
-
-  const toggleFamilyLink = useCallback((familyId: string) => {
-    setFamilyLinks(prev => ({ ...prev, [familyId]: !prev[familyId] }));
-  }, []);
+  }, [effectiveMode, isTokenLocked]);
 
   const setBranding = useCallback((key: string, value: string) => {
     setThemeLocal(prev => ({
@@ -519,28 +507,14 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     });
   }, []);
 
-  const resetFamily = useCallback((familyId: string) => {
-    const family = families.find(f => f.id === familyId);
-    if (!family) return;
-    setThemeLocal(prev => {
-      const next = cloneTheme(prev);
-      for (const mem of family.members) {
-        const defaultVal = getNested(defaults.current, mem.path);
-        setNested(next, mem.path, defaultVal);
-      }
-      return next;
-    });
-  }, [families]);
-
   // ── Reset ──
 
   const handleReset = useCallback(() => {
     setThemeLocal(cloneTheme(playgroundTheme));
     setCustomSvg(null);
-    const resetLinks: Record<string, boolean> = {};
-    families.forEach(f => { resetLinks[f.id] = true; });
-    setFamilyLinks(resetLinks);
-  }, [families]);
+    setTokenLocks({});
+    setThemeMode('dark');
+  }, []);
 
   // ── SVG upload ──
 
@@ -600,15 +574,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const parts = theme.branding.heroSubheadParts ?? { leading: '', emphasis: '', trailing: '' };
   const defParts = def.branding.heroSubheadParts ?? { leading: '', emphasis: '', trailing: '' };
 
-  // Get current family hex from live theme (may have changed from default)
-  const familyCurrentHex = (familyId: string): string => {
-    const family = families.find(f => f.id === familyId);
-    if (!family || family.members.length === 0) return familyId;
-    const firstNonRgba = family.members.find(m => !m.isRgba);
-    const member = firstNonRgba ?? family.members[0];
-    return toHex(getNested(theme, member.path) as string);
-  };
-
   return (
     <div
       className="fixed top-0 right-0 bottom-0 z-[9999] flex flex-col bg-[#0a1a19]/50 backdrop-blur-xl border-l border-white/10 shadow-2xl w-[min(380px,100vw)]
@@ -661,41 +626,70 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         {/* ── Instructions ── */}
         <LabInstructions />
 
-        {/* ── Color Families ── */}
-        <SectionHeader label="Color Families" />
-        <div className="text-[9px] text-white/30 -mt-1 mb-2">Auto-detected shared colors. Linked families change together.</div>
-        {families.map(family => {
-          const currentHex = familyCurrentHex(family.id);
-          const linked = familyLinks[family.id] ?? true;
-          const isFamilyDefault = currentHex === family.id;
+        {/* ── Primaries ── */}
+        <SectionHeader label="Primaries" />
+        <div className="text-[9px] text-white/30 -mt-1 mb-2">
+          Set primary colors. Derived tokens auto-update unless unlocked.
+        </div>
+
+        {/* Mode toggle */}
+        <div className="flex items-center gap-1 mb-3 p-1 rounded-lg bg-white/5 w-fit">
+          {([
+            { mode: 'dark' as const, icon: Moon, label: 'Dark' },
+            { mode: 'light' as const, icon: Sun, label: 'Light' },
+            { mode: 'auto' as const, icon: Zap, label: 'Auto' },
+          ]).map(({ mode, icon: Icon, label }) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setThemeMode(mode)}
+              className={`flex items-center gap-1 px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${
+                themeMode === mode
+                  ? 'bg-white/15 text-white'
+                  : 'text-white/40 hover:text-white/60'
+              }`}
+            >
+              <Icon size={10} /> {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Primary color pickers */}
+        {(['bg', 'brand', 'returns', 'loss', 'startNow', 'opm'] as const).map(key => {
+          const derivedCount = key === 'opm' ? 0
+            : key === 'bg' ? 5
+            : key === 'brand' ? 5
+            : key === 'returns' ? 7
+            : key === 'loss' ? 1
+            : 1; // startNow
           return (
-            <div key={family.id} className="mb-2">
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="color"
-                  value={currentHex}
-                  onChange={(e) => setFamilyColor(family.id, e.target.value)}
-                  className="w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0"
-                />
-                <div className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate">
-                  {family.hex} ({family.members.length})
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { if (!isFamilyDefault) resetFamily(family.id); }}
-                  className={`p-0.5 transition-colors ${isFamilyDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
-                  title="Reset family to default"
-                  aria-disabled={isFamilyDefault}
-                >
-                  <RotateCcw size={10} />
-                </button>
-                <LinkToggle linked={linked} onToggle={() => toggleFamilyLink(family.id)} />
+            <div key={key} className="flex items-center gap-1.5 py-0.5">
+              <input
+                type="color"
+                value={toHex(theme.colors[key])}
+                onChange={(e) => setPrimaryColor(key, e.target.value)}
+                className="w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0"
+              />
+              <div className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight">
+                {camelToLabel(key)}
               </div>
-              <div className="ml-8 mt-0.5 flex flex-wrap gap-x-2 gap-y-0">
-                {family.members.map(m => (
-                  <span key={m.path} className="text-[8px] text-white/30">{m.label}</span>
-                ))}
-              </div>
+              {derivedCount > 0 && (
+                <span className="text-[8px] text-white/25 tabular-nums">{derivedCount} derived</span>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setPrimaryColor(key, def.colors[key]);
+                }}
+                className={`p-0.5 shrink-0 transition-colors ${
+                  theme.colors[key] === def.colors[key]
+                    ? 'text-white/[0.06] cursor-default'
+                    : 'text-white/30 hover:text-white/60'
+                }`}
+                title="Reset to default"
+              >
+                <RotateCcw size={10} />
+              </button>
             </div>
           );
         })}
@@ -706,7 +700,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
             <SectionHeader label={section} />
             {tokens.map(({ key, label }) => {
               const path = `colors.${key}`;
-              const familyId = pathToFamily.get(path);
+              const isPrimary = PRIMARY_KEYS.has(key);
               return (
                 <ColorInput
                   key={key}
@@ -714,7 +708,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                   value={theme.colors[key]}
                   defaultValue={def.colors[key]}
                   onChange={(hex) => setColorAtPath(path, hex)}
-                  familyHex={familyId ? familyCurrentHex(familyId) : undefined}
+                  locked={!isPrimary ? isTokenLocked(path) : undefined}
+                  onUnlock={!isPrimary ? () => unlockToken(path) : undefined}
+                  onRelock={!isPrimary ? () => relockToken(path) : undefined}
                 />
               );
             })}
@@ -738,14 +734,18 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
             value={theme.branding.heroLine1Color}
             defaultValue={def.branding.heroLine1Color}
             onChange={(hex) => setColorAtPath('branding.heroLine1Color', hex)}
-            familyHex={pathToFamily.has('branding.heroLine1Color') ? familyCurrentHex(pathToFamily.get('branding.heroLine1Color')!) : undefined}
+            locked={isTokenLocked('branding.heroLine1Color')}
+            onUnlock={() => unlockToken('branding.heroLine1Color')}
+            onRelock={() => relockToken('branding.heroLine1Color')}
           />
           <ColorInput
             label="Hero Line 2 Color"
             value={theme.branding.heroLine2Color}
             defaultValue={def.branding.heroLine2Color}
             onChange={(hex) => setColorAtPath('branding.heroLine2Color', hex)}
-            familyHex={pathToFamily.has('branding.heroLine2Color') ? familyCurrentHex(pathToFamily.get('branding.heroLine2Color')!) : undefined}
+            locked={isTokenLocked('branding.heroLine2Color')}
+            onUnlock={() => unlockToken('branding.heroLine2Color')}
+            onRelock={() => relockToken('branding.heroLine2Color')}
           />
         </div>
 
@@ -785,7 +785,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               value={theme.colors.brand}
               defaultValue={def.colors.brand}
               onChange={(hex) => setColorAtPath('colors.brand', hex)}
-              familyHex={pathToFamily.has('colors.brand') ? familyCurrentHex(pathToFamily.get('colors.brand')!) : undefined}
             />
             <div className="text-[9px] text-white/25">Synced with Brand accent color</div>
           </div>
@@ -805,7 +804,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         </div>
         {theme.effects.glowColors.map((gc, i) => {
           const path = `effects.glowColors.${i}`;
-          const familyId = pathToFamily.get(path);
           return (
             <ColorInput
               key={`glow-${i}`}
@@ -813,7 +811,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               value={gc}
               defaultValue={def.effects.glowColors[i]}
               onChange={(hex) => setColorAtPath(path, hex)}
-              familyHex={familyId ? familyCurrentHex(familyId) : undefined}
+              locked={isTokenLocked(path)}
+              onUnlock={() => unlockToken(path)}
+              onRelock={() => relockToken(path)}
             />
           );
         })}
@@ -824,7 +824,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         </div>
         {theme.effects.blobs.map((blob, i) => {
           const path = `effects.blobs.${i}.color`;
-          const familyId = pathToFamily.get(path);
           return (
             <div key={`blob-${i}`}>
               <ColorInput
@@ -832,7 +831,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                 value={blob.color}
                 defaultValue={def.effects.blobs[i].color}
                 onChange={(hex) => setColorAtPath(path, hex)}
-                familyHex={familyId ? familyCurrentHex(familyId) : undefined}
+                locked={isTokenLocked(path)}
+                onUnlock={() => unlockToken(path)}
+                onRelock={() => relockToken(path)}
               />
               <div className="flex items-center gap-2 ml-8 -mt-0.5 mb-1">
                 <span className="text-[9px] text-white/30">Opacity</span>
