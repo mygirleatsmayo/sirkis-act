@@ -4,30 +4,9 @@ import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
 import { playgroundTheme } from './themes/playground';
 import { useTheme } from './themes/useTheme';
+import { hexToRgb, parseRgba, toHex } from './utils/colorMath';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
-
-const parseRgba = (s: string): [number, number, number, number] | null => {
-  const m = s.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/);
-  if (!m) return null;
-  return [+m[1], +m[2], +m[3], m[4] != null ? +m[4] : 1];
-};
-
-const hexToRgb = (hex: string): [number, number, number] => [
-  parseInt(hex.slice(1, 3), 16),
-  parseInt(hex.slice(3, 5), 16),
-  parseInt(hex.slice(5, 7), 16),
-];
-
-const rgbToHex = (r: number, g: number, b: number): string =>
-  '#' + [r, g, b].map(c => Math.max(0, Math.min(255, c)).toString(16).padStart(2, '0')).join('');
-
-const toHex = (color: string): string => {
-  if (color.startsWith('#')) return color.slice(0, 7).toLowerCase();
-  const rgba = parseRgba(color);
-  if (rgba) return rgbToHex(rgba[0], rgba[1], rgba[2]);
-  return '#888888';
-};
 
 const camelToLabel = (s: string): string =>
   s.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).trim();

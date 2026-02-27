@@ -103,6 +103,23 @@ export const relativeLuminance = (hex: string): number => {
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 };
 
+// ─── Parsing utilities ──────────────────────────────────────────────────
+
+/** Parse an rgba/rgb() string into [r, g, b, a] or null if invalid */
+export const parseRgba = (s: string): [number, number, number, number] | null => {
+  const m = s.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/);
+  if (!m) return null;
+  return [+m[1], +m[2], +m[3], m[4] != null ? +m[4] : 1];
+};
+
+/** Convert any color string (hex or rgba) to a 7-char lowercase hex */
+export const toHex = (color: string): string => {
+  if (color.startsWith('#')) return color.slice(0, 7).toLowerCase();
+  const rgba = parseRgba(color);
+  if (rgba) return rgbToHex(rgba[0], rgba[1], rgba[2]);
+  return '#888888';
+};
+
 // ─── Harmony (pure functions, no UI) ────────────────────────────────────
 
 const rotateHue = (hex: string, degrees: number): string => {
