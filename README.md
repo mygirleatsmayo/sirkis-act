@@ -7,9 +7,9 @@ Plan for your future as an old-fashioned millionaire with Dr. Sirkis's interacti
 ## Features
 - 401(k)/403(b), Roth IRA, and HSA toggles with IRS cap helpers
 - Contribution timing and delayed-start comparison overlay
-- Inflation-adjusted and nominal projections with chart + table
+- Inflation-adjusted and nominal projections with chart and table views
 - Withdrawal estimates through life expectancy
-- Curated salary presets by major
+- Curated starting salary presets by major
 - Sirkisms
 - Theme Lab (beta)
 
