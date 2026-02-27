@@ -140,9 +140,10 @@ interface ColorInputProps {
   locked?: boolean;
   onUnlock?: () => void;
   onRelock?: () => void;
+  onFlash?: () => void;
 }
 
-const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock }: ColorInputProps) => {
+const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock, onFlash }: ColorInputProps) => {
   const hex = toHex(value);
   const isDefault = value === defaultValue;
   const [hexDraft, setHexDraft] = useState(hex);
@@ -178,9 +179,20 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
         onChange={(e) => onChange(e.target.value)}
         className={`w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0 ${isLocked ? 'pointer-events-none opacity-50' : ''}`}
       />
-      <div className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight">
-        {label}
-      </div>
+      {onFlash ? (
+        <button
+          type="button"
+          onClick={onFlash}
+          className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight text-left hover:text-white/90 transition-colors cursor-pointer"
+          title="Flash to preview"
+        >
+          {label}
+        </button>
+      ) : (
+        <div className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight">
+          {label}
+        </div>
+      )}
       <input
         type="text"
         value={hexDraft}
@@ -417,6 +429,56 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       return next;
     });
   }, []);
+
+  /** Map a dot-path to its CSS variable name */
+  const pathToCssVar = useCallback((path: string): string | null => {
+    if (path.startsWith('colors.')) {
+      const key = path.replace('colors.', '');
+      const kebab = key.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
+      return `--color-${kebab}`;
+    }
+    if (path.startsWith('effects.glowColors.')) {
+      const idx = path.replace('effects.glowColors.', '');
+      return `--glow-color-${idx}`;
+    }
+    return null;
+  }, []);
+
+  /** Flash a CSS variable to magenta for 250ms to show which elements use it */
+  const flashToken = useCallback((path: string) => {
+    const root = document.documentElement;
+    const varName = pathToCssVar(path);
+    if (!varName) return;
+
+    const original = root.style.getPropertyValue(varName);
+    // Use magenta flash — channels for hex-based vars, rgba for alpha-based
+    root.style.setProperty(varName, '255 0 255');
+    setTimeout(() => {
+      root.style.setProperty(varName, original);
+    }, 250);
+  }, [pathToCssVar]);
+
+  /** Flash a primary and all its locked derived tokens */
+  const flashPrimary = useCallback((primaryKey: string) => {
+    // Flash the primary itself
+    flashToken(`colors.${primaryKey}`);
+
+    // Derived token paths per primary
+    const derivedPaths: Record<string, string[]> = {
+      bg: ['colors.bgGlass', 'colors.bgCard', 'colors.bgInput', 'colors.bgMuted', 'colors.borderDefault'],
+      brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color'],
+      returns: ['colors.returnsBg', 'branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2'],
+      loss: ['colors.lossBg'],
+      startNow: ['colors.startNowBg'],
+    };
+
+    const paths = derivedPaths[primaryKey] ?? [];
+    for (const path of paths) {
+      if (isTokenLocked(path)) {
+        flashToken(path);
+      }
+    }
+  }, [flashToken, isTokenLocked]);
 
   /** Change a primary color and auto-update all locked derived tokens */
   const setPrimaryColor = useCallback((primaryKey: keyof Primaries, newHex: string) => {
@@ -670,9 +732,14 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                 onChange={(e) => setPrimaryColor(key, e.target.value)}
                 className="w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0"
               />
-              <div className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight">
+              <button
+                type="button"
+                onClick={() => flashPrimary(key)}
+                className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight text-left hover:text-white/90 transition-colors cursor-pointer"
+                title="Flash to preview"
+              >
                 {camelToLabel(key)}
-              </div>
+              </button>
               {derivedCount > 0 && (
                 <span className="text-[8px] text-white/25 tabular-nums">{derivedCount} derived</span>
               )}
@@ -711,6 +778,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                   locked={!isPrimary ? isTokenLocked(path) : undefined}
                   onUnlock={!isPrimary ? () => unlockToken(path) : undefined}
                   onRelock={!isPrimary ? () => relockToken(path) : undefined}
+                  onFlash={() => flashToken(path)}
                 />
               );
             })}
@@ -814,6 +882,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               locked={isTokenLocked(path)}
               onUnlock={() => unlockToken(path)}
               onRelock={() => relockToken(path)}
+              onFlash={() => flashToken(path)}
             />
           );
         })}
