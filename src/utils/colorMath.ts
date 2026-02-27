@@ -1,42 +1,137 @@
 // src/utils/colorMath.ts
 
 /** Convert hex (#RRGGBB) to RGB tuple */
-export const hexToRgb = (_hex: string): [number, number, number] => [0, 0, 0];
+export const hexToRgb = (hex: string): [number, number, number] => {
+  const h = hex.toLowerCase();
+  return [
+    parseInt(h.slice(1, 3), 16),
+    parseInt(h.slice(3, 5), 16),
+    parseInt(h.slice(5, 7), 16),
+  ];
+};
 
 /** Convert RGB tuple to hex (#rrggbb) */
-export const rgbToHex = (_r: number, _g: number, _b: number): string => '#000000';
+export const rgbToHex = (r: number, g: number, b: number): string =>
+  '#' + [r, g, b]
+    .map(c => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0'))
+    .join('');
 
 /** Convert RGB to HSL (h: 0-360, s: 0-100, l: 0-100) */
-export const rgbToHsl = (_r: number, _g: number, _b: number): [number, number, number] => [0, 0, 0];
+export const rgbToHsl = (r: number, g: number, b: number): [number, number, number] => {
+  const rN = r / 255;
+  const gN = g / 255;
+  const bN = b / 255;
+  const max = Math.max(rN, gN, bN);
+  const min = Math.min(rN, gN, bN);
+  const d = max - min;
+  const l = (max + min) / 2;
+
+  if (d === 0) return [0, 0, l * 100];
+
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h: number;
+  if (max === rN) h = ((gN - bN) / d + (gN < bN ? 6 : 0)) / 6;
+  else if (max === gN) h = ((bN - rN) / d + 2) / 6;
+  else h = ((rN - gN) / d + 4) / 6;
+
+  return [h * 360, s * 100, l * 100];
+};
 
 /** Convert HSL to RGB */
-export const hslToRgb = (_h: number, _s: number, _l: number): [number, number, number] => [0, 0, 0];
+export const hslToRgb = (h: number, s: number, l: number): [number, number, number] => {
+  const sN = s / 100;
+  const lN = l / 100;
+
+  if (sN === 0) {
+    const v = Math.round(lN * 255);
+    return [v, v, v];
+  }
+
+  const hue2rgb = (p: number, q: number, t: number): number => {
+    let tN = t;
+    if (tN < 0) tN += 1;
+    if (tN > 1) tN -= 1;
+    if (tN < 1 / 6) return p + (q - p) * 6 * tN;
+    if (tN < 1 / 2) return q;
+    if (tN < 2 / 3) return p + (q - p) * (2 / 3 - tN) * 6;
+    return p;
+  };
+
+  const q = lN < 0.5 ? lN * (1 + sN) : lN + sN - lN * sN;
+  const p = 2 * lN - q;
+  const hN = h / 360;
+
+  return [
+    Math.round(hue2rgb(p, q, hN + 1 / 3) * 255),
+    Math.round(hue2rgb(p, q, hN) * 255),
+    Math.round(hue2rgb(p, q, hN - 1 / 3) * 255),
+  ];
+};
 
 /** Convert hex to HSL */
-export const hexToHsl = (_hex: string): [number, number, number] => [0, 0, 0];
+export const hexToHsl = (hex: string): [number, number, number] => {
+  const [r, g, b] = hexToRgb(hex);
+  return rgbToHsl(r, g, b);
+};
 
 /** Convert HSL to hex */
-export const hslToHex = (_h: number, _s: number, _l: number): string => '#000000';
+export const hslToHex = (h: number, s: number, l: number): string => {
+  const [r, g, b] = hslToRgb(h, s, l);
+  return rgbToHex(r, g, b);
+};
 
 /** Shift lightness of a hex color by delta percentage points (clamped 0-100) */
-export const shiftLightness = (_hex: string, _delta: number): string => '#000000';
+export const shiftLightness = (hex: string, delta: number): string => {
+  const [h, s, l] = hexToHsl(hex);
+  const newL = Math.max(0, Math.min(100, l + delta));
+  return hslToHex(h, s, newL);
+};
 
 /** Create rgba string from hex + alpha */
-export const hexToRgba = (_hex: string, _alpha: number): string => 'rgba(0,0,0,0)';
+export const hexToRgba = (hex: string, alpha: number): string => {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 /** Relative luminance per WCAG 2.1 (0 = black, 1 = white) */
-export const relativeLuminance = (_hex: string): number => 0;
+export const relativeLuminance = (hex: string): number => {
+  const [r, g, b] = hexToRgb(hex);
+  const toLinear = (c: number): number => {
+    const sRGB = c / 255;
+    return sRGB <= 0.04045 ? sRGB / 12.92 : ((sRGB + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+};
 
-// ─── Harmony stubs (pure functions, no UI) ──────────────────────────────
+// ─── Harmony (pure functions, no UI) ────────────────────────────────────
 
-/** Analogous colors: ±30° hue rotation */
-export const analogous = (_hex: string, _count?: number): string[] => [];
+const rotateHue = (hex: string, degrees: number): string => {
+  const [h, s, l] = hexToHsl(hex);
+  return hslToHex((h + degrees + 360) % 360, s, l);
+};
 
-/** Triadic colors: ±120° hue rotation */
-export const triadic = (_hex: string): [string, string, string] => ['#000', '#000', '#000'];
+/** Analogous colors: evenly spaced around ±30° */
+export const analogous = (hex: string, count = 3): string[] => {
+  const spread = 60; // total spread in degrees
+  const step = spread / (count - 1);
+  const start = -(spread / 2);
+  return Array.from({ length: count }, (_, i) => rotateHue(hex, start + step * i));
+};
 
-/** Tetradic colors: 90° intervals */
-export const tetradic = (_hex: string): [string, string, string, string] => ['#000', '#000', '#000', '#000'];
+/** Triadic colors: 0°, 120°, 240° */
+export const triadic = (hex: string): [string, string, string] => [
+  hex.toLowerCase().slice(0, 7),
+  rotateHue(hex, 120),
+  rotateHue(hex, 240),
+];
+
+/** Tetradic colors: 0°, 90°, 180°, 270° */
+export const tetradic = (hex: string): [string, string, string, string] => [
+  hex.toLowerCase().slice(0, 7),
+  rotateHue(hex, 90),
+  rotateHue(hex, 180),
+  rotateHue(hex, 270),
+];
 
 /** Complementary color: 180° hue rotation */
-export const complementary = (_hex: string): string => '#000000';
+export const complementary = (hex: string): string => rotateHue(hex, 180);
