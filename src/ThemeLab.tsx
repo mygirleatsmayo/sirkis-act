@@ -785,7 +785,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               : key === 'brandAccent' ? 7
                 : key === 'returns' ? 1
                   : key === 'loss' ? 1
-                    : key === 'startNow' ? 1
+                    : key === 'startNow' ? 0
                       : 1; // opm
           return (
             <div key={key} className="flex items-center gap-1.5 py-0.5">
