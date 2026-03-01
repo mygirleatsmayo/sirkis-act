@@ -56,7 +56,7 @@ const ChangelogEntryBlock = ({ entry }: { entry: { version: string; date: string
       <span className="text-xs font-bold text-content-secondary">v{entry.version}</span>
       <span className="text-[10px] text-content-subtle">{entry.date}</span>
     </div>
-    <p className="text-xs font-semibold text-content-muted mb-1">{entry.title}</p>
+    <p className="text-xs font-semibold text-content-secondary mb-1">{entry.title}</p>
     <ul className="space-y-0.5">
       {entry.items.map((item, i) => (
         <li key={i} className="text-[11px] text-content-subtle pl-3 relative before:content-['·'] before:absolute before:left-0 before:text-content-subtle">
@@ -150,7 +150,7 @@ export const SettingsModal = ({
             type="button"
             onClick={onClose}
             aria-label="Close settings"
-            className="p-1.5 rounded-lg text-content-subtle hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-content-subtle hover:text-content-primary hover:bg-white/10 transition-colors"
           >
             <X size={18} />
           </button>
@@ -166,12 +166,12 @@ export const SettingsModal = ({
               </h3>
               <span
                 className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                style={{ backgroundColor: theme.colors.brand, color: theme.colors.textOnBrand }}
+                style={{ backgroundColor: theme.colors.brand, color: theme.colors.textPrimary }}
               >
                 Beta
               </span>
             </div>
-            <p className="text-sm text-content-muted mb-4">
+            <p className="text-sm text-content-secondary mb-4">
               Customize colors, fonts, and branding with{' '}
               <span className="whitespace-nowrap">a live preview.</span>
             </p>
@@ -179,7 +179,7 @@ export const SettingsModal = ({
               type="button"
               onClick={handleOpenThemeLab}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
-              style={{ backgroundColor: theme.colors.brand, color: theme.colors.textOnBrand }}
+              style={{ backgroundColor: theme.colors.brand, color: theme.colors.textPrimary }}
             >
               <Palette size={16} />
               Open Theme Lab

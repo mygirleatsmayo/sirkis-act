@@ -36,6 +36,7 @@ export const syncCssVars = (theme: ThemeConfig) => {
   });
 
   // Meta theme-color (needs full hex, not channels)
+  // Note: iOS Safari only updates the address bar color on layout reflow (e.g. drawer close)
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', theme.colors.bg);
 

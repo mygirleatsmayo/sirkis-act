@@ -6,7 +6,6 @@ export type LogoComponent = ComponentType<{ className?: string }>;
 export interface ThemeColors {
   // Backgrounds (darkest → lightest for dark themes; reversed for light)
   bg: string;                 // body / main background
-  bgCard: string;             // Card component backgrounds
   bgGlass: string;            // GlassCard / sidebar / elevated surfaces
   bgInput: string;            // input, select, number fields
   bgOverlay: string;          // modal overlays, drawer overlay
@@ -19,21 +18,22 @@ export interface ThemeColors {
   // Text
   textPrimary: string;        // headings, primary content
   textSecondary: string;      // secondary labels, values
-  textMuted: string;          // tertiary content, descriptions
+  textNeutral: string;        // neutral/real-value text (neither growth nor loss)
   textSubtle: string;         // helper text, timestamps, faint labels
-  textOnBrand: string;        // text rendered on brand-colored backgrounds
 
   // Semantic accents
   brand: string;              // primary brand / Your Contributions
   brandBg: string;            // brand tint background
   opm: string;                // Employer Match (OPM)
+  opmBg: string;              // OPM tint background (derived from opm)
   returns: string;            // Investment Returns / gold accent
   returnsBg: string;          // returns tint background
+  brandAccent: string;        // brand accent / hero line 2 / section headers / blobs / glows
+  brandAccentBg: string;      // brand accent tint background
   startNow: string;           // Start Now comparison line
-  startNowBg: string;         // start-now tint background
   loss: string;               // loss / error / destructive
   lossBg: string;             // loss tint background
-  neutral: string;            // neutral badge, misc
+  neutralBg: string;          // neutral badge background (derived from textNeutral)
 
   // Interactive
   focusRing: string;          // focus-visible outlines

@@ -70,7 +70,6 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
     tokens: [
       { key: 'bg', label: 'Background' },
       { key: 'bgGlass', label: 'Glass' },
-      { key: 'bgCard', label: 'Card' },
       { key: 'bgInput', label: 'Input' },
       { key: 'bgOverlay', label: 'Overlay' },
       { key: 'bgMuted', label: 'Muted' },
@@ -88,9 +87,8 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
     tokens: [
       { key: 'textPrimary', label: 'Primary' },
       { key: 'textSecondary', label: 'Secondary' },
-      { key: 'textMuted', label: 'Muted' },
+      { key: 'textNeutral', label: 'Neutral' },
       { key: 'textSubtle', label: 'Subtle' },
-      { key: 'textOnBrand', label: 'On Brand' },
     ],
   },
   {
@@ -98,14 +96,16 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
     tokens: [
       { key: 'brand', label: 'Brand' },
       { key: 'brandBg', label: 'Brand BG' },
+      { key: 'brandAccent', label: 'Brand Accent' },
+      { key: 'brandAccentBg', label: 'Brand Accent BG' },
       { key: 'opm', label: 'Employer (OPM)' },
+      { key: 'opmBg', label: 'OPM BG' },
       { key: 'returns', label: 'Returns' },
       { key: 'returnsBg', label: 'Returns BG' },
       { key: 'startNow', label: 'Start Now' },
-      { key: 'startNowBg', label: 'Start Now BG' },
       { key: 'loss', label: 'Loss' },
       { key: 'lossBg', label: 'Loss BG' },
-      { key: 'neutral', label: 'Neutral' },
+      { key: 'neutralBg', label: 'Neutral BG' },
     ],
   },
   {
@@ -122,7 +122,7 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
 ];
 
 /** Keys that are primaries (not derived) — skip lock/unlock UI for these */
-const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'returns', 'loss', 'startNow', 'opm']);
+const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm']);
 
 // ─── Sub-components ───────────────────────────────────────────────────────
 
@@ -167,7 +167,7 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
         <button
           type="button"
           onClick={() => { if (isLocked && onUnlock) onUnlock(); else if (!isLocked && onRelock) onRelock(); }}
-          className={`p-0.5 shrink-0 transition-colors ${isLocked ? 'text-white/20 hover:text-white/40' : 'text-teal-400/70 hover:text-teal-400'}`}
+          className={`p-0.5 shrink-0 transition-colors ${isLocked ? 'text-white/40 hover:text-white/60' : 'text-teal-400 hover:text-teal-300'}`}
           title={isLocked ? 'Unlock for manual editing' : 'Re-lock (snap to derived value)'}
         >
           {isLocked ? <Lock size={10} /> : <Unlock size={10} />}
@@ -212,12 +212,15 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
           <RotateCcw size={10} />
         </button>
       )}
-      {hasLockBehavior && !isLocked && (
+      {hasLockBehavior && (
         <button
           type="button"
-          onClick={() => { if (!isDefault) onChange(defaultValue); }}
+          onClick={() => {
+            if (!isDefault) onChange(defaultValue);
+            if (!isLocked) onRelock?.();
+          }}
           className={`p-0.5 shrink-0 transition-colors ${isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
-          title="Reset to default"
+          title={isLocked ? 'Reset to default' : 'Reset and re-lock'}
           aria-disabled={isDefault}
         >
           <RotateCcw size={10} />
@@ -310,7 +313,7 @@ const LabInstructions = () => {
         <ul className="mt-2 space-y-1 text-[10px] text-white/40 leading-relaxed pl-4">
           <li><strong className="text-white/55">Primaries</strong> set the 6 base colors. Derived tokens auto-update unless manually unlocked.</li>
           <li><strong className="text-white/55">Token Sections</strong> let you fine-tune individual colors (surfaces, text, accents, etc.).</li>
-          <li><strong className="text-white/55">Branding</strong> controls hero copy, subheadline parts, and hero line colors.</li>
+          <li><strong className="text-white/55">Hero Colors</strong> and <strong className="text-white/55">Branding Copy</strong> control hero line colors and hero copy/subheadline parts.</li>
           <li><strong className="text-white/55">Logo</strong> accepts any SVG upload; stroke color syncs with Brand accent.</li>
           <li><strong className="text-white/55">Save</strong> exports a TypeScript theme file you can submit to the developer for inclusion in a future release.</li>
         </ul>
@@ -367,7 +370,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const [copyFeedback, setCopyFeedback] = useState(false);
 
   // Dark/Light/Auto mode
-  const [themeMode, setThemeMode] = useState<'dark' | 'light' | 'auto'>('dark');
+  const [themeMode, setThemeMode] = useState<'dark' | 'light' | 'auto'>('auto');
 
   // Per-token lock state: absence = locked; stored as false = unlocked
   const [tokenLocks, setTokenLocks] = useState<Record<string, boolean>>(() => ({}));
@@ -395,6 +398,56 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     }
     return themeMode;
   }, [themeMode, theme.colors.bg]);
+
+  // ── Re-derive locked tokens when mode changes ──
+
+  useEffect(() => {
+    setThemeLocal(prev => {
+      const next = cloneTheme(prev);
+      const primaries = extractPrimaries(next.colors);
+      const derived = applyDerivations(primaries, effectiveMode);
+
+      // Re-derive locked color tokens
+      for (const [key, value] of Object.entries(derived.colors)) {
+        if (PRIMARY_KEYS.has(key as keyof ThemeColors)) continue;
+        if (isTokenLocked(`colors.${key}`)) {
+          (next.colors as unknown as Record<string, string>)[key] = value;
+        }
+      }
+
+      // Re-derive locked branding
+      if (isTokenLocked('branding.heroLine1Color')) {
+        next.branding.heroLine1Color = derived.heroLine1Color;
+      }
+      if (isTokenLocked('branding.heroLine2Color')) {
+        next.branding.heroLine2Color = derived.heroLine2Color;
+      }
+
+      // Re-derive locked glow colors
+      derived.glowColors.forEach((gc, i) => {
+        if (isTokenLocked(`effects.glowColors.${i}`)) {
+          next.effects.glowColors[i] = gc;
+        }
+      });
+
+      // Re-derive locked blob colors
+      derived.blobColors.forEach((bc, i) => {
+        if (isTokenLocked(`effects.blobs.${i}.color`)) {
+          next.effects.blobs[i] = { ...next.effects.blobs[i], color: bc };
+        }
+      });
+
+      // Re-derive locked mode statics
+      const statics = getModeStatics(effectiveMode);
+      for (const [key, value] of Object.entries(statics)) {
+        if (isTokenLocked(`colors.${key}`)) {
+          (next.colors as unknown as Record<string, string>)[key] = value as string;
+        }
+      }
+
+      return next;
+    });
+  }, [effectiveMode, isTokenLocked]);
 
   // ── Sync to ThemeProvider ──
 
@@ -430,63 +483,67 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     });
   }, []);
 
-  /** Map a dot-path to its CSS variable name */
-  const pathToCssVar = useCallback((path: string): string | null => {
-    if (path.startsWith('colors.')) {
-      const key = path.replace('colors.', '');
-      const kebab = key.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
-      return `--color-${kebab}`;
-    }
-    if (path.startsWith('effects.glowColors.')) {
-      const idx = path.replace('effects.glowColors.', '');
-      return `--glow-color-${idx}`;
-    }
-    return null;
+  /** Flash one or more token paths to magenta for 250ms.
+   *  Uses theme-state mutation so both inline-style and CSS-var consumers flash. */
+  const flashPaths = useCallback((paths: string[]) => {
+    setThemeLocal(prev => {
+      const next = cloneTheme(prev);
+      const originals: Record<string, string> = {};
+
+      for (const path of paths) {
+        const original = getNested(prev, path) as string;
+        originals[path] = original;
+        const flashValue = typeof original === 'string' && original.startsWith('rgba')
+          ? 'rgba(255, 0, 255, 0.8)'
+          : '#ff00ff';
+        setNested(next, path, flashValue);
+      }
+
+      setTimeout(() => {
+        setThemeLocal(cur => {
+          const restored = cloneTheme(cur);
+          for (const path of paths) {
+            setNested(restored, path, originals[path]);
+          }
+          return restored;
+        });
+      }, 250);
+
+      return next;
+    });
   }, []);
 
-  /** Flash a CSS variable to magenta for 250ms to show which elements use it */
+  /** Flash a single token path */
   const flashToken = useCallback((path: string) => {
-    const root = document.documentElement;
-    const varName = pathToCssVar(path);
-    if (!varName) return;
-
-    const original = root.style.getPropertyValue(varName);
-    // Use magenta flash — channels for hex-based vars, rgba for alpha-based
-    root.style.setProperty(varName, '255 0 255');
-    setTimeout(() => {
-      root.style.setProperty(varName, original);
-    }, 250);
-  }, [pathToCssVar]);
+    flashPaths([path]);
+  }, [flashPaths]);
 
   /** Flash a primary and all its locked derived tokens */
   const flashPrimary = useCallback((primaryKey: string) => {
-    // Flash the primary itself
-    flashToken(`colors.${primaryKey}`);
-
     // Derived token paths per primary
     const derivedPaths: Record<string, string[]> = {
-      bg: ['colors.bgGlass', 'colors.bgCard', 'colors.bgInput', 'colors.bgMuted', 'colors.borderDefault'],
+      bg: ['colors.bgGlass', 'colors.bgInput', 'colors.bgMuted', 'colors.borderDefault'],
       brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color'],
-      returns: ['colors.returnsBg', 'branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2'],
+      brandAccent: ['colors.brandAccentBg', 'branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2', 'effects.blobs.0.color', 'effects.blobs.1.color'],
+      returns: ['colors.returnsBg'],
       loss: ['colors.lossBg'],
-      startNow: ['colors.startNowBg'],
+      startNow: [],
+      opm: ['colors.opmBg'],
     };
 
-    const paths = derivedPaths[primaryKey] ?? [];
-    for (const path of paths) {
-      if (isTokenLocked(path)) {
-        flashToken(path);
-      }
+    const allPaths = [`colors.${primaryKey}`];
+    for (const path of derivedPaths[primaryKey] ?? []) {
+      if (isTokenLocked(path)) allPaths.push(path);
     }
-  }, [flashToken, isTokenLocked]);
+
+    flashPaths(allPaths);
+  }, [flashPaths, isTokenLocked]);
 
   /** Change a primary color and auto-update all locked derived tokens */
   const setPrimaryColor = useCallback((primaryKey: keyof Primaries, newHex: string) => {
     setThemeLocal(prev => {
       const next = cloneTheme(prev);
       (next.colors as unknown as Record<string, string>)[primaryKey] = newHex;
-
-      if (primaryKey === 'opm') return next; // standalone, no derivations
 
       const primaries = extractPrimaries(next.colors);
       const derived = applyDerivations(primaries, effectiveMode);
@@ -575,7 +632,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     setThemeLocal(cloneTheme(playgroundTheme));
     setCustomSvg(null);
     setTokenLocks({});
-    setThemeMode('dark');
+    setThemeMode('auto');
   }, []);
 
   // ── SVG upload ──
@@ -638,7 +695,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
   return (
     <div
-      className="fixed top-0 right-0 bottom-0 z-[9999] flex flex-col bg-[#0a1a19]/50 backdrop-blur-xl border-l border-white/10 shadow-2xl w-[min(380px,100vw)]
+      className="fixed top-0 right-0 bottom-0 z-[9999] flex flex-col bg-neutral-500/50 backdrop-blur-xl border-l border-white/10 shadow-2xl w-[min(380px,100vw)]
         max-sm:top-auto max-sm:left-0 max-sm:w-full max-sm:h-[50dvh] max-sm:rounded-t-3xl max-sm:border-l-0 max-sm:border-t"
     >
       {/* Header */}
@@ -688,13 +745,8 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         {/* ── Instructions ── */}
         <LabInstructions />
 
-        {/* ── Primaries ── */}
-        <SectionHeader label="Primaries" />
-        <div className="text-[9px] text-white/30 -mt-1 mb-2">
-          Set primary colors. Derived tokens auto-update unless unlocked.
-        </div>
-
-        {/* Mode toggle */}
+        {/* ── Mode ── */}
+        <SectionHeader label="Mode" />
         <div className="flex items-center gap-1 mb-3 p-1 rounded-lg bg-white/5 w-fit">
           {([
             { mode: 'dark' as const, icon: Moon, label: 'Dark' },
@@ -705,25 +757,36 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               key={mode}
               type="button"
               onClick={() => setThemeMode(mode)}
-              className={`flex items-center gap-1 px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${
-                themeMode === mode
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/40 hover:text-white/60'
-              }`}
+              className={`flex items-center gap-1 px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${themeMode === mode
+                ? 'bg-white/15 text-white'
+                : 'text-white/40 hover:text-white/60'
+                }`}
             >
               <Icon size={10} /> {label}
             </button>
           ))}
         </div>
 
+        {/* ── Primaries ── */}
+        <SectionHeader label="Primaries" />
+        <div className="text-[9px] text-white/30 -mt-1 mb-2">
+          Set primary colors. Derived tokens auto-update unless unlocked.
+        </div>
+        {theme.colors.bg !== defaults.current.colors.bg && (
+          <p className="hidden max-sm:block text-[9px] font-bold text-white bg-red-600 rounded px-2 py-1 -mt-1 mb-2">
+            ⚠ Address bar color updates when panel closes
+          </p>
+        )}
+
         {/* Primary color pickers */}
-        {(['bg', 'brand', 'returns', 'loss', 'startNow', 'opm'] as const).map(key => {
-          const derivedCount = key === 'opm' ? 0
-            : key === 'bg' ? 5
+        {(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm'] as const).map(key => {
+          const derivedCount = key === 'bg' ? 5
             : key === 'brand' ? 5
-            : key === 'returns' ? 7
-            : key === 'loss' ? 1
-            : 1; // startNow
+              : key === 'brandAccent' ? 7
+                : key === 'returns' ? 1
+                  : key === 'loss' ? 1
+                    : key === 'startNow' ? 1
+                      : 1; // opm
           return (
             <div key={key} className="flex items-center gap-1.5 py-0.5">
               <input
@@ -748,11 +811,10 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                 onClick={() => {
                   setPrimaryColor(key, def.colors[key]);
                 }}
-                className={`p-0.5 shrink-0 transition-colors ${
-                  theme.colors[key] === def.colors[key]
-                    ? 'text-white/[0.06] cursor-default'
-                    : 'text-white/30 hover:text-white/60'
-                }`}
+                className={`p-0.5 shrink-0 transition-colors ${theme.colors[key] === def.colors[key]
+                  ? 'text-white/[0.06] cursor-default'
+                  : 'text-white/30 hover:text-white/60'
+                  }`}
                 title="Reset to default"
               >
                 <RotateCcw size={10} />
@@ -785,8 +847,31 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           </div>
         ))}
 
-        {/* ── Branding ── */}
-        <SectionHeader label="Branding" />
+        {/* ── Hero Colors ── */}
+        <SectionHeader label="Hero Colors" />
+        <ColorInput
+          label="Hero Line 1 Color"
+          value={theme.branding.heroLine1Color}
+          defaultValue={def.branding.heroLine1Color}
+          onChange={(hex) => setColorAtPath('branding.heroLine1Color', hex)}
+          locked={isTokenLocked('branding.heroLine1Color')}
+          onUnlock={() => unlockToken('branding.heroLine1Color')}
+          onRelock={() => relockToken('branding.heroLine1Color')}
+          onFlash={() => flashToken('branding.heroLine1Color')}
+        />
+        <ColorInput
+          label="Hero Line 2 Color"
+          value={theme.branding.heroLine2Color}
+          defaultValue={def.branding.heroLine2Color}
+          onChange={(hex) => setColorAtPath('branding.heroLine2Color', hex)}
+          locked={isTokenLocked('branding.heroLine2Color')}
+          onUnlock={() => unlockToken('branding.heroLine2Color')}
+          onRelock={() => relockToken('branding.heroLine2Color')}
+          onFlash={() => flashToken('branding.heroLine2Color')}
+        />
+
+        {/* ── Branding Copy ── */}
+        <SectionHeader label="Branding Copy" />
         <TextInput label="App Name" value={theme.branding.appName} defaultValue={def.branding.appName} onChange={(v) => setBranding('appName', v)} />
         <TextInput label="Tagline" value={theme.branding.tagline} defaultValue={def.branding.tagline} onChange={(v) => setBranding('tagline', v)} />
         <TextInput label="Hero Line 1" value={theme.branding.heroLine1} defaultValue={def.branding.heroLine1} onChange={(v) => setBranding('heroLine1', v)} />
@@ -795,27 +880,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <TextInput label="Leading" value={parts.leading} defaultValue={defParts.leading} onChange={(v) => setSubheadPart('leading', v)} />
         <TextInput label="Emphasis" value={parts.emphasis} defaultValue={defParts.emphasis} onChange={(v) => setSubheadPart('emphasis', v)} />
         <TextInput label="Trailing" value={parts.trailing} defaultValue={defParts.trailing} onChange={(v) => setSubheadPart('trailing', v)} />
-
-        <div className="mt-2">
-          <ColorInput
-            label="Hero Line 1 Color"
-            value={theme.branding.heroLine1Color}
-            defaultValue={def.branding.heroLine1Color}
-            onChange={(hex) => setColorAtPath('branding.heroLine1Color', hex)}
-            locked={isTokenLocked('branding.heroLine1Color')}
-            onUnlock={() => unlockToken('branding.heroLine1Color')}
-            onRelock={() => relockToken('branding.heroLine1Color')}
-          />
-          <ColorInput
-            label="Hero Line 2 Color"
-            value={theme.branding.heroLine2Color}
-            defaultValue={def.branding.heroLine2Color}
-            onChange={(hex) => setColorAtPath('branding.heroLine2Color', hex)}
-            locked={isTokenLocked('branding.heroLine2Color')}
-            onUnlock={() => unlockToken('branding.heroLine2Color')}
-            onRelock={() => relockToken('branding.heroLine2Color')}
-          />
-        </div>
 
         {/* ── Logo ── */}
         <SectionHeader label="Logo" />
@@ -853,6 +917,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               value={theme.colors.brand}
               defaultValue={def.colors.brand}
               onChange={(hex) => setColorAtPath('colors.brand', hex)}
+              onFlash={() => flashToken('colors.brand')}
             />
             <div className="text-[9px] text-white/25">Synced with Brand accent color</div>
           </div>
@@ -902,6 +967,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                 onChange={(hex) => setColorAtPath(path, hex)}
                 locked={isTokenLocked(path)}
                 onUnlock={() => unlockToken(path)}
+                onFlash={() => flashToken(path)}
                 onRelock={() => relockToken(path)}
               />
               <div className="flex items-center gap-2 ml-8 -mt-0.5 mb-1">
