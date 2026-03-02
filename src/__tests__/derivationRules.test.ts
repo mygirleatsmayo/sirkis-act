@@ -48,9 +48,6 @@ describe('applyDerivations', () => {
   it('derives bgInput as bg -3% lightness', () => {
     hexCloseTo(derived.colors.bgInput, cyprusTheme.colors.bgInput);
   });
-  it('derives bgMuted as bg at alpha 0.6', () => {
-    expect(derived.colors.bgMuted).toBe(cyprusTheme.colors.bgMuted);
-  });
   it('derives borderDefault as bg +8% lightness', () => {
     hexCloseTo(derived.colors.borderDefault, cyprusTheme.colors.borderDefault);
   });

@@ -18,7 +18,6 @@ export default {
           glass: 'rgb(var(--color-bg-glass) / <alpha-value>)',
           input: 'rgb(var(--color-bg-input) / <alpha-value>)',
           overlay: 'var(--color-bg-overlay)',
-          muted: 'var(--color-bg-muted)',
         },
         content: {
           primary: 'rgb(var(--color-text-primary) / <alpha-value>)',

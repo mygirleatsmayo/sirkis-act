@@ -1,17 +1,40 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDown, Sun, Moon, Zap } from 'lucide-react';
+import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDown, Sun, Moon, Zap, Info } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
 import { playgroundTheme } from './themes/playground';
 import { useTheme } from './themes/useTheme';
-import { hexToRgb, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
+import { hexToRgb, hexToRgba, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
 import { applyDerivations, extractPrimaries, getModeStatics } from './themes/derivationRules';
+import { syncCssVars } from './themes/syncCssVars';
 import type { Primaries, ThemeMode } from './themes/derivationRules';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 const camelToLabel = (s: string): string =>
   s.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).trim();
+
+const camelToKebab = (s: string) =>
+  s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
+
+/** Convert a derived token path to a readable label for tooltips */
+const pathToLabel = (path: string): string => {
+  if (path.startsWith('colors.')) return camelToLabel(path.slice(7));
+  if (path.startsWith('branding.')) return camelToLabel(path.slice(9));
+  if (path.startsWith('effects.glowColors.')) return `Glow ${+path.slice(19) + 1}`;
+  if (path.startsWith('effects.blobs.')) {
+    const idx = +path.charAt(14);
+    return `Blob ${idx + 1}`;
+  }
+  return path;
+};
+
+/** Map a token dot-path to its CSS custom property name, or null if no CSS var exists */
+const pathToCssVar = (path: string): string | null => {
+  if (path.startsWith('colors.')) return `--color-${camelToKebab(path.slice(7))}`;
+  if (path.startsWith('effects.glowColors.')) return `--glow-color-${path.slice(19)}`;
+  return null; // branding and blob paths use inline styles, no CSS var
+};
 
 /** Sanitize SVG string via DOMPurify — strips scripts, event handlers, unsafe elements */
 const sanitizeSvg = (raw: string): string =>
@@ -68,42 +91,33 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
   {
     section: 'Surfaces',
     tokens: [
-      { key: 'bg', label: 'Background' },
       { key: 'bgGlass', label: 'Glass' },
       { key: 'bgInput', label: 'Input' },
       { key: 'bgOverlay', label: 'Overlay' },
-      { key: 'bgMuted', label: 'Muted' },
     ],
   },
   {
     section: 'Borders',
     tokens: [
-      { key: 'borderDefault', label: 'Default' },
-      { key: 'borderSubtle', label: 'Subtle' },
+      { key: 'borderDefault', label: 'Border Default' },
+      { key: 'borderSubtle', label: 'Border Subtle' },
     ],
   },
   {
     section: 'Text',
     tokens: [
-      { key: 'textPrimary', label: 'Primary' },
-      { key: 'textSecondary', label: 'Secondary' },
-      { key: 'textNeutral', label: 'Neutral' },
-      { key: 'textSubtle', label: 'Subtle' },
+      { key: 'textPrimary', label: 'Text Primary' },
+      { key: 'textSecondary', label: 'Text Secondary' },
+      { key: 'textSubtle', label: 'Text Subtle' },
     ],
   },
   {
     section: 'Accents',
     tokens: [
-      { key: 'brand', label: 'Brand' },
       { key: 'brandBg', label: 'Brand BG' },
-      { key: 'brandAccent', label: 'Brand Accent' },
       { key: 'brandAccentBg', label: 'Brand Accent BG' },
-      { key: 'opm', label: 'Employer (OPM)' },
       { key: 'opmBg', label: 'OPM BG' },
-      { key: 'returns', label: 'Returns' },
       { key: 'returnsBg', label: 'Returns BG' },
-      { key: 'startNow', label: 'Start Now' },
-      { key: 'loss', label: 'Loss' },
       { key: 'lossBg', label: 'Loss BG' },
       { key: 'neutralBg', label: 'Neutral BG' },
     ],
@@ -121,8 +135,25 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
   },
 ];
 
-/** Keys that are primaries (not derived) — skip lock/unlock UI for these */
-const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm']);
+/** Hint tooltips for specific tokens */
+const TOKEN_HINTS: Partial<Record<keyof ThemeColors, string>> = {
+  bgOverlay: 'Visible when Settings modal is open',
+};
+
+/** Keys that are primaries — shown in Primaries picker, skip lock/unlock UI in sections */
+const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral']);
+
+/** Derived token paths per primary — used for flash, sticky highlight, and tooltip content */
+const DERIVED_PATHS: Record<string, string[]> = {
+  bg: ['colors.bgGlass', 'colors.bgInput', 'colors.borderDefault'],
+  brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color'],
+  brandAccent: ['colors.brandAccentBg', 'branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2', 'effects.blobs.0.color', 'effects.blobs.1.color'],
+  returns: ['colors.returnsBg'],
+  loss: ['colors.lossBg'],
+  startNow: [],
+  opm: ['colors.opmBg'],
+  textNeutral: ['colors.neutralBg'],
+};
 
 // ─── Sub-components ───────────────────────────────────────────────────────
 
@@ -141,9 +172,11 @@ interface ColorInputProps {
   onUnlock?: () => void;
   onRelock?: () => void;
   onFlash?: () => void;
+  highlighted?: boolean;
+  hint?: string;
 }
 
-const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock, onFlash }: ColorInputProps) => {
+const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock, onFlash, highlighted, hint }: ColorInputProps) => {
   const hex = toHex(value);
   const isDefault = value === defaultValue;
   const [hexDraft, setHexDraft] = useState(hex);
@@ -163,6 +196,34 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
 
   return (
     <div className="flex items-center gap-1.5 py-0.5 group/row">
+      <input
+        type="color"
+        value={hex}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0 ${isLocked ? 'pointer-events-none opacity-50' : ''}`}
+      />
+      {onFlash ? (
+        <button
+          type="button"
+          onClick={onFlash}
+          className={`text-[10px] font-bold uppercase tracking-wider truncate leading-tight text-left transition-colors cursor-pointer ${highlighted ? 'text-[#ff00ff]' : 'text-white/70 hover:text-white/90'}`}
+          title="Flash to preview"
+        >
+          {label}
+        </button>
+      ) : (
+        <div
+          className={`text-[10px] font-bold uppercase tracking-wider truncate leading-tight ${highlighted ? 'text-[#ff00ff]' : 'text-white/70'}`}
+        >
+          {label}
+        </div>
+      )}
+      {hint && (
+        <span className="shrink-0 text-white/25" title={hint}>
+          <Info size={10} />
+        </span>
+      )}
+      <div className="flex-1 min-w-0" />
       {hasLockBehavior && (
         <button
           type="button"
@@ -174,26 +235,6 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
         </button>
       )}
       <input
-        type="color"
-        value={hex}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0 ${isLocked ? 'pointer-events-none opacity-50' : ''}`}
-      />
-      {onFlash ? (
-        <button
-          type="button"
-          onClick={onFlash}
-          className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight text-left hover:text-white/90 transition-colors cursor-pointer"
-          title="Flash to preview"
-        >
-          {label}
-        </button>
-      ) : (
-        <div className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight">
-          {label}
-        </div>
-      )}
-      <input
         type="text"
         value={hexDraft}
         onChange={(e) => setHexDraft(e.target.value)}
@@ -201,31 +242,18 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
         onKeyDown={(e) => { if (e.key === 'Enter') commitHex(); }}
         className={`w-[72px] text-[10px] font-mono text-white/60 bg-white/5 border border-white/10 rounded px-1.5 py-0.5 outline-none focus:border-white/30 shrink-0 ${isLocked ? 'pointer-events-none opacity-50' : ''}`}
       />
-      {!hasLockBehavior && (
-        <button
-          type="button"
-          onClick={() => { if (!isDefault) onChange(defaultValue); }}
-          className={`p-0.5 shrink-0 transition-colors ${isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
-          title="Reset to default"
-          aria-disabled={isDefault}
-        >
-          <RotateCcw size={10} />
-        </button>
-      )}
-      {hasLockBehavior && (
-        <button
-          type="button"
-          onClick={() => {
-            if (!isDefault) onChange(defaultValue);
-            if (!isLocked) onRelock?.();
-          }}
-          className={`p-0.5 shrink-0 transition-colors ${isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
-          title={isLocked ? 'Reset to default' : 'Reset and re-lock'}
-          aria-disabled={isDefault}
-        >
-          <RotateCcw size={10} />
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => {
+          if (!isDefault) onChange(defaultValue);
+          if (hasLockBehavior && !isLocked) onRelock?.();
+        }}
+        className={`p-0.5 shrink-0 transition-colors ${isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
+        title={hasLockBehavior && !isLocked ? 'Reset and re-lock' : 'Reset to default'}
+        aria-disabled={isDefault}
+      >
+        <RotateCcw size={10} />
+      </button>
     </div>
   );
 };
@@ -355,7 +383,6 @@ interface ThemeLabProps {
 export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const { setThemeId, themeId, setThemeOverride } = useTheme();
   const prevThemeId = useRef(themeId);
-  const defaults = useRef(cloneTheme(playgroundTheme));
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Editable theme
@@ -374,6 +401,22 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
   // Per-token lock state: absence = locked; stored as false = unlocked
   const [tokenLocks, setTokenLocks] = useState<Record<string, boolean>>(() => ({}));
+
+  // Flash state: paths currently flashing (for label highlight)
+  const [flashedPaths, setFlashedPaths] = useState<Set<string>>(() => new Set());
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Sticky highlight: which primary's derived tokens are highlighted
+  const [highlightedPrimary, setHighlightedPrimary] = useState<string | null>(null);
+
+  // Combined set of paths to highlight (flash + sticky)
+  const highlightedPaths = useMemo(() => {
+    const paths = new Set(flashedPaths);
+    if (highlightedPrimary) {
+      for (const p of DERIVED_PATHS[highlightedPrimary] ?? []) paths.add(p);
+    }
+    return paths;
+  }, [flashedPaths, highlightedPrimary]);
 
   const isTokenLocked = useCallback((path: string): boolean => {
     return tokenLocks[path] !== false;
@@ -398,6 +441,24 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     }
     return themeMode;
   }, [themeMode, theme.colors.bg]);
+
+  // Defaults computed through derivation engine so reset buttons match actual derived output
+  const defaults = useMemo(() => {
+    const d = cloneTheme(playgroundTheme);
+    const primaries = extractPrimaries(d.colors);
+    const derived = applyDerivations(primaries, effectiveMode);
+    for (const [key, value] of Object.entries(derived.colors)) {
+      if (PRIMARY_KEYS.has(key as keyof ThemeColors)) continue;
+      (d.colors as unknown as Record<string, string>)[key] = value;
+    }
+    d.branding.heroLine1Color = derived.heroLine1Color;
+    d.branding.heroLine2Color = derived.heroLine2Color;
+    d.effects.glowColors = [...derived.glowColors];
+    derived.blobColors.forEach((bc, i) => {
+      d.effects.blobs[i] = { ...d.effects.blobs[i], color: bc };
+    });
+    return d;
+  }, [effectiveMode]);
 
   // ── Re-derive locked tokens when mode changes ──
 
@@ -484,59 +545,50 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   }, []);
 
   /** Flash one or more token paths to magenta for 250ms.
-   *  Uses theme-state mutation so both inline-style and CSS-var consumers flash. */
+   *  Sets CSS vars directly (no React state mutation) + highlights labels via flashedPaths.
+   *  Note: branding and blob paths use inline styles (no CSS var), so only their
+   *  ThemeLab labels flash — the app elements themselves don't flash for those paths. */
   const flashPaths = useCallback((paths: string[]) => {
-    setThemeLocal(prev => {
-      const next = cloneTheme(prev);
-      const originals: Record<string, string> = {};
+    const root = document.documentElement;
 
-      for (const path of paths) {
-        const original = getNested(prev, path) as string;
-        originals[path] = original;
-        const flashValue = typeof original === 'string' && original.startsWith('rgba')
-          ? 'rgba(255, 0, 255, 0.8)'
-          : '#ff00ff';
-        setNested(next, path, flashValue);
-      }
+    // Flash CSS vars for app-visible tokens
+    for (const path of paths) {
+      const cssVar = pathToCssVar(path);
+      if (!cssVar) continue;
+      // Determine format from the theme value: hex → channels, everything else → rgba passthrough
+      const themeValue = getNested(theme, path) as string;
+      const isHex = typeof themeValue === 'string' && themeValue.startsWith('#');
+      root.style.setProperty(cssVar, isHex ? '255 0 255' : 'rgba(255, 0, 255, 0.8)');
+    }
 
-      setTimeout(() => {
-        setThemeLocal(cur => {
-          const restored = cloneTheme(cur);
-          for (const path of paths) {
-            setNested(restored, path, originals[path]);
-          }
-          return restored;
-        });
-      }, 250);
+    // Flash labels in ThemeLab
+    setFlashedPaths(new Set(paths));
 
-      return next;
-    });
-  }, []);
+    // Clear previous timer if rapid-fire clicking
+    if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+
+    flashTimerRef.current = setTimeout(() => {
+      syncCssVars(theme);
+      setFlashedPaths(new Set());
+      flashTimerRef.current = null;
+    }, 250);
+  }, [theme]);
 
   /** Flash a single token path */
   const flashToken = useCallback((path: string) => {
     flashPaths([path]);
   }, [flashPaths]);
 
-  /** Flash a primary and all its locked derived tokens */
+  /** Flash a primary and all its locked derived tokens + toggle sticky highlight */
   const flashPrimary = useCallback((primaryKey: string) => {
-    // Derived token paths per primary
-    const derivedPaths: Record<string, string[]> = {
-      bg: ['colors.bgGlass', 'colors.bgInput', 'colors.bgMuted', 'colors.borderDefault'],
-      brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color'],
-      brandAccent: ['colors.brandAccentBg', 'branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2', 'effects.blobs.0.color', 'effects.blobs.1.color'],
-      returns: ['colors.returnsBg'],
-      loss: ['colors.lossBg'],
-      startNow: [],
-      opm: ['colors.opmBg'],
-    };
-
     const allPaths = [`colors.${primaryKey}`];
-    for (const path of derivedPaths[primaryKey] ?? []) {
+    for (const path of DERIVED_PATHS[primaryKey] ?? []) {
       if (isTokenLocked(path)) allPaths.push(path);
     }
-
     flashPaths(allPaths);
+
+    // Toggle sticky highlight
+    setHighlightedPrimary(prev => prev === primaryKey ? null : primaryKey);
   }, [flashPaths, isTokenLocked]);
 
   /** Change a primary color and auto-update all locked derived tokens */
@@ -589,6 +641,18 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       return next;
     });
   }, [effectiveMode, isTokenLocked]);
+
+  /** Change textNeutral and re-derive neutralBg if locked */
+  const setTextNeutralColor = useCallback((newHex: string) => {
+    setThemeLocal(prev => {
+      const next = cloneTheme(prev);
+      next.colors.textNeutral = newHex;
+      if (isTokenLocked('colors.neutralBg')) {
+        next.colors.neutralBg = hexToRgba(newHex, 0.10);
+      }
+      return next;
+    });
+  }, [isTokenLocked]);
 
   const setBranding = useCallback((key: string, value: string) => {
     setThemeLocal(prev => ({
@@ -689,7 +753,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
   if (!isOpen) return null;
 
-  const def = defaults.current;
+  const def = defaults;
   const parts = theme.branding.heroSubheadParts ?? { leading: '', emphasis: '', trailing: '' };
   const defParts = def.branding.heroSubheadParts ?? { leading: '', emphasis: '', trailing: '' };
 
@@ -772,45 +836,58 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <div className="text-[9px] text-white/30 -mt-1 mb-2">
           Set primary colors. Derived tokens auto-update unless unlocked.
         </div>
-        {theme.colors.bg !== defaults.current.colors.bg && (
+        {theme.colors.bg !== defaults.colors.bg && (
           <p className="hidden max-sm:block text-[9px] font-bold text-white bg-red-600 rounded px-2 py-1 -mt-1 mb-2">
             ⚠ Address bar color updates when panel closes
           </p>
         )}
 
         {/* Primary color pickers */}
-        {(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm'] as const).map(key => {
-          const derivedCount = key === 'bg' ? 5
+        {(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral'] as const).map(key => {
+          const derivedCount = key === 'bg' ? 3
             : key === 'brand' ? 5
               : key === 'brandAccent' ? 7
-                : key === 'returns' ? 1
-                  : key === 'loss' ? 1
-                    : key === 'startNow' ? 0
-                      : 1; // opm
+                : key === 'startNow' ? 0
+                  : 1; // returns, loss, opm, textNeutral
+          const isDerivationPrimary = key !== 'textNeutral';
+          const handleChange = (hex: string) =>
+            isDerivationPrimary ? setPrimaryColor(key as keyof Primaries, hex) : setTextNeutralColor(hex);
+          const handleReset = () => handleChange(def.colors[key]);
+          const infoHint = (key === 'startNow' || key === 'loss') ? 'Visible when Start Age is adjusted' : undefined;
           return (
             <div key={key} className="flex items-center gap-1.5 py-0.5">
               <input
                 type="color"
                 value={toHex(theme.colors[key])}
-                onChange={(e) => setPrimaryColor(key, e.target.value)}
+                onChange={(e) => handleChange(e.target.value)}
                 className="w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0"
               />
               <button
                 type="button"
                 onClick={() => flashPrimary(key)}
-                className="flex-1 min-w-0 text-[10px] font-bold text-white/70 uppercase tracking-wider truncate leading-tight text-left hover:text-white/90 transition-colors cursor-pointer"
-                title="Flash to preview"
+                className={`text-[10px] font-bold uppercase tracking-wider truncate leading-tight text-left transition-colors cursor-pointer ${highlightedPrimary === key ? 'text-[#ff00ff]' : 'text-white/70 hover:text-white/90'}`}
+                title={derivedCount > 0 ? 'Click to highlight derived tokens' : undefined}
               >
                 {camelToLabel(key)}
+                {highlightedPrimary === key && <span className="ml-1 text-[8px] opacity-60">●</span>}
               </button>
+              {infoHint && (
+                <span className="shrink-0 text-white/25" title={infoHint}>
+                  <Info size={10} />
+                </span>
+              )}
+              <div className="flex-1 min-w-0" />
               {derivedCount > 0 && (
-                <span className="text-[8px] text-white/25 tabular-nums">{derivedCount} derived</span>
+                <span
+                  className={`text-[8px] tabular-nums cursor-default ${highlightedPrimary === key ? 'text-[#ff00ff]' : 'text-white/25'}`}
+                  title={(DERIVED_PATHS[key] ?? []).map(pathToLabel).join(', ')}
+                >
+                  {derivedCount} derived
+                </span>
               )}
               <button
                 type="button"
-                onClick={() => {
-                  setPrimaryColor(key, def.colors[key]);
-                }}
+                onClick={handleReset}
                 className={`p-0.5 shrink-0 transition-colors ${theme.colors[key] === def.colors[key]
                   ? 'text-white/[0.06] cursor-default'
                   : 'text-white/30 hover:text-white/60'
@@ -841,6 +918,8 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                   onUnlock={!isPrimary ? () => unlockToken(path) : undefined}
                   onRelock={!isPrimary ? () => relockToken(path) : undefined}
                   onFlash={() => flashToken(path)}
+                  highlighted={highlightedPaths.has(path)}
+                  hint={TOKEN_HINTS[key]}
                 />
               );
             })}
@@ -858,6 +937,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           onUnlock={() => unlockToken('branding.heroLine1Color')}
           onRelock={() => relockToken('branding.heroLine1Color')}
           onFlash={() => flashToken('branding.heroLine1Color')}
+          highlighted={highlightedPaths.has('branding.heroLine1Color')}
         />
         <ColorInput
           label="Hero Line 2 Color"
@@ -868,6 +948,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           onUnlock={() => unlockToken('branding.heroLine2Color')}
           onRelock={() => relockToken('branding.heroLine2Color')}
           onFlash={() => flashToken('branding.heroLine2Color')}
+          highlighted={highlightedPaths.has('branding.heroLine2Color')}
         />
 
         {/* ── Branding Copy ── */}
@@ -948,6 +1029,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               onUnlock={() => unlockToken(path)}
               onRelock={() => relockToken(path)}
               onFlash={() => flashToken(path)}
+              highlighted={highlightedPaths.has(path)}
             />
           );
         })}
@@ -969,6 +1051,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                 onUnlock={() => unlockToken(path)}
                 onFlash={() => flashToken(path)}
                 onRelock={() => relockToken(path)}
+                highlighted={highlightedPaths.has(path)}
               />
               <div className="flex items-center gap-2 ml-8 -mt-0.5 mb-1">
                 <span className="text-[9px] text-white/30">Opacity</span>

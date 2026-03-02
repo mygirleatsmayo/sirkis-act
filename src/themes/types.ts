@@ -9,7 +9,6 @@ export interface ThemeColors {
   bgGlass: string;            // GlassCard / sidebar / elevated surfaces
   bgInput: string;            // input, select, number fields
   bgOverlay: string;          // modal overlays, drawer overlay
-  bgMuted: string;            // withdrawal cards, comparison sub-cards
 
   // Borders
   borderDefault: string;      // input borders, dividers

@@ -80,7 +80,6 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     // bg derivations
     bgGlass: shiftLightness(p.bg, 2 * dir),
     bgInput: shiftLightness(p.bg, -3 * dir),
-    bgMuted: hexToRgba(p.bg, 0.6),
     borderDefault: shiftLightness(p.bg, 8 * dir),
 
     // brand derivations

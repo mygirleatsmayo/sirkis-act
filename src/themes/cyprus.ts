@@ -9,7 +9,6 @@ export const cyprusTheme: ThemeConfig = {
     bgGlass: '#004745',
     bgInput: '#002E2B',
     bgOverlay: 'rgba(15, 23, 42, 0.4)',
-    bgMuted: 'rgba(0, 61, 58, 0.6)',
 
     borderDefault: '#006560',
     borderSubtle: 'rgba(255, 255, 255, 0.06)',
