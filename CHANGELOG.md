@@ -3,12 +3,14 @@
 ## [Unreleased]
 
 - **Cyprus Color Defaults**: loss=#E65C5C, startNow=#5CE6E6, opm=#74c365.
-- **Token Cleanup**: Removed unused `startNowBg` and `bgCard` tokens from entire system.
+- **Token Cleanup**: Removed unused `startNowBg`, `bgCard`, and `bgMuted` tokens from entire system.
 - **Start-Now Button**: Text inverts with background color for proper contrast.
 - **Input Icons**: Hourglass (Start Investing), Skull (Life Expectancy), TreePalm (Retirement), Balloon (Inflation), Sprout (Salary Growth), Rocket (Expected Return), Calendar (Contribution Timing).
 - **Icon Hover**: Input field icons highlight with brand color on hover.
 - **iOS Warning**: Mobile-only red banner in Theme Lab when background color changes (address bar updates on panel close).
 - **Contribution Timing**: Label styling matches other input fields with hover states.
+- **Theme Lab Structural Overhaul**: Removed primary duplicates from token sections; added textNeutral as primary; sticky highlight system for derived tokens; derived count tooltips; hint tooltips for startNow/loss/bgOverlay.
+- **Theme Lab Reset Fix**: Reset buttons now compute defaults through derivation engine instead of hardcoded values.
 
 ## [1.2.0] - 2026-02-26 — Settings Modal & Theme Lab Polish
 
