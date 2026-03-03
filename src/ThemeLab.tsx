@@ -204,7 +204,7 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
           type="button"
           onClick={onFlash}
           className={`text-[10px] font-bold uppercase tracking-wider truncate leading-tight text-left transition-colors cursor-pointer ${highlighted ? 'text-[#ff00ff]' : 'text-white/70 hover:text-white/90'}`}
-          title="Flash to preview"
+          title="Click to flash in app."
         >
           {label}
         </button>
@@ -792,7 +792,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                 type="button"
                 onClick={() => flashPrimary(key)}
                 className={`text-[10px] font-bold uppercase tracking-wider truncate leading-tight text-left transition-colors cursor-pointer ${highlightedPrimary === key ? 'text-[#ff00ff]' : 'text-white/70 hover:text-white/90'}`}
-                title={derivedCount > 0 ? 'Click to highlight derived tokens' : undefined}
+                title="Click to flash in app and highlight derived colors."
               >
                 {camelToLabel(key)}
                 {highlightedPrimary === key && <span className="ml-1 text-[8px] opacity-60">●</span>}
@@ -877,6 +877,68 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           highlighted={highlightedPaths.has('branding.heroLine2Color')}
         />
 
+        {/* ── Effects ── */}
+        <div className="mt-3 pt-3 border-t border-white/10">
+          <SectionHeader label="Effects" showDivider={false} compactTop />
+          <div className="flex items-baseline gap-2 mb-1">
+            <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Glow Colors</div>
+            <span className="text-[8px] text-white/25 uppercase tracking-wider">Mobile only</span>
+          </div>
+          {theme.effects.glowColors.map((gc, i) => {
+            const path = `effects.glowColors.${i}`;
+            return (
+              <ColorInput
+                key={`glow-${i}`}
+                label={`Glow ${i + 1}`}
+                value={gc}
+                defaultValue={def.effects.glowColors[i]}
+                onChange={(hex) => setColorAtPath(path, hex)}
+                locked={isTokenLocked(tokenLocks, path)}
+                onUnlock={() => unlockToken(path)}
+                onRelock={() => relockToken(path)}
+                onFlash={() => flashToken(path)}
+                highlighted={highlightedPaths.has(path)}
+              />
+            );
+          })}
+
+          <div className="flex items-baseline gap-2 mt-3 mb-1">
+            <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Background Blobs</div>
+            <span className="text-[8px] text-white/25 uppercase tracking-wider">Desktop only</span>
+          </div>
+          {theme.effects.blobs.map((blob, i) => {
+            const path = `effects.blobs.${i}.color`;
+            return (
+              <div key={`blob-${i}`}>
+                <ColorInput
+                  label={`Blob ${i + 1} (${blob.position})`}
+                  value={blob.color}
+                  defaultValue={def.effects.blobs[i].color}
+                  onChange={(hex) => setColorAtPath(path, hex)}
+                  locked={isTokenLocked(tokenLocks, path)}
+                  onUnlock={() => unlockToken(path)}
+                  onFlash={() => flashToken(path)}
+                  onRelock={() => relockToken(path)}
+                  highlighted={highlightedPaths.has(path)}
+                />
+                <div className="flex items-center gap-2 ml-8 -mt-0.5 mb-1">
+                  <span className="text-[9px] text-white/30">Opacity</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={blob.opacity}
+                    onChange={(e) => setBlobOpacity(i, parseFloat(e.target.value))}
+                    className="flex-1 h-1 accent-teal-400"
+                  />
+                  <span className="text-[9px] text-white/40 font-mono w-6 text-right">{blob.opacity}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {/* ── Branding Copy ── */}
         <SectionHeader label="Branding Copy" />
         <TextInput label="App Name" value={theme.branding.appName} defaultValue={def.branding.appName} onChange={(v) => setBranding('appName', v)} />
@@ -940,65 +1002,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <FontSelect label="Sans / UI" value={theme.fonts.sans} defaultValue={def.fonts.sans} onChange={(v) => setFont('sans', v)} />
         <FontSelect label="Mono (Numbers)" value={theme.fonts.mono} defaultValue={def.fonts.mono} onChange={(v) => setFont('mono', v)} />
 
-        {/* ── Effects ── */}
-        <SectionHeader label="Effects" />
-        <div className="flex items-baseline gap-2 mb-1">
-          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Glow Colors</div>
-          <span className="text-[8px] text-white/25 uppercase tracking-wider">Mobile only</span>
-        </div>
-        {theme.effects.glowColors.map((gc, i) => {
-          const path = `effects.glowColors.${i}`;
-          return (
-            <ColorInput
-              key={`glow-${i}`}
-              label={`Glow ${i + 1}`}
-              value={gc}
-              defaultValue={def.effects.glowColors[i]}
-              onChange={(hex) => setColorAtPath(path, hex)}
-              locked={isTokenLocked(tokenLocks, path)}
-              onUnlock={() => unlockToken(path)}
-              onRelock={() => relockToken(path)}
-              onFlash={() => flashToken(path)}
-              highlighted={highlightedPaths.has(path)}
-            />
-          );
-        })}
-
-        <div className="flex items-baseline gap-2 mt-3 mb-1">
-          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Background Blobs</div>
-          <span className="text-[8px] text-white/25 uppercase tracking-wider">Desktop only</span>
-        </div>
-        {theme.effects.blobs.map((blob, i) => {
-          const path = `effects.blobs.${i}.color`;
-          return (
-            <div key={`blob-${i}`}>
-              <ColorInput
-                label={`Blob ${i + 1} (${blob.position})`}
-                value={blob.color}
-                defaultValue={def.effects.blobs[i].color}
-                onChange={(hex) => setColorAtPath(path, hex)}
-                locked={isTokenLocked(tokenLocks, path)}
-                onUnlock={() => unlockToken(path)}
-                onFlash={() => flashToken(path)}
-                onRelock={() => relockToken(path)}
-                highlighted={highlightedPaths.has(path)}
-              />
-              <div className="flex items-center gap-2 ml-8 -mt-0.5 mb-1">
-                <span className="text-[9px] text-white/30">Opacity</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={blob.opacity}
-                  onChange={(e) => setBlobOpacity(i, parseFloat(e.target.value))}
-                  className="flex-1 h-1 accent-teal-400"
-                />
-                <span className="text-[9px] text-white/40 font-mono w-6 text-right">{blob.opacity}</span>
-              </div>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
