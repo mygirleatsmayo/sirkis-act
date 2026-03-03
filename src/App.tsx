@@ -64,8 +64,8 @@ const Badge = ({ children, color = "brand" }: BadgeProps) => {
   const { theme } = useTheme();
   const c = theme.colors;
   const palette: Record<BadgeColor, { bg: string; text: string; border: string }> = {
-    brand: { bg: hexAlpha(c.brand, 0.10), text: c.brand, border: hexAlpha(c.brand, 0.20) },
-    returns: { bg: hexAlpha(c.returns, 0.10), text: c.returns, border: hexAlpha(c.returns, 0.20) },
+    brand: { bg: c.brandBg, text: c.brand, border: hexAlpha(c.brand, 0.20) },
+    returns: { bg: c.returnsBg, text: c.returns, border: hexAlpha(c.returns, 0.20) },
     loss: { bg: hexAlpha(c.loss, 0.15), text: c.loss, border: hexAlpha(c.loss, 0.20) },
     neutral: { bg: c.neutralBg, text: c.textNeutral, border: c.borderSubtle },
   };
