@@ -16,6 +16,7 @@ export interface Primaries {
 
 export interface DerivedColors {
   colors: ThemeColors;
+  logoColor: string;
   heroLine1Color: string;
   heroLine2Color: string;
   glowColors: [string, string, string];
@@ -115,6 +116,7 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
 
   return {
     colors,
+    logoColor: p.brand,
     heroLine1Color: p.brand,
     heroLine2Color: p.brandAccent,
     glowColors: [

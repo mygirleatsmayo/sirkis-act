@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDown, Sun, Moon, Zap, Info } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
-import { playgroundTheme } from './themes/playground';
 import { useTheme } from './themes/useTheme';
 import { hexToRgb, hexToRgba, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
 import { applyDerivations, extractPrimaries, getModeStatics } from './themes/derivationRules';
@@ -135,7 +134,7 @@ const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', '
 /** Derived token paths per primary — used for flash, sticky highlight, and tooltip content */
 const DERIVED_PATHS: Record<string, string[]> = {
   bg: ['colors.bgGlass', 'colors.bgInput', 'colors.borderDefault'],
-  brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color'],
+  brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color', 'branding.logoColor'],
   brandAccent: ['colors.brandAccentBg', 'branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2', 'effects.blobs.0.color', 'effects.blobs.1.color'],
   returns: ['colors.returnsBg'],
   loss: ['colors.lossBg'],
@@ -331,7 +330,7 @@ const LabInstructions = () => {
           <li><strong className="text-white/55">Primaries</strong> set the 6 base colors. Derived tokens auto-update unless manually unlocked.</li>
           <li><strong className="text-white/55">Token Sections</strong> let you fine-tune individual colors (surfaces, text, accents, etc.).</li>
           <li><strong className="text-white/55">Hero Colors</strong> and <strong className="text-white/55">Branding Copy</strong> control hero line colors and hero copy/subheadline parts.</li>
-          <li><strong className="text-white/55">Logo</strong> accepts any SVG upload; stroke color syncs with Brand accent.</li>
+          <li><strong className="text-white/55">Logo</strong> accepts any SVG upload; stroke color defaults to Brand and can be customized independently.</li>
           <li><strong className="text-white/55">Save</strong> exports a TypeScript theme file you can submit to the developer for inclusion in a future release.</li>
         </ul>
       )}
@@ -370,17 +369,21 @@ interface ThemeLabProps {
 }
 
 export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
-  const { setThemeId, themeId, setThemeOverride } = useTheme();
+  const { theme: activeTheme, setThemeId, themeId, setThemeOverride } = useTheme();
   const prevThemeId = useRef(themeId);
+  const wasOpenRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const baseThemeRef = useRef<ThemeConfig>(cloneTheme(activeTheme));
 
   // Editable theme
-  const [theme, setThemeLocal] = useState<ThemeConfig>(() => cloneTheme(playgroundTheme));
+  const [theme, setThemeLocal] = useState<ThemeConfig>(() => cloneTheme(activeTheme));
   const themeRef = useRef(theme);
   themeRef.current = theme;
 
   // Logo state
   const [customSvg, setCustomSvg] = useState<string | null>(null);
+  // Source defaults for reset actions — captured from the active theme when Theme Lab opens.
+  const [resetBaseTheme, setResetBaseTheme] = useState<ThemeConfig>(() => cloneTheme(activeTheme));
 
   // Save state
   const [showSave, setShowSave] = useState(false);
@@ -433,9 +436,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     return themeMode;
   }, [themeMode, theme.colors.bg]);
 
-  // Defaults computed through derivation engine so reset buttons match actual derived output
+  // Defaults computed through derivation engine from the current lab base theme.
   const defaults = useMemo(() => {
-    const d = cloneTheme(playgroundTheme);
+    const d = cloneTheme(resetBaseTheme);
     const primaries = extractPrimaries(d.colors);
     const derived = applyDerivations(primaries, effectiveMode);
     for (const [key, value] of Object.entries(derived.colors)) {
@@ -444,12 +447,13 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     }
     d.branding.heroLine1Color = derived.heroLine1Color;
     d.branding.heroLine2Color = derived.heroLine2Color;
+    d.branding.logoColor = derived.logoColor;
     d.effects.glowColors = [...derived.glowColors];
     derived.blobColors.forEach((bc, i) => {
       d.effects.blobs[i] = { ...d.effects.blobs[i], color: bc };
     });
     return d;
-  }, [effectiveMode]);
+  }, [effectiveMode, resetBaseTheme]);
 
   // ── Re-derive locked tokens when mode changes ──
 
@@ -473,6 +477,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       }
       if (isTokenLocked('branding.heroLine2Color')) {
         next.branding.heroLine2Color = derived.heroLine2Color;
+      }
+      if (isTokenLocked('branding.logoColor')) {
+        next.branding.logoColor = derived.logoColor;
       }
 
       // Re-derive locked glow colors
@@ -508,13 +515,20 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   }, [theme, isOpen, setThemeOverride]);
 
   useEffect(() => {
-    if (isOpen && themeId !== 'playground') {
-      prevThemeId.current = themeId;
-      setThemeId('playground');
+    if (isOpen && !wasOpenRef.current) {
+      const base = cloneTheme(activeTheme);
+      baseThemeRef.current = base;
+      setResetBaseTheme(base);
+      setThemeLocal(cloneTheme(base));
+      if (themeId !== 'playground') {
+        prevThemeId.current = themeId;
+        setThemeId('playground');
+      }
     }
+    wasOpenRef.current = isOpen;
     // Override persists when panel closes so changes remain visible
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, activeTheme]);
 
   // ── Value setters ──
 
@@ -599,6 +613,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       if (isTokenLocked('branding.heroLine2Color')) {
         next.branding.heroLine2Color = derived.heroLine2Color;
       }
+      if (isTokenLocked('branding.logoColor')) {
+        next.branding.logoColor = derived.logoColor;
+      }
 
       // glow colors
       derived.glowColors.forEach((gc, i) => {
@@ -677,7 +694,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   // ── Reset ──
 
   const handleReset = useCallback(() => {
-    setThemeLocal(cloneTheme(playgroundTheme));
+    setThemeLocal(cloneTheme(baseThemeRef.current));
     setCustomSvg(null);
     setTokenLocks({});
     setThemeMode('auto');
@@ -834,11 +851,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
         {/* Primary color pickers */}
         {(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral'] as const).map(key => {
-          const derivedCount = key === 'bg' ? 3
-            : key === 'brand' ? 5
-              : key === 'brandAccent' ? 7
-                : key === 'startNow' ? 0
-                  : 1; // returns, loss, opm, textNeutral
+          const derivedCount = DERIVED_PATHS[key]?.length ?? 0;
           const isDerivationPrimary = key !== 'textNeutral';
           const handleChange = (hex: string) =>
             isDerivationPrimary ? setPrimaryColor(key as keyof Primaries, hex) : setTextNeutralColor(hex);
@@ -957,7 +970,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <div className="flex items-center gap-3 py-2">
           <div
             className="w-12 h-12 rounded-lg border border-white/15 bg-black/30 flex items-center justify-center overflow-hidden shrink-0"
-            style={{ color: theme.colors.brand }}
+            style={{ color: theme.branding.logoColor }}
           >
             {customSvg ? (
               <div
@@ -985,12 +998,13 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
             />
             <ColorInput
               label="Stroke Color"
-              value={theme.colors.brand}
-              defaultValue={def.colors.brand}
-              onChange={(hex) => setColorAtPath('colors.brand', hex)}
-              onFlash={() => flashToken('colors.brand')}
+              value={theme.branding.logoColor}
+              defaultValue={def.branding.logoColor}
+              onChange={(hex) => setColorAtPath('branding.logoColor', hex)}
+              onFlash={() => flashToken('branding.logoColor')}
+              highlighted={highlightedPaths.has('branding.logoColor')}
             />
-            <div className="text-[9px] text-white/25">Synced with Brand accent color</div>
+            <div className="text-[9px] text-white/25">Changing this affects only the logo.</div>
           </div>
         </div>
 

@@ -72,6 +72,9 @@ describe('applyDerivations', () => {
   it('derives heroLine1Color as copy of brand', () => {
     expect(derived.heroLine1Color).toBe(cyprusPrimaries.brand);
   });
+  it('derives logoColor as copy of brand', () => {
+    expect(derived.logoColor).toBe(cyprusPrimaries.brand);
+  });
 
   // ── returns derivations ──
   it('derives returnsBg as returns at alpha 0.08', () => {

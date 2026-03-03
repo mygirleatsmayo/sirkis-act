@@ -48,6 +48,8 @@ import { getLossFractionLabel, clampNumber, formatCurrency, formatCompact, hexAl
 import { runProjection } from './utils/projection';
 import { useTheme } from './themes/useTheme';
 // --- HELPER COMPONENTS ---
+// Guardrail: GlassCard and Card intentionally share the same surface token.
+// If one changes, review the other in the same edit unless intentionally diverging.
 const GlassCard = ({ children, className = "" }: CardProps) => (
   <div className={`bg-surface-glass border border-subtle shadow-[0_22px_55px_-38px_rgba(0,0,0,0.8)] rounded-[28px] ${className}`}>
     {children}
@@ -318,10 +320,12 @@ const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = f
         {!isMobile && (
           <div className="mb-8 pt-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5" style={{ color: theme.colors.brand }}>
-                <Logo className="h-9 w-9" />
+              <div className="flex items-center gap-2.5">
+                <div style={{ color: theme.branding.logoColor }}>
+                  <Logo className="h-9 w-9" />
+                </div>
                 <div>
-                  <div className="font-display font-black text-xl tracking-tight leading-tight">{theme.branding.appName}</div>
+                  <div className="font-display font-black text-xl tracking-tight leading-tight" style={{ color: theme.colors.brand }}>{theme.branding.appName}</div>
                   <div className="text-[10px] font-medium text-content-subtle leading-tight">{theme.branding.tagline}</div>
                 </div>
               </div>
@@ -615,6 +619,8 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
     : nominalAtRetirement / withdrawalYears;
   const monthlyRealWithdrawalAtRetirement = realTodayToNominalAtRetirement(monthlyRealWithdrawal);
   const useThreeColumnPanels = chartSize.width >= 550;
+  // Intentional: "Start Now Difference" is represented by the top overlay curve
+  // (Immediate Total Nominal), while the tooltip computes the numeric gap vs delayed total.
   const legendItems = useMemo(() => [
     { label: 'Your Contributions', color: theme.colors.brand, visible: true },
     { label: 'Employer Match (OPM)', color: theme.colors.opm, visible: true },
@@ -707,15 +713,17 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
       <div role="main" id="main-content" className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
         {/* MOBILE HEADER */}
         <div role="banner" className={`lg:hidden flex justify-between items-center px-4 bg-surface border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
-          <div className="flex items-center gap-2" style={{ color: theme.colors.brand }}>
-            <div
-              className="transition-transform duration-300 ease-in-out"
-              style={{ transform: isScrolled ? 'scale(0.67)' : 'scale(1)', transformOrigin: 'left center' }}
-            >
-              <Logo className="h-9 w-9" />
+          <div className="flex items-center gap-2">
+            <div style={{ color: theme.branding.logoColor }}>
+              <div
+                className="transition-transform duration-300 ease-in-out"
+                style={{ transform: isScrolled ? 'scale(0.67)' : 'scale(1)', transformOrigin: 'left center' }}
+              >
+                <Logo className="h-9 w-9" />
+              </div>
             </div>
             <div className="flex flex-col">
-              <div className="font-display font-black tracking-tight leading-tight text-2xl">{theme.branding.appName}</div>
+              <div className="font-display font-black tracking-tight leading-tight text-2xl" style={{ color: theme.colors.brand }}>{theme.branding.appName}</div>
               <div className={`font-medium text-content-subtle leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>{theme.branding.tagline}</div>
             </div>
           </div>
@@ -958,6 +966,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       <Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke={theme.colors.opm} strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
                       <Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke={theme.colors.returns} strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
                       {isDelayed && showImmediateLine && (
+                        // Intentional: plot immediate total as the comparison top line for the "Start Now Difference" overlay.
                         <Line name="Start Now Difference" type="monotone" dataKey="Immediate Total Nominal" stroke={theme.colors.startNow} strokeDasharray="6 6" strokeWidth={2.5} dot={false} />
                       )}
                     </AreaChart>

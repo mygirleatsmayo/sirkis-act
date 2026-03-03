@@ -166,6 +166,7 @@ export const SettingsModal = ({
               </h3>
               <span
                 className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                // Intentional: Theme Lab is fully user-driven; no hardcoded contrast guardrails for brand surfaces.
                 style={{ backgroundColor: theme.colors.brand, color: theme.colors.textPrimary }}
               >
                 Beta
@@ -179,6 +180,7 @@ export const SettingsModal = ({
               type="button"
               onClick={handleOpenThemeLab}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
+              // Intentional: contrast is controlled by theme token choices (brand/textPrimary), not forced logic.
               style={{ backgroundColor: theme.colors.brand, color: theme.colors.textPrimary }}
             >
               <Palette size={16} />

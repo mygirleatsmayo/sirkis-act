@@ -40,6 +40,7 @@ export const cyprusTheme: ThemeConfig = {
   },
   branding: {
     logo: CrownLogo,
+    logoColor: '#00A499',
     appName: 'Sirkis Act',
     tagline: 'Old-Fashioned Financial Planning',
     heroLine1: "Dr. Sirkis's",

@@ -45,6 +45,7 @@ export interface ThemeColors {
 
 export interface ThemeBranding {
   logo: LogoComponent;
+  logoColor: string;           // logo stroke/fill color
   appName: string;              // e.g. 'Sirkis Act'
   tagline: string;              // e.g. 'Old-Fashioned Financial Planning'
   heroLine1: string;            // e.g. "Dr. Sirkis's"
