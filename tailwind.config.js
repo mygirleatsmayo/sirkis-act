@@ -29,7 +29,6 @@ export default {
           brand: 'rgb(var(--color-brand) / <alpha-value>)',
           'brand-bg': 'var(--color-brand-bg)',
           'brand-accent': 'rgb(var(--color-brand-accent) / <alpha-value>)',
-          'brand-accent-bg': 'var(--color-brand-accent-bg)',
           opm: 'rgb(var(--color-opm) / <alpha-value>)',
           'opm-bg': 'var(--color-opm-bg)',
           returns: 'rgb(var(--color-returns) / <alpha-value>)',

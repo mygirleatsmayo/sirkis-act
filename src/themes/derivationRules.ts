@@ -92,9 +92,6 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     // returns derivation
     returnsBg: hexToRgba(p.returns, 0.08),
 
-    // brandAccent derivations
-    brandAccentBg: hexToRgba(p.brandAccent, 0.08),
-
     // opm derivation
     opmBg: hexToRgba(p.opm, 0.08),
 

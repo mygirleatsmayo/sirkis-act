@@ -103,7 +103,6 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
     section: 'Accents',
     tokens: [
       { key: 'brandBg', label: 'Brand BG' },
-      { key: 'brandAccentBg', label: 'Brand Accent BG' },
       { key: 'opmBg', label: 'OPM BG' },
       { key: 'returnsBg', label: 'Returns BG' },
       { key: 'lossBg', label: 'Loss BG' },
@@ -135,7 +134,7 @@ const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', '
 const DERIVED_PATHS: Record<string, string[]> = {
   bg: ['colors.bgGlass', 'colors.bgInput', 'colors.borderDefault'],
   brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color', 'branding.logoColor'],
-  brandAccent: ['colors.brandAccentBg', 'branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2', 'effects.blobs.0.color', 'effects.blobs.1.color'],
+  brandAccent: ['branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2', 'effects.blobs.0.color', 'effects.blobs.1.color'],
   returns: ['colors.returnsBg'],
   loss: ['colors.lossBg'],
   startNow: [],

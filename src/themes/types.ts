@@ -28,7 +28,6 @@ export interface ThemeColors {
   returns: string;            // Investment Returns / gold accent
   returnsBg: string;          // returns tint background
   brandAccent: string;        // brand accent / hero line 2 / section headers / blobs / glows
-  brandAccentBg: string;      // brand accent tint background
   startNow: string;           // Start Now comparison line
   loss: string;               // loss / error / destructive
   lossBg: string;             // loss tint background

@@ -25,7 +25,6 @@ export const cyprusTheme: ThemeConfig = {
     returns: '#E6C300',
     returnsBg: 'rgba(230, 195, 0, 0.08)',
     brandAccent: '#E6C300',
-    brandAccentBg: 'rgba(230, 195, 0, 0.08)',
     startNow: '#5CE6E6',
     loss: '#E65C5C',
     lossBg: 'rgba(230, 92, 92, 0.07)',

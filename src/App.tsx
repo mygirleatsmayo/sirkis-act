@@ -348,7 +348,10 @@ const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = f
             <Clock size={14} /> Timeline
           </h3>
           <InputField label="Current Age" value={inputs.currentAge} onChange={v => handleInputChange('currentAge', v)} min={18} max={80} icon={User} />
-          <div className={`relative rounded-2xl mb-6 transition-all duration-300 ${inputs.startAge > inputs.currentAge ? 'bg-accent-loss/8 ring-1 ring-accent-loss/25' : 'bg-transparent'}`}>
+          <div
+            className={`relative rounded-2xl mb-6 transition-all duration-300 ${inputs.startAge > inputs.currentAge ? 'ring-1 ring-accent-loss/25' : ''}`}
+            style={inputs.startAge > inputs.currentAge ? { background: theme.colors.lossBg } : undefined}
+          >
             <div className="p-4 pb-2">
               <InputField
                 label="Start Investing At"
@@ -362,7 +365,7 @@ const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = f
             </div>
             {inputs.startAge > inputs.currentAge && (
               <div className="px-4 pb-4 -mt-3">
-                <div className="flex items-center justify-between gap-2 text-[11px] font-semibold bg-accent-loss/10 p-2.5 rounded-lg">
+                <div className="flex items-center justify-between gap-2 text-[11px] font-semibold p-2.5 rounded-lg" style={{ background: theme.colors.lossBg }}>
                   <div className="flex items-center gap-2 text-accent-loss/80">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent-loss animate-pulse" />
                     {inputs.startAge - inputs.currentAge} year delay active
@@ -788,7 +791,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                         <div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: theme.colors.startNow }}>Start Early</div>
                         <div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black font-mono text-content-primary">{formatCurrency(comparisonData['Total Nominal'])}</div>
                       </div>
-                      <div className="rounded-xl bg-surface/60 p-2.5 border border-accent-loss/50">
+                      <div className="rounded-xl p-2.5 border border-accent-loss/50" style={{ background: theme.colors.lossBg }}>
                         <div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: theme.colors.loss }}>Potential Loss</div>
                         <div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black font-mono text-accent-loss">-{formatCurrency(lossAmount)}</div>
                       </div>
@@ -825,7 +828,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
               />
             </div>
             {isDelayed && useThreeColumnPanels && (
-              <div className="px-4 py-3 grid grid-cols-3 items-center gap-4 rounded-[22px] shadow-[0_16px_32px_-24px_rgba(0,0,0,0.7)]" style={{ background: hexAlpha(theme.colors.loss, 0.10), border: `1px solid ${hexAlpha(theme.colors.loss, 0.50)}` }}>
+              <div className="px-4 py-3 grid grid-cols-3 items-center gap-4 rounded-[22px] shadow-[0_16px_32px_-24px_rgba(0,0,0,0.7)]" style={{ background: theme.colors.lossBg, border: `1px solid ${hexAlpha(theme.colors.loss, 0.50)}` }}>
                 <div className="col-span-1 text-center">
                   <div className="text-center text-[clamp(0.65rem,1.1vw,0.85rem)] font-black uppercase tracking-widest" style={{ color: theme.colors.loss }}>Potential Loss</div>
                   <div className="text-center text-[clamp(1.2rem,2vw,1.7rem)] leading-none font-black font-mono text-accent-loss">-{formatCurrency(lossAmount)}</div>

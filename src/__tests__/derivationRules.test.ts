@@ -111,11 +111,6 @@ describe('applyDerivations', () => {
     expect(normalizeRgba(derived.colors.neutralBg)).toBe(normalizeRgba('rgba(226, 232, 240, 0.10)'));
   });
 
-  // ── brandAccent derivations ──
-  it('derives brandAccentBg as brandAccent at alpha 0.08', () => {
-    expect(derived.colors.brandAccentBg).toBe(cyprusTheme.colors.brandAccentBg);
-  });
-
   // ── primaries pass through ──
   it('includes primaries in output colors', () => {
     expect(derived.colors.bg).toBe(cyprusPrimaries.bg);
