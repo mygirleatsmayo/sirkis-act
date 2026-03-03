@@ -11,6 +11,8 @@
 - **Contribution Timing**: Label styling matches other input fields with hover states.
 - **Theme Lab Structural Overhaul**: Removed primary duplicates from token sections; added textNeutral as primary; sticky highlight system for derived tokens; derived count tooltips; hint tooltips for startNow/loss/bgOverlay.
 - **Theme Lab Reset Fix**: Reset buttons now compute defaults through derivation engine instead of hardcoded values.
+- **Flash Fix**: Restored full app flash (all elements including Recharts) via hybrid override approach; eliminates race condition from previous implementation.
+- **Global Reset**: Now clears sticky highlights and pending flash timers.
 
 ## [1.2.0] - 2026-02-26 — Settings Modal & Theme Lab Polish
 
