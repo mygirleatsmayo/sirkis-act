@@ -6,16 +6,12 @@ import { playgroundTheme } from './themes/playground';
 import { useTheme } from './themes/useTheme';
 import { hexToRgb, hexToRgba, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
 import { applyDerivations, extractPrimaries, getModeStatics } from './themes/derivationRules';
-import { syncCssVars } from './themes/syncCssVars';
 import type { Primaries, ThemeMode } from './themes/derivationRules';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 const camelToLabel = (s: string): string =>
   s.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).trim();
-
-const camelToKebab = (s: string) =>
-  s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
 
 /** Convert a derived token path to a readable label for tooltips */
 const pathToLabel = (path: string): string => {
@@ -27,13 +23,6 @@ const pathToLabel = (path: string): string => {
     return `Blob ${idx + 1}`;
   }
   return path;
-};
-
-/** Map a token dot-path to its CSS custom property name, or null if no CSS var exists */
-const pathToCssVar = (path: string): string | null => {
-  if (path.startsWith('colors.')) return `--color-${camelToKebab(path.slice(7))}`;
-  if (path.startsWith('effects.glowColors.')) return `--glow-color-${path.slice(19)}`;
-  return null; // branding and blob paths use inline styles, no CSS var
 };
 
 /** Sanitize SVG string via DOMPurify — strips scripts, event handlers, unsafe elements */
@@ -387,6 +376,8 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
   // Editable theme
   const [theme, setThemeLocal] = useState<ThemeConfig>(() => cloneTheme(playgroundTheme));
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
 
   // Logo state
   const [customSvg, setCustomSvg] = useState<string | null>(null);
@@ -545,34 +536,27 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   }, []);
 
   /** Flash one or more token paths to magenta for 250ms.
-   *  Sets CSS vars directly (no React state mutation) + highlights labels via flashedPaths.
-   *  Note: branding and blob paths use inline styles (no CSS var), so only their
-   *  ThemeLab labels flash — the app elements themselves don't flash for those paths. */
+   *  Pushes a flash theme through ThemeProvider (React render path) so both
+   *  inline styles and CSS vars update. Labels highlight via flashedPaths state. */
   const flashPaths = useCallback((paths: string[]) => {
-    const root = document.documentElement;
-
-    // Flash CSS vars for app-visible tokens
+    const flashTheme = cloneTheme(themeRef.current);
     for (const path of paths) {
-      const cssVar = pathToCssVar(path);
-      if (!cssVar) continue;
-      // Determine format from the theme value: hex → channels, everything else → rgba passthrough
-      const themeValue = getNested(theme, path) as string;
-      const isHex = typeof themeValue === 'string' && themeValue.startsWith('#');
-      root.style.setProperty(cssVar, isHex ? '255 0 255' : 'rgba(255, 0, 255, 0.8)');
+      const current = getNested(themeRef.current, path);
+      if (typeof current !== 'string') continue;
+      setNested(flashTheme, path, current.startsWith('#') ? '#ff00ff' : 'rgba(255, 0, 255, 0.8)');
     }
 
-    // Flash labels in ThemeLab
+    setThemeOverride(flashTheme);
     setFlashedPaths(new Set(paths));
 
-    // Clear previous timer if rapid-fire clicking
     if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
 
     flashTimerRef.current = setTimeout(() => {
-      syncCssVars(theme);
+      setThemeOverride(themeRef.current);
       setFlashedPaths(new Set());
       flashTimerRef.current = null;
     }, 250);
-  }, [theme]);
+  }, [setThemeOverride]);
 
   /** Flash a single token path */
   const flashToken = useCallback((path: string) => {
@@ -697,6 +681,12 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     setCustomSvg(null);
     setTokenLocks({});
     setThemeMode('auto');
+    setHighlightedPrimary(null);
+    if (flashTimerRef.current) {
+      clearTimeout(flashTimerRef.current);
+      flashTimerRef.current = null;
+    }
+    setFlashedPaths(new Set());
   }, []);
 
   // ── SVG upload ──
