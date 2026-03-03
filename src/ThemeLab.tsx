@@ -144,9 +144,19 @@ const DERIVED_PATHS: Record<string, string[]> = {
 
 // ─── Sub-components ───────────────────────────────────────────────────────
 
-const SectionHeader = ({ label }: { label: string }) => (
-  <div className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 mt-5 mb-2 border-t border-white/5 pt-3 first:mt-0 first:border-0 first:pt-0">
-    {label}
+const SectionHeader = ({
+  label,
+  showDivider = true,
+  compactTop = false,
+}: {
+  label: string;
+  showDivider?: boolean;
+  compactTop?: boolean;
+}) => (
+  <div
+    className={`text-[9px] font-black uppercase tracking-[0.2em] text-white/50 mb-2 ${compactTop ? 'mt-3' : 'mt-5'} ${showDivider ? 'border-t border-white/5 pt-3' : 'border-0 pt-0'}`}
+  >
+    {label.toUpperCase()}
   </div>
 );
 
@@ -312,25 +322,34 @@ const FontSelect = ({ label, value, defaultValue, onChange }: TextInputProps) =>
 
 // ─── Lab Instructions ─────────────────────────────────────────────────────
 
-const LabInstructions = () => {
-  const [open, setOpen] = useState(false);
+const LabInstructions = ({
+  open,
+  onToggle,
+}: {
+  open: boolean;
+  onToggle: () => void;
+}) => {
   return (
-    <div className="mb-3">
+    <div className={open ? 'mb-3' : 'mb-2'}>
       <button
         type="button"
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white/60 transition-colors"
+        onClick={onToggle}
+        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/70 hover:text-white/90 transition-colors"
       >
         <ChevronDown size={10} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
         How to use Theme Lab
       </button>
       {open && (
         <ul className="mt-2 space-y-1 text-[10px] text-white/40 leading-relaxed pl-4">
-          <li><strong className="text-white/55">Primaries</strong> set the 6 base colors. Derived tokens auto-update unless manually unlocked.</li>
-          <li><strong className="text-white/55">Token Sections</strong> let you fine-tune individual colors (surfaces, text, accents, etc.).</li>
-          <li><strong className="text-white/55">Hero Colors</strong> and <strong className="text-white/55">Branding Copy</strong> control hero line colors and hero copy/subheadline parts.</li>
-          <li><strong className="text-white/55">Logo</strong> accepts any SVG upload; stroke color defaults to Brand and can be customized independently.</li>
-          <li><strong className="text-white/55">Save</strong> exports a TypeScript theme file you can submit to the developer for inclusion in a future release.</li>
+          <li><strong className="text-white/55">SWATCHES</strong> Click a swatch to change that color.</li>
+          <li><strong className="text-white/55">PRIMARIES</strong> The primary colors from which others derive. Changes update linked (derived) colors while those rows are locked.</li>
+          <li><strong className="text-white/55">MODE</strong> Toggle dark, light, or auto to preview how colors behave.</li>
+          <li><strong className="text-white/55">PRIMARY LABELS</strong> Click to flash that color in app and highlight linked rows. Click again to clear highlights.</li>
+          <li><strong className="text-white/55">ROW LABELS</strong> Click to flash only that row in app.</li>
+          <li><strong className="text-white/55">LOCKING</strong> Unlocked rows keep manual edits. Re-lock snaps back to the derived color.</li>
+          <li><strong className="text-white/55">LOGO</strong> Upload any SVG; stroke color defaults to Brand and can be changed independently.</li>
+          <li><strong className="text-white/55">RESET</strong> Row reset restores row. Header reset restores everything.</li>
+          <li><strong className="text-white/55">SAVE</strong> Exports a TypeScript file you can share with the developer.</li>
         </ul>
       )}
     </div>
@@ -388,6 +407,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const [showSave, setShowSave] = useState(false);
   const [saveName, setSaveName] = useState('');
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   // Dark/Light/Auto mode
   const [themeMode, setThemeMode] = useState<'dark' | 'light' | 'auto'>('auto');
@@ -674,6 +694,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <div className="flex items-center gap-2">
           <Palette size={16} className="text-teal-400" />
           <span className="text-sm font-black text-white tracking-tight">Theme Lab</span>
+          <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-white/15 bg-white/10 text-content-secondary">
+            Beta
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <button type="button" onClick={handleReset} className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 rounded-md transition-colors" title="Reset all to defaults">
@@ -714,10 +737,10 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       <div className="flex-1 overflow-y-auto px-4 pt-3 pb-8 custom-scrollbar">
 
         {/* ── Instructions ── */}
-        <LabInstructions />
+        <LabInstructions open={instructionsOpen} onToggle={() => setInstructionsOpen((prev) => !prev)} />
 
         {/* ── Mode ── */}
-        <SectionHeader label="Mode" />
+        <SectionHeader label="Mode" showDivider={instructionsOpen} compactTop />
         <div className="flex items-center gap-1 mb-3 p-1 rounded-lg bg-white/5 w-fit">
           {([
             { mode: 'dark' as const, icon: Moon, label: 'Dark' },
