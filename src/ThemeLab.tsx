@@ -3,9 +3,9 @@ import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDow
 import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
 import { useTheme } from './themes/useTheme';
-import { hexToRgb, hexToRgba, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
-import { applyDerivations, extractPrimaries, getModeStatics } from './themes/derivationRules';
+import { hexToRgb, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
 import type { Primaries, ThemeMode } from './themes/derivationRules';
+import { applyLockedDerivations, isTokenLocked } from './themes/themeLabDerivation';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -395,6 +395,16 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
   // Per-token lock state: absence = locked; stored as false = unlocked
   const [tokenLocks, setTokenLocks] = useState<Record<string, boolean>>(() => ({}));
+  const tokenLocksRef = useRef<Record<string, boolean>>(tokenLocks);
+
+  const setTokenLocksAndRef = useCallback((nextLocks: Record<string, boolean>) => {
+    tokenLocksRef.current = nextLocks;
+    setTokenLocks(nextLocks);
+  }, []);
+
+  useEffect(() => {
+    tokenLocksRef.current = tokenLocks;
+  }, [tokenLocks]);
 
   // Flash state: paths currently flashing (for label highlight)
   const [flashedPaths, setFlashedPaths] = useState<Set<string>>(() => new Set());
@@ -412,21 +422,10 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     return paths;
   }, [flashedPaths, highlightedPrimary]);
 
-  const isTokenLocked = useCallback((path: string): boolean => {
-    return tokenLocks[path] !== false;
-  }, [tokenLocks]);
-
   const unlockToken = useCallback((path: string) => {
-    setTokenLocks(prev => ({ ...prev, [path]: false }));
-  }, []);
-
-  const relockToken = useCallback((path: string) => {
-    setTokenLocks(prev => {
-      const next = { ...prev };
-      delete next[path];
-      return next;
-    });
-  }, []);
+    const nextLocks = { ...tokenLocksRef.current, [path]: false };
+    setTokenLocksAndRef(nextLocks);
+  }, [setTokenLocksAndRef]);
 
   // Compute effective mode
   const effectiveMode: ThemeMode = useMemo(() => {
@@ -436,77 +435,25 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     return themeMode;
   }, [themeMode, theme.colors.bg]);
 
+  const relockToken = useCallback((path: string) => {
+    const nextLocks = { ...tokenLocksRef.current };
+    delete nextLocks[path];
+    setTokenLocksAndRef(nextLocks);
+    setThemeLocal((prev) =>
+      applyLockedDerivations(prev, effectiveMode, nextLocks, { onlyPaths: [path] }),
+    );
+  }, [effectiveMode, setTokenLocksAndRef]);
+
   // Defaults computed through derivation engine from the current lab base theme.
   const defaults = useMemo(() => {
-    const d = cloneTheme(resetBaseTheme);
-    const primaries = extractPrimaries(d.colors);
-    const derived = applyDerivations(primaries, effectiveMode);
-    for (const [key, value] of Object.entries(derived.colors)) {
-      if (PRIMARY_KEYS.has(key as keyof ThemeColors)) continue;
-      (d.colors as unknown as Record<string, string>)[key] = value;
-    }
-    d.branding.heroLine1Color = derived.heroLine1Color;
-    d.branding.heroLine2Color = derived.heroLine2Color;
-    d.branding.logoColor = derived.logoColor;
-    d.effects.glowColors = [...derived.glowColors];
-    derived.blobColors.forEach((bc, i) => {
-      d.effects.blobs[i] = { ...d.effects.blobs[i], color: bc };
-    });
-    return d;
+    return applyLockedDerivations(resetBaseTheme, effectiveMode, {});
   }, [effectiveMode, resetBaseTheme]);
 
   // ── Re-derive locked tokens when mode changes ──
 
   useEffect(() => {
-    setThemeLocal(prev => {
-      const next = cloneTheme(prev);
-      const primaries = extractPrimaries(next.colors);
-      const derived = applyDerivations(primaries, effectiveMode);
-
-      // Re-derive locked color tokens
-      for (const [key, value] of Object.entries(derived.colors)) {
-        if (PRIMARY_KEYS.has(key as keyof ThemeColors)) continue;
-        if (isTokenLocked(`colors.${key}`)) {
-          (next.colors as unknown as Record<string, string>)[key] = value;
-        }
-      }
-
-      // Re-derive locked branding
-      if (isTokenLocked('branding.heroLine1Color')) {
-        next.branding.heroLine1Color = derived.heroLine1Color;
-      }
-      if (isTokenLocked('branding.heroLine2Color')) {
-        next.branding.heroLine2Color = derived.heroLine2Color;
-      }
-      if (isTokenLocked('branding.logoColor')) {
-        next.branding.logoColor = derived.logoColor;
-      }
-
-      // Re-derive locked glow colors
-      derived.glowColors.forEach((gc, i) => {
-        if (isTokenLocked(`effects.glowColors.${i}`)) {
-          next.effects.glowColors[i] = gc;
-        }
-      });
-
-      // Re-derive locked blob colors
-      derived.blobColors.forEach((bc, i) => {
-        if (isTokenLocked(`effects.blobs.${i}.color`)) {
-          next.effects.blobs[i] = { ...next.effects.blobs[i], color: bc };
-        }
-      });
-
-      // Re-derive locked mode statics
-      const statics = getModeStatics(effectiveMode);
-      for (const [key, value] of Object.entries(statics)) {
-        if (isTokenLocked(`colors.${key}`)) {
-          (next.colors as unknown as Record<string, string>)[key] = value as string;
-        }
-      }
-
-      return next;
-    });
-  }, [effectiveMode, isTokenLocked]);
+    setThemeLocal((prev) => applyLockedDerivations(prev, effectiveMode, tokenLocksRef.current));
+  }, [effectiveMode]);
 
   // ── Sync to ThemeProvider ──
 
@@ -581,79 +528,33 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const flashPrimary = useCallback((primaryKey: string) => {
     const allPaths = [`colors.${primaryKey}`];
     for (const path of DERIVED_PATHS[primaryKey] ?? []) {
-      if (isTokenLocked(path)) allPaths.push(path);
+      if (isTokenLocked(tokenLocksRef.current, path)) allPaths.push(path);
     }
     flashPaths(allPaths);
 
     // Toggle sticky highlight
     setHighlightedPrimary(prev => prev === primaryKey ? null : primaryKey);
-  }, [flashPaths, isTokenLocked]);
+  }, [flashPaths]);
 
   /** Change a primary color and auto-update all locked derived tokens */
   const setPrimaryColor = useCallback((primaryKey: keyof Primaries, newHex: string) => {
-    setThemeLocal(prev => {
+    setThemeLocal((prev) => {
       const next = cloneTheme(prev);
       (next.colors as unknown as Record<string, string>)[primaryKey] = newHex;
-
-      const primaries = extractPrimaries(next.colors);
-      const derived = applyDerivations(primaries, effectiveMode);
-
-      // Apply derived values only to LOCKED tokens
-      for (const [key, value] of Object.entries(derived.colors)) {
-        if (PRIMARY_KEYS.has(key as keyof ThemeColors)) continue;
-        if (isTokenLocked(`colors.${key}`)) {
-          (next.colors as unknown as Record<string, string>)[key] = value;
-        }
-      }
-
-      // branding
-      if (isTokenLocked('branding.heroLine1Color')) {
-        next.branding.heroLine1Color = derived.heroLine1Color;
-      }
-      if (isTokenLocked('branding.heroLine2Color')) {
-        next.branding.heroLine2Color = derived.heroLine2Color;
-      }
-      if (isTokenLocked('branding.logoColor')) {
-        next.branding.logoColor = derived.logoColor;
-      }
-
-      // glow colors
-      derived.glowColors.forEach((gc, i) => {
-        if (isTokenLocked(`effects.glowColors.${i}`)) {
-          next.effects.glowColors[i] = gc;
-        }
-      });
-
-      // blob colors
-      derived.blobColors.forEach((bc, i) => {
-        if (isTokenLocked(`effects.blobs.${i}.color`)) {
-          next.effects.blobs[i] = { ...next.effects.blobs[i], color: bc };
-        }
-      });
-
-      // mode-dependent statics
-      const statics = getModeStatics(effectiveMode);
-      for (const [key, value] of Object.entries(statics)) {
-        if (isTokenLocked(`colors.${key}`)) {
-          (next.colors as unknown as Record<string, string>)[key] = value as string;
-        }
-      }
-
-      return next;
+      return applyLockedDerivations(next, effectiveMode, tokenLocksRef.current);
     });
-  }, [effectiveMode, isTokenLocked]);
+  }, [effectiveMode]);
 
   /** Change textNeutral and re-derive neutralBg if locked */
   const setTextNeutralColor = useCallback((newHex: string) => {
-    setThemeLocal(prev => {
+    setThemeLocal((prev) => {
       const next = cloneTheme(prev);
       next.colors.textNeutral = newHex;
-      if (isTokenLocked('colors.neutralBg')) {
-        next.colors.neutralBg = hexToRgba(newHex, 0.10);
-      }
-      return next;
+      return applyLockedDerivations(next, effectiveMode, tokenLocksRef.current, {
+        onlyPaths: ['colors.neutralBg'],
+      });
     });
-  }, [isTokenLocked]);
+  }, [effectiveMode]);
 
   const setBranding = useCallback((key: string, value: string) => {
     setThemeLocal(prev => ({
@@ -696,7 +597,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const handleReset = useCallback(() => {
     setThemeLocal(cloneTheme(baseThemeRef.current));
     setCustomSvg(null);
-    setTokenLocks({});
+    setTokenLocksAndRef({});
     setThemeMode('auto');
     setHighlightedPrimary(null);
     if (flashTimerRef.current) {
@@ -704,7 +605,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       flashTimerRef.current = null;
     }
     setFlashedPaths(new Set());
-  }, []);
+  }, [setTokenLocksAndRef]);
 
   // ── SVG upload ──
 
@@ -917,7 +818,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                   value={theme.colors[key]}
                   defaultValue={def.colors[key]}
                   onChange={(hex) => setColorAtPath(path, hex)}
-                  locked={!isPrimary ? isTokenLocked(path) : undefined}
+                  locked={!isPrimary ? isTokenLocked(tokenLocks, path) : undefined}
                   onUnlock={!isPrimary ? () => unlockToken(path) : undefined}
                   onRelock={!isPrimary ? () => relockToken(path) : undefined}
                   onFlash={() => flashToken(path)}
@@ -936,7 +837,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           value={theme.branding.heroLine1Color}
           defaultValue={def.branding.heroLine1Color}
           onChange={(hex) => setColorAtPath('branding.heroLine1Color', hex)}
-          locked={isTokenLocked('branding.heroLine1Color')}
+          locked={isTokenLocked(tokenLocks, 'branding.heroLine1Color')}
           onUnlock={() => unlockToken('branding.heroLine1Color')}
           onRelock={() => relockToken('branding.heroLine1Color')}
           onFlash={() => flashToken('branding.heroLine1Color')}
@@ -947,7 +848,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           value={theme.branding.heroLine2Color}
           defaultValue={def.branding.heroLine2Color}
           onChange={(hex) => setColorAtPath('branding.heroLine2Color', hex)}
-          locked={isTokenLocked('branding.heroLine2Color')}
+          locked={isTokenLocked(tokenLocks, 'branding.heroLine2Color')}
           onUnlock={() => unlockToken('branding.heroLine2Color')}
           onRelock={() => relockToken('branding.heroLine2Color')}
           onFlash={() => flashToken('branding.heroLine2Color')}
@@ -1001,10 +902,13 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               value={theme.branding.logoColor}
               defaultValue={def.branding.logoColor}
               onChange={(hex) => setColorAtPath('branding.logoColor', hex)}
+              locked={isTokenLocked(tokenLocks, 'branding.logoColor')}
+              onUnlock={() => unlockToken('branding.logoColor')}
+              onRelock={() => relockToken('branding.logoColor')}
               onFlash={() => flashToken('branding.logoColor')}
               highlighted={highlightedPaths.has('branding.logoColor')}
             />
-            <div className="text-[9px] text-white/25">Changing this affects only the logo.</div>
+            <div className="text-[9px] text-white/25">Derived from Brand while locked. Changing this affects only the logo.</div>
           </div>
         </div>
 
@@ -1029,7 +933,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               value={gc}
               defaultValue={def.effects.glowColors[i]}
               onChange={(hex) => setColorAtPath(path, hex)}
-              locked={isTokenLocked(path)}
+              locked={isTokenLocked(tokenLocks, path)}
               onUnlock={() => unlockToken(path)}
               onRelock={() => relockToken(path)}
               onFlash={() => flashToken(path)}
@@ -1051,7 +955,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                 value={blob.color}
                 defaultValue={def.effects.blobs[i].color}
                 onChange={(hex) => setColorAtPath(path, hex)}
-                locked={isTokenLocked(path)}
+                locked={isTokenLocked(tokenLocks, path)}
                 onUnlock={() => unlockToken(path)}
                 onFlash={() => flashToken(path)}
                 onRelock={() => relockToken(path)}
