@@ -1,6 +1,16 @@
 # Changelog
 ---
 
+## [Unreleased]
+
+---
+
+## [1.3.1] - 2026-03-04 — Tooltip Hover Scope Fix
+
+- **Tooltip Hover Scope Fix**: Desktop sidebar input tooltips now trigger only from the info icon (not the full input row), by isolating tooltip hover/focus group scope.
+
+---
+
 ## [1.3.0] - 2026-03-04 — Theme Lab Robustness, Derivation, and Token Semantics (and more)
 
 - **Theme Lab Structural Overhaul**: Removed primary duplicates from token sections; added textNeutral as primary; sticky highlight system for derived tokens; derived count tooltips; hint tooltips for startNow/loss/bgOverlay. *All this and more detailed below.*

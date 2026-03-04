@@ -7,6 +7,25 @@ export interface ChangelogEntry {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    version: '1.3.1',
+    date: '2026-03-04',
+    title: 'Tooltip Hover Scope Fix',
+    items: [
+      'Desktop sidebar input tooltips now trigger only from the info icon, not the full input row',
+    ],
+  },
+  {
+    version: '1.3.0',
+    date: '2026-03-04',
+    title: 'Theme Lab Robustness, Derivation, and Token Semantics',
+    items: [
+      'Lock-aware derivation application and targeted re-lock snap behavior',
+      'textPrimary/textNeutral primary consistency and neutralBg derivation alignment',
+      'Logo token wiring, lossBg wiring, and badge background token mapping',
+      'Theme Lab UX/control updates: derived grouping, tooltips/copy refresh, beta badge',
+    ],
+  },
+  {
     version: '1.2.0',
     date: '2026-02-26',
     title: 'Settings Modal & Theme Lab Polish',
