@@ -1,29 +1,31 @@
 # Changelog
+---
 
-## [Unreleased]
+## [1.3.0] - 2026-03-04 — Theme Lab Robustness, Derivation, and Token Semantics (and more)
 
+- **Theme Lab Structural Overhaul**: Removed primary duplicates from token sections; added textNeutral as primary; sticky highlight system for derived tokens; derived count tooltips; hint tooltips for startNow/loss/bgOverlay. *All this and more detailed below.*
 - **Theme Lab Derivation Robustness**: Added shared lock-aware derivation application helpers and removed lock-triggered global re-derive churn; re-lock now snaps targeted rows to current derived values.
+- **Primary Derivation Consistency**: `textPrimary` and `textNeutral` now behave as true editable primaries in Theme Lab; they are no longer mode-static overrides.
+- **Neutral Surface Mapping Fix**: `neutralBg` now derives from the live `textNeutral` primary value (when locked), matching Theme Lab behavior expectations.
 - **Theme Lab Reset Baseline Fix**: Reset now uses the active theme snapshot captured at lab open instead of hardcoded Cyprus defaults.
+- **Flash Fix**: Restored full app flash (all elements including Recharts) via hybrid override approach; eliminates race condition from previous implementation.
+- **Global Reset**: Now clears sticky highlights and pending flash timers.
 - **Logo Tokening Fix**: Added `branding.logoColor` (derived from `brand` while locked) so logo color editing/flashing/highlighting is isolated from non-logo elements.
 - **Loss Surface Wiring**: `lossBg` now drives delayed/potential-loss panel backgrounds.
-- **Theme Token Cleanup**: Removed unused `brandAccentBg` from theme schema, derivations, Theme Lab, tests, and Tailwind token mappings.
-- **Theme Lab UX Structure**: Added `DERIVED` parent grouping with demoted subheadings; moved hero color rows into derived `TEXT`; moved `textPrimary` into `PRIMARIES`.
-- **Theme Lab Control Simplification**: Removed inline hex text inputs from color rows; swatch picker remains for color edits.
 - **Badge Background Tokening**: Target and Growth badge backgrounds now consume `brandBg` and `returnsBg` respectively.
-- **Theme Lab Header**: Added `BETA` badge in panel header.
-- **Theme Lab Copy/Tooltip Refresh**: Updated flash/sticky tooltip wording and simplified instruction copy to match current behavior.
+- **Theme Token Cleanup**: Removed unused `brandAccentBg`, `startNowBg`, `bgCard`, and `bgMuted` tokens from theme schema/derivations/UI/tests/Tailwind mappings.
+- **Color Utility Guard**: `analogous(hex, count)` now safely handles `count <= 1` without invalid math output.
 
 - **Cyprus Color Defaults**: loss=#E65C5C, startNow=#5CE6E6, opm=#74c365.
-- **Token Cleanup**: Removed unused `startNowBg`, `bgCard`, and `bgMuted` tokens from entire system.
 - **Start-Now Button**: Text inverts with background color for proper contrast.
 - **Input Icons**: Hourglass (Start Investing), Skull (Life Expectancy), TreePalm (Retirement), Balloon (Inflation), Sprout (Salary Growth), Rocket (Expected Return), Calendar (Contribution Timing).
 - **Icon Hover**: Input field icons highlight with brand color on hover.
-- **iOS Warning**: Mobile-only red banner in Theme Lab when background color changes (address bar updates on panel close).
 - **Contribution Timing**: Label styling matches other input fields with hover states.
-- **Theme Lab Structural Overhaul**: Removed primary duplicates from token sections; added textNeutral as primary; sticky highlight system for derived tokens; derived count tooltips; hint tooltips for startNow/loss/bgOverlay.
-- **Theme Lab Reset Fix**: Reset buttons now compute defaults through derivation engine instead of hardcoded values.
-- **Flash Fix**: Restored full app flash (all elements including Recharts) via hybrid override approach; eliminates race condition from previous implementation.
-- **Global Reset**: Now clears sticky highlights and pending flash timers.
+- **iOS Warning**: Mobile-only red banner in Theme Lab when background color changes (address bar updates on panel close).
+- **Theme Lab UX Structure**: Added `DERIVED` parent grouping with demoted subheadings; moved hero color rows into derived `TEXT`; moved `textPrimary` into `PRIMARIES`.
+- **Theme Lab Control Simplification**: Removed inline hex text inputs from color rows; swatch picker remains for color edits.
+- **Theme Lab Header**: Added `BETA` badge in panel header.
+- **Theme Lab Copy/Tooltip Refresh**: Updated flash/sticky tooltip wording and simplified instruction copy to match current behavior.
 
 ## [1.2.0] - 2026-02-26 — Settings Modal & Theme Lab Polish
 
