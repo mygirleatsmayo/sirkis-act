@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+- **Theme Lab Derivation Robustness**: Added shared lock-aware derivation application helpers and removed lock-triggered global re-derive churn; re-lock now snaps targeted rows to current derived values.
+- **Theme Lab Reset Baseline Fix**: Reset now uses the active theme snapshot captured at lab open instead of hardcoded Cyprus defaults.
+- **Logo Tokening Fix**: Added `branding.logoColor` (derived from `brand` while locked) so logo color editing/flashing/highlighting is isolated from non-logo elements.
+- **Loss Surface Wiring**: `lossBg` now drives delayed/potential-loss panel backgrounds.
+- **Theme Token Cleanup**: Removed unused `brandAccentBg` from theme schema, derivations, Theme Lab, tests, and Tailwind token mappings.
+- **Theme Lab UX Structure**: Added `DERIVED` parent grouping with demoted subheadings; moved hero color rows into derived `TEXT`; moved `textPrimary` into `PRIMARIES`.
+- **Theme Lab Control Simplification**: Removed inline hex text inputs from color rows; swatch picker remains for color edits.
+- **Badge Background Tokening**: Target and Growth badge backgrounds now consume `brandBg` and `returnsBg` respectively.
+- **Theme Lab Header**: Added `BETA` badge in panel header.
+- **Theme Lab Copy/Tooltip Refresh**: Updated flash/sticky tooltip wording and simplified instruction copy to match current behavior.
+
 - **Cyprus Color Defaults**: loss=#E65C5C, startNow=#5CE6E6, opm=#74c365.
 - **Token Cleanup**: Removed unused `startNowBg`, `bgCard`, and `bgMuted` tokens from entire system.
 - **Start-Now Button**: Text inverts with background color for proper contrast.
