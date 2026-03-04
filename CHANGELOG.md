@@ -27,6 +27,8 @@
 - **Theme Lab Header**: Added `BETA` badge in panel header.
 - **Theme Lab Copy/Tooltip Refresh**: Updated flash/sticky tooltip wording and simplified instruction copy to match current behavior.
 
+---
+
 ## [1.2.0] - 2026-02-26 — Settings Modal & Theme Lab Polish
 
 - **Settings Modal**: Gear icon trigger in mobile header and desktop sidebar; Theme Lab launch, FAB toggle, changelog display (3 recent entries with fold), Welcome Tour stub.
@@ -40,6 +42,8 @@
 - **Mobile Gear Fix**: Settings gear button made stateless on mobile (no stuck hover states on iOS).
 - **Salary Presets**: `SALARY_PRESETS` extracted from `App.tsx` to `constants.ts`.
 
+---
+
 ## [1.1.0-rc.1] - 2026-02-25 — Theme Architecture & Theme Lab
 
 - **Runtime Theme Architecture**: `ThemeProvider` with CSS variable sync, Tailwind semantic tokens (38 colors), `useTheme` hook, Cyprus + Playground theme configs.
@@ -49,6 +53,8 @@
 - **`hexAlpha` Hardening**: Safely handles non-hex color strings (rgba, named colors) instead of producing garbage.
 - **New Tests**: `hexAlpha` (5 tests) and `hexToChannels` (4 tests) added to format test suite.
 - **CrownLogo Extraction**: Logo component extracted from `App.tsx` into `src/components/CrownLogo.tsx`.
+
+---
 
 ## [1.0.0] - 2026-02-24 — Code Quality & Infrastructure
 
@@ -64,6 +70,8 @@
 - **Tooltip Dismiss**: Tooltips close on tap outside; new tooltips for 401(k) input fields (Contribution %, Match %, Limit %).
 - **Versioning**: Retroactive version tags (v0.1.0–v0.9.0) and v1.0.0 release.
 
+---
+
 ## [0.9.0] - 2026-02-21 — UX Polish & Copy
 
 - **Loss Panel Responsive Sizing**: Fluid clamp-based font sizes for quote, number, and label across narrow and three-column layouts.
@@ -73,6 +81,8 @@
 - **Stat Icon Radius**: Proportional `rounded-[27%]` replaces fixed `rounded-2xl`.
 - **Market Funded Icon**: Swapped `Coins` → `TrendingUp` for better semantic fit.
 
+---
+
 ## [0.8.0] - 2026-02-19 — Typography & Drawer Enrichment
 
 - **Custom Font Pairing**: Fraunces (display/headings) + Recursive Sans Linear (UI/body), self-hosted variable woff2.
@@ -81,6 +91,8 @@
 - **iOS Theming**: `theme-color` meta tag and `apple-mobile-web-app-status-bar-style` for dynamic island/address bar.
 - **Badge Vertical Centering**: Asymmetric padding for Recursive font metrics.
 - **Color Consistency**: Semantic badge variants, loss/error color separation.
+
+---
 
 ## [0.7.0] - 2026-02-18 — Visual Identity & Compact Panels
 
@@ -94,6 +106,8 @@
 - **Header Smoothness**: GPU-composited transitions for collapse/expand on mobile scroll.
 - **Sirkisms**: 8 new quotes added to the carousel.
 
+---
+
 ## [0.6.0] - 2026-02-15 — UI Polish & Responsive Stats
 
 - **Responsive Stats Panels**: Smart per-value abbreviation (4 sig digits), adaptive icon/padding/gap scaling, 3-column threshold at 550px.
@@ -105,11 +119,15 @@
 - **Quote Carousel**: "Sirkism" quote carousel for educational reinforcement.
 - **Responsiveness**: Enhanced scroll handling, viewport management, and mobile layout.
 
+---
+
 ## [0.5.0] - 2026-02-14 — Logic Overhaul
 
 - **Comparisons**: Dual projections for "start now" vs delayed start.
 - **Insights**: Potential loss surfaced in metrics and summary panel.
 - **Table**: Waiting-period years visually dimmed for clarity.
+
+---
 
 ## [0.4.0] - 2026-02-14 — The "High-Wire" Redesign
 
@@ -117,15 +135,21 @@
 - **Layout**: Desktop-first sidebar with mobile drawer.
 - **Typography**: Editorial serif headings.
 
+---
+
 ## [0.3.0] - 2026-02-14 — Delayed Start Feature
 
 - **New Input**: "Start investing at" age to quantify delay impact.
 - **Insight**: Loss alert module for delayed starts.
 
+---
+
 ## [0.2.0] - 2026-02-13 — Granularity Update
 
 - **Breakdown**: Contributions vs employer match vs returns in charts and stats.
 - **Inputs**: Slider + text inputs for all parameters.
+
+---
 
 ## [0.1.0] - 2026-02-13 — Initial Release
 
