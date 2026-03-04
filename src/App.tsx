@@ -171,7 +171,7 @@ const TooltipIcon = ({ content, className = "", align = 'center', placement = 't
   const placementClass = placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2';
   const visibilityClass = isTouch
     ? (isOpen ? 'opacity-100' : 'opacity-0')
-    : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100';
+    : 'opacity-0 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100';
   return (
     <div ref={containerRef} className={`relative flex items-center overflow-visible ${className}`}>
       <button
@@ -187,7 +187,7 @@ const TooltipIcon = ({ content, className = "", align = 'center', placement = 't
             setIsOpen(false);
           }
         }}
-        className="group inline-flex items-center text-content-subtle hover:text-accent-brand focus:outline-none"
+        className="group/tooltip inline-flex items-center text-content-subtle hover:text-accent-brand focus:outline-none"
       >
         <Info size={12} />
         <span className="sr-only">Info</span>
@@ -212,11 +212,13 @@ const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, un
   return (
     <div className="mb-8 group">
       <div className="flex justify-between items-center mb-3">
-        <label htmlFor={fieldId} className={`text-sm flex items-center gap-2 transition-colors ${hasError ? 'text-accent-loss font-bold' : 'text-content-secondary font-semibold group-hover:text-accent-brand'}`}>
-          {Icon && <Icon size={16} className="text-content-subtle group-hover:text-accent-brand transition-colors" />}
-          {label}
-          {tooltip && <TooltipIcon content={tooltip} />}
-        </label>
+        <div className="flex items-center gap-2">
+          <label htmlFor={fieldId} className={`text-sm flex items-center gap-2 transition-colors ${hasError ? 'text-accent-loss font-bold' : 'text-content-secondary font-semibold group-hover:text-accent-brand'}`}>
+            {Icon && <Icon size={16} className="text-content-subtle group-hover:text-accent-brand transition-colors" />}
+            {label}
+          </label>
+          {tooltip && <TooltipIcon content={tooltip} className="shrink-0" />}
+        </div>
       </div>
       <div className="flex items-center gap-4">
         <input
@@ -446,11 +448,17 @@ const SettingsPanel = ({ inputs, handleInputChange, formatCurrency, isMobile = f
             <InputField label="Contribution %" value={inputs.contribution401k} onChange={v => handleInputChange('contribution401k', v)} min={0} max={100} unit="%" errorState={employeeOverCap} tooltip="Percentage of your salary (pre-tax) contributed each pay period." />
             <div className="grid grid-cols-2 gap-4 border-t border-subtle pt-6 mt-2">
               <div>
-                <label htmlFor="match-percent" className="text-[10px] font-bold text-content-subtle uppercase mb-2 flex items-center gap-1">Match % <TooltipIcon placement="top" align="left" content="Your employer's match rate, e.g., 50% means they contribute $0.50 for every $1.00 you put in." /></label>
+                <div className="mb-2 flex items-center gap-1">
+                  <label htmlFor="match-percent" className="text-[10px] font-bold text-content-subtle uppercase">Match %</label>
+                  <TooltipIcon placement="top" align="left" content="Your employer's match rate, e.g., 50% means they contribute $0.50 for every $1.00 you put in." />
+                </div>
                 <input id="match-percent" type="number" min={0} max={100} step={1} value={inputs.matchPercent} onChange={(e) => handleInputChange('matchPercent', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-theme/50 bg-surface-input text-content-primary" />
               </div>
               <div>
-                <label htmlFor="match-limit" className="text-[10px] font-bold text-content-subtle uppercase mb-2 flex items-center gap-1">Limit % <TooltipIcon placement="top" align="right" width="w-56" content="Employer matches up to this percentage of your salary. Contributions above this threshold get no additional match." /></label>
+                <div className="mb-2 flex items-center gap-1">
+                  <label htmlFor="match-limit" className="text-[10px] font-bold text-content-subtle uppercase">Limit %</label>
+                  <TooltipIcon placement="top" align="right" width="w-56" content="Employer matches up to this percentage of your salary. Contributions above this threshold get no additional match." />
+                </div>
                 <input id="match-limit" type="number" min={0} max={100} step={1} value={inputs.matchLimit} onChange={(e) => handleInputChange('matchLimit', parseFloat(e.target.value))} className="w-full text-[16px] sm:text-sm font-bold p-2.5 rounded-xl border border-theme/50 bg-surface-input text-content-primary" />
               </div>
             </div>
