@@ -13,6 +13,8 @@ const cyprusPrimaries: Primaries = {
   loss: '#E65C5C',
   startNow: '#5CE6E6',
   opm: '#74c365',
+  textPrimary: '#ffffff',
+  textNeutral: '#e2e8f0',
 };
 
 /** Check that two hex colors are within ±1 per RGB channel (HSL rounding tolerance) */
@@ -110,6 +112,10 @@ describe('applyDerivations', () => {
   it('derives neutralBg from textNeutral at alpha 0.10', () => {
     expect(normalizeRgba(derived.colors.neutralBg)).toBe(normalizeRgba('rgba(226, 232, 240, 0.10)'));
   });
+  it('derives neutralBg from the provided textNeutral primary', () => {
+    const custom = applyDerivations({ ...cyprusPrimaries, textNeutral: '#112233' }, 'dark');
+    expect(normalizeRgba(custom.colors.neutralBg)).toBe(normalizeRgba('rgba(17, 34, 51, 0.10)'));
+  });
 
   // ── primaries pass through ──
   it('includes primaries in output colors', () => {
@@ -118,15 +124,17 @@ describe('applyDerivations', () => {
     expect(derived.colors.returns).toBe(cyprusPrimaries.returns);
     expect(derived.colors.loss).toBe(cyprusPrimaries.loss);
     expect(derived.colors.startNow).toBe(cyprusPrimaries.startNow);
+    expect(derived.colors.textPrimary).toBe(cyprusPrimaries.textPrimary);
+    expect(derived.colors.textNeutral).toBe(cyprusPrimaries.textNeutral);
   });
 });
 
 describe('getModeStatics', () => {
   it('returns dark statics', () => {
     const dark = getModeStatics('dark');
-    expect(dark.textPrimary).toBe('#ffffff');
     expect(dark.textSecondary).toBe('#e2e8f0');
-    expect(dark.textNeutral).toBe('#e2e8f0');
+    expect(dark.textPrimary).toBeUndefined();
+    expect(dark.textNeutral).toBeUndefined();
     expect(dark.textSubtle).toBe('#94a3b8');
     expect(dark.borderSubtle).toBe('rgba(255, 255, 255, 0.06)');
     expect(dark.toggleOff).toBe('#cbd5e1');
@@ -136,9 +144,9 @@ describe('getModeStatics', () => {
   });
   it('returns light statics with inverted text', () => {
     const light = getModeStatics('light');
-    expect(light.textPrimary).toBe('#0f172a');
     expect(light.textSecondary).toBe('#334155');
-    expect(light.textNeutral).toBe('#334155');
+    expect(light.textPrimary).toBeUndefined();
+    expect(light.textNeutral).toBeUndefined();
     expect(light.textSubtle).toBe('#475569');
     expect(light.borderSubtle).toBe('rgba(0, 0, 0, 0.06)');
     expect(light.toggleOff).toBe('#94a3b8');

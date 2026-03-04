@@ -129,6 +129,7 @@ const rotateHue = (hex: string, degrees: number): string => {
 
 /** Analogous colors: evenly spaced around ±30° */
 export const analogous = (hex: string, count = 3): string[] => {
+  if (count <= 1) return [toHex(hex)];
   const spread = 60; // total spread in degrees
   const step = spread / (count - 1);
   const start = -(spread / 2);

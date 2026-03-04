@@ -151,4 +151,12 @@ describe('harmony functions', () => {
     const colors = analogous('#ff0000');
     expect(colors).toHaveLength(3);
   });
+  it('analogous count 1 returns base color only', () => {
+    const colors = analogous('#ff0000', 1);
+    expect(colors).toEqual(['#ff0000']);
+  });
+  it('analogous count 0 returns base color only', () => {
+    const colors = analogous('#00A499', 0);
+    expect(colors).toEqual(['#00a499']);
+  });
 });

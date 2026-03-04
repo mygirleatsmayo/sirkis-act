@@ -550,17 +550,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     });
   }, [effectiveMode]);
 
-  /** Change textNeutral and re-derive neutralBg if locked */
-  const setTextNeutralColor = useCallback((newHex: string) => {
-    setThemeLocal((prev) => {
-      const next = cloneTheme(prev);
-      next.colors.textNeutral = newHex;
-      return applyLockedDerivations(next, effectiveMode, tokenLocksRef.current, {
-        onlyPaths: ['colors.neutralBg'],
-      });
-    });
-  }, [effectiveMode]);
-
   const setBranding = useCallback((key: string, value: string) => {
     setThemeLocal(prev => ({
       ...prev,
@@ -762,14 +751,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         {(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral', 'textPrimary'] as const).map(key => {
           const derivedCount = DERIVED_PATHS[key]?.length ?? 0;
           const handleChange = (hex: string) => {
-            if (key === 'textNeutral') {
-              setTextNeutralColor(hex);
-              return;
-            }
-            if (key === 'textPrimary') {
-              setColorAtPath('colors.textPrimary', hex);
-              return;
-            }
             setPrimaryColor(key as keyof Primaries, hex);
           };
           const handleReset = () => handleChange(def.colors[key]);

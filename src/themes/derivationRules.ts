@@ -12,6 +12,8 @@ export interface Primaries {
   loss: string;
   startNow: string;
   opm: string;
+  textPrimary: string;
+  textNeutral: string;
 }
 
 export interface DerivedColors {
@@ -23,7 +25,7 @@ export interface DerivedColors {
   blobColors: [string, string];
 }
 
-/** Extract the 6 primaries from a ThemeConfig's colors */
+/** Extract editable primaries from a ThemeConfig's colors */
 export const extractPrimaries = (colors: ThemeColors): Primaries => ({
   bg: colors.bg,
   brand: colors.brand,
@@ -32,14 +34,14 @@ export const extractPrimaries = (colors: ThemeColors): Primaries => ({
   loss: colors.loss,
   startNow: colors.startNow,
   opm: colors.opm,
+  textPrimary: colors.textPrimary,
+  textNeutral: colors.textNeutral,
 });
 
 const DARK_STATICS: Partial<ThemeColors> = {
   bgOverlay: 'rgba(15, 23, 42, 0.4)',
   borderSubtle: 'rgba(255, 255, 255, 0.06)',
-  textPrimary: '#ffffff',
   textSecondary: '#e2e8f0',
-  textNeutral: '#e2e8f0',
   textSubtle: '#94a3b8',
   toggleOff: '#cbd5e1',
   scrollbarThumb: 'rgba(148, 163, 184, 0.3)',
@@ -49,9 +51,7 @@ const DARK_STATICS: Partial<ThemeColors> = {
 const LIGHT_STATICS: Partial<ThemeColors> = {
   bgOverlay: 'rgba(15, 23, 42, 0.4)',
   borderSubtle: 'rgba(0, 0, 0, 0.06)',
-  textPrimary: '#0f172a',
   textSecondary: '#334155',
-  textNeutral: '#334155',
   textSubtle: '#475569',
   toggleOff: '#94a3b8',
   scrollbarThumb: 'rgba(100, 116, 139, 0.3)',
@@ -77,6 +77,8 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     loss: p.loss,
     startNow: p.startNow,
     opm: p.opm,
+    textPrimary: p.textPrimary,
+    textNeutral: p.textNeutral,
 
     // bg derivations
     bgGlass: shiftLightness(p.bg, 2 * dir),
@@ -101,11 +103,9 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     // mode-dependent statics
     bgOverlay: statics.bgOverlay!,
     borderSubtle: statics.borderSubtle!,
-    textPrimary: statics.textPrimary!,
     textSecondary: statics.textSecondary!,
-    textNeutral: statics.textNeutral!,
     textSubtle: statics.textSubtle!,
-    neutralBg: hexToRgba(statics.textNeutral!, 0.10),
+    neutralBg: hexToRgba(p.textNeutral, 0.10),
     toggleOff: statics.toggleOff!,
     scrollbarThumb: statics.scrollbarThumb!,
     scrollbarThumbHover: statics.scrollbarThumbHover!,

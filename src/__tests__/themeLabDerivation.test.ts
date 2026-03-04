@@ -13,6 +13,7 @@ const PRIMARY_KEYS = new Set<keyof ThemeColors>([
   'startNow',
   'opm',
   'textNeutral',
+  'textPrimary',
 ]);
 
 const cloneTheme = (t: ThemeConfig): ThemeConfig => ({
@@ -78,13 +79,35 @@ describe('themeLabDerivation helpers', () => {
   it('applies mode statics only when corresponding path is locked', () => {
     const input = cloneTheme(cyprusTheme);
     input.colors.textPrimary = '#123456';
+    input.colors.textNeutral = '#345678';
     input.colors.textSecondary = '#654321';
     const locks = { 'colors.textPrimary': false };
 
     const result = applyLockedDerivations(input, 'light', locks);
 
     expect(result.colors.textPrimary).toBe('#123456');
+    expect(result.colors.textNeutral).toBe('#345678');
     expect(result.colors.textSecondary).toBe('#334155');
+  });
+
+  it('does not overwrite edited text primaries on mode re-derive', () => {
+    const input = cloneTheme(cyprusTheme);
+    input.colors.textPrimary = '#112233';
+    input.colors.textNeutral = '#223344';
+
+    const result = applyLockedDerivations(input, 'light', {});
+
+    expect(result.colors.textPrimary).toBe('#112233');
+    expect(result.colors.textNeutral).toBe('#223344');
+  });
+
+  it('derives neutralBg from edited textNeutral when locked', () => {
+    const input = cloneTheme(cyprusTheme);
+    input.colors.textNeutral = '#112233';
+
+    const result = applyLockedDerivations(input, 'dark', {});
+
+    expect(result.colors.neutralBg).toBe('rgba(17, 34, 51, 0.1)');
   });
 
   it('supports targeted re-derive by path via onlyPaths', () => {
