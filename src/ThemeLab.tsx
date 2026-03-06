@@ -478,6 +478,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       baseThemeRef.current = base;
       setResetBaseTheme(base);
       setThemeLocal(cloneTheme(base));
+      setTokenLocksAndRef({});
       if (themeId !== 'playground') {
         prevThemeId.current = themeId;
         setThemeId('playground');
@@ -486,7 +487,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     wasOpenRef.current = isOpen;
     // Override persists when panel closes so changes remain visible
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, activeTheme]);
+  }, [isOpen, activeTheme, setTokenLocksAndRef]);
 
   // ── Value setters ──
 
@@ -592,7 +593,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     });
   }, []);
 
-  const setCapability = useCallback((key: keyof typeof DEFAULT_THEME_CAPABILITIES, value: boolean | 'structured' | 'plain' | 'themed' | 'intrinsic') => {
+  const setCapability = useCallback((key: keyof typeof DEFAULT_THEME_CAPABILITIES, value: boolean | 'plain' | 'bold' | 'italic' | 'boldItalic' | 'pretty' | 'balance' | 'none' | 'themed' | 'intrinsic') => {
     setThemeLocal((prev) => ({
       ...prev,
       capabilities: {
@@ -606,7 +607,13 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   // ── Reset ──
 
   const handleReset = useCallback(() => {
-    setThemeLocal(cloneTheme(baseThemeRef.current));
+    setThemeLocal(() => {
+      const next = cloneTheme(baseThemeRef.current);
+      return {
+        ...next,
+        capabilities: { ...DEFAULT_THEME_CAPABILITIES },
+      };
+    });
     setCustomSvg(null);
     setTokenLocksAndRef({});
     setThemeMode('auto');
@@ -953,7 +960,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           {([
             ['showLogo', 'Logo'],
             ['showTagline', 'Tagline'],
-            ['showHero', 'Hero'],
+            ['showHeroLine1', 'Hero Line 1'],
             ['showHeroLine2', 'Hero Line 2'],
             ['showSubhead', 'Subhead'],
             ['showSirkisms', 'Sirkisms'],
@@ -976,21 +983,75 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
             );
           })}
           <div className="pt-1">
-            <div className="text-[9px] text-white/30 mb-1">Subhead Mode</div>
+            <div className="text-[9px] text-white/30 mb-1">Subhead Emphasis</div>
             <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={() => setCapability('subheadMode', 'structured')}
-                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadMode === 'structured' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
-              >
-                Structured
-              </button>
               <button
                 type="button"
                 onClick={() => setCapability('subheadMode', 'plain')}
                 className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadMode === 'plain' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
               >
                 Plain
+              </button>
+              <button
+                type="button"
+                onClick={() => setCapability('subheadMode', 'bold')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadMode === 'bold' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Bold
+              </button>
+              <button
+                type="button"
+                onClick={() => setCapability('subheadMode', 'italic')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadMode === 'italic' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Italic
+              </button>
+              <button
+                type="button"
+                onClick={() => setCapability('subheadMode', 'boldItalic')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadMode === 'boldItalic' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Bold & Italic
+              </button>
+            </div>
+          </div>
+          <div className="pt-1">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="text-[9px] text-white/30">Subhead Wrap</div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={capabilities.subheadWidowControl}
+                onClick={() => setCapability('subheadWidowControl', !capabilities.subheadWidowControl)}
+                className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-white/55"
+              >
+                <span>Widow</span>
+                <span className={`w-8 h-4 rounded-full p-0.5 transition-colors ${capabilities.subheadWidowControl ? 'bg-teal-400/70' : 'bg-white/15'}`}>
+                  <span className={`block w-3 h-3 rounded-full bg-white shadow-sm transition-transform ${capabilities.subheadWidowControl ? 'translate-x-4' : ''}`} />
+                </span>
+              </button>
+            </div>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setCapability('subheadWrap', 'pretty')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadWrap === 'pretty' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Pretty
+              </button>
+              <button
+                type="button"
+                onClick={() => setCapability('subheadWrap', 'balance')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadWrap === 'balance' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Balance
+              </button>
+              <button
+                type="button"
+                onClick={() => setCapability('subheadWrap', 'none')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadWrap === 'none' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                None
               </button>
             </div>
           </div>

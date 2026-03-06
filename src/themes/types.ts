@@ -77,11 +77,13 @@ export interface ThemeEffects {
 export interface ThemeCapabilities {
   showLogo: boolean;
   showTagline: boolean;
-  showHero: boolean;
+  showHeroLine1: boolean;
   showHeroLine2: boolean;
   showSubhead: boolean;
   showSirkisms: boolean;
-  subheadMode: 'structured' | 'plain';
+  subheadMode: 'plain' | 'bold' | 'italic' | 'boldItalic';
+  subheadWrap: 'pretty' | 'balance' | 'none';
+  subheadWidowControl: boolean;
   logoColorMode: 'themed' | 'intrinsic';
 }
 

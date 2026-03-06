@@ -25,7 +25,9 @@ describe('resolveTheme', () => {
     expect(resolved.colors.textSecondary).toBe('#800080');
     expect(resolved.capabilities.showSirkisms).toBe(false);
     expect(resolved.capabilities.subheadMode).toBe('plain');
-    expect(resolved.capabilities.showHero).toBe(true);
+    expect(resolved.capabilities.subheadWrap).toBe('pretty');
+    expect(resolved.capabilities.subheadWidowControl).toBe(true);
+    expect(resolved.capabilities.showHeroLine1).toBe(true);
     expect(resolved.editor.kind).toBe('locked');
   });
 

@@ -8,11 +8,13 @@ import type {
 export const DEFAULT_THEME_CAPABILITIES: ThemeCapabilities = {
   showLogo: true,
   showTagline: true,
-  showHero: true,
+  showHeroLine1: true,
   showHeroLine2: true,
   showSubhead: true,
   showSirkisms: true,
-  subheadMode: 'structured',
+  subheadMode: 'bold',
+  subheadWrap: 'pretty',
+  subheadWidowControl: true,
   logoColorMode: 'themed',
 };
 
@@ -22,9 +24,22 @@ export const DEFAULT_THEME_EDITOR: ThemeEditorConfig = {
 };
 
 export const resolveTheme = (theme: ThemeConfig): ResolvedThemeConfig => {
+  const legacyCapabilities = theme.capabilities as (Partial<ThemeCapabilities> & {
+    showHero?: boolean;
+  }) | undefined;
+  const legacySubheadMode = (theme.capabilities as Record<string, unknown> | undefined)?.subheadMode;
+
   const capabilities: ThemeCapabilities = {
     ...DEFAULT_THEME_CAPABILITIES,
     ...theme.capabilities,
+    showHeroLine1:
+      theme.capabilities?.showHeroLine1
+      ?? legacyCapabilities?.showHero
+      ?? DEFAULT_THEME_CAPABILITIES.showHeroLine1,
+    subheadMode:
+      legacySubheadMode === 'structured'
+        ? 'bold'
+        : (theme.capabilities?.subheadMode ?? DEFAULT_THEME_CAPABILITIES.subheadMode),
   };
 
   const editor: ThemeEditorConfig = {

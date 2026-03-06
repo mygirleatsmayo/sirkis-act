@@ -46,9 +46,9 @@ export const cyprusTheme: ThemeConfig = {
     heroLine2: 'High\u2011Wire Act',
     heroSubhead: 'Fall into a Million\u2011Dollar Safety Net with tax\u2011advantaged compounding.',
     heroSubheadParts: {
-      leading: 'Fall into a ',
+      leading: 'Fall into a',
       emphasis: 'Million\u2011Dollar Safety Net',
-      trailing: ' with tax\u2011advantaged compounding.',
+      trailing: 'with tax\u2011advantaged compounding.',
     },
     heroLine1Color: '#00A499',
     heroLine2Color: '#E6C300',
@@ -72,11 +72,11 @@ export const cyprusTheme: ThemeConfig = {
   capabilities: {
     showLogo: true,
     showTagline: true,
-    showHero: true,
+    showHeroLine1: true,
     showHeroLine2: true,
     showSubhead: true,
     showSirkisms: true,
-    subheadMode: 'structured',
+    subheadMode: 'bold',
     logoColorMode: 'themed',
   },
   editor: {

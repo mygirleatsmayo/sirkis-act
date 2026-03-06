@@ -45,6 +45,16 @@ import type {
   InputValue,
 } from './types';
 import { getLossFractionLabel, clampNumber, formatCurrency, formatCompact, hexAlpha } from './utils/format';
+import {
+  getHeroVisibility,
+  getNextSirkismIndex,
+  getSafeSirkismIndex,
+  getStructuredSubheadPieces,
+  getSubheadWrapClass,
+  hasVisibleText,
+  resolveSubhead,
+  shouldInsertSubheadBoundarySpace,
+} from './utils/branding';
 import { runProjection } from './utils/projection';
 import { useTheme } from './themes/useTheme';
 // --- HELPER COMPONENTS ---
@@ -315,6 +325,8 @@ const SettingsPanel = ({
   const { theme } = useTheme();
   const capabilities = theme.capabilities;
   const Logo = theme.branding.logo;
+  const showSidebarLogo = capabilities.showLogo && Boolean(Logo);
+  const showSidebarTagline = capabilities.showTagline && hasVisibleText(theme.branding.tagline);
   const annualEmployee401k = inputs.enable401k ? inputs.currentSalary * (inputs.contribution401k / 100) : 0;
   const matchBase = Math.min(inputs.contribution401k, inputs.matchLimit) / 100;
   const annualEmployer401k = inputs.enable401k ? inputs.currentSalary * matchBase * (inputs.matchPercent / 100) : 0;
@@ -333,14 +345,14 @@ const SettingsPanel = ({
           <div className="mb-8 pt-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                {capabilities.showLogo && (
+                {showSidebarLogo && (
                   <div style={capabilities.logoColorMode === 'themed' ? { color: theme.branding.logoColor } : undefined}>
                     <Logo className="h-9 w-9" />
                   </div>
                 )}
                 <div>
                   <div className="font-display font-black text-xl tracking-tight leading-tight" style={{ color: theme.colors.brand }}>{theme.branding.appName}</div>
-                  {capabilities.showTagline && (
+                  {showSidebarTagline && (
                     <div className="text-[10px] font-medium text-content-subtle leading-tight">{theme.branding.tagline}</div>
                   )}
                 </div>
@@ -542,13 +554,42 @@ const SettingsPanel = ({
             <div className={`mt-2 text-[11px] ${hsaOverCap ? 'text-accent-loss' : 'text-content-subtle'}`}>Common caps: {formatCurrency(LIMITS.hsaIndividual)} individual, {formatCurrency(LIMITS.hsaFamily)} family.</div>
           </ToggleSection>
         </section>
-        <div className="pt-8 text-center">
-          <button
-            onClick={() => handleInputChange('RESET', true)}
-            className="text-xs font-bold text-content-subtle hover:text-accent-brand flex items-center justify-center gap-2 transition-colors mx-auto"
-          >
-            <RotateCcw size={12} /> Reset to Defaults
-          </button>
+        <div className="pt-8">
+          {isMobile ? (
+            <div className="text-center">
+              <button
+                onClick={() => handleInputChange('RESET', true)}
+                className="text-xs font-bold text-content-subtle hover:text-accent-brand flex items-center justify-center gap-2 transition-colors mx-auto"
+              >
+                <RotateCcw size={12} /> Reset to Defaults
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between" ref={disclosureContainerRef}>
+              <button
+                onClick={() => handleInputChange('RESET', true)}
+                className="text-xs font-bold text-content-subtle hover:text-accent-brand flex items-center gap-2 transition-colors"
+              >
+                <RotateCcw size={12} /> Reset to Defaults
+              </button>
+              {onToggleDisclosure && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={onToggleDisclosure}
+                    className="text-xs font-bold text-content-subtle hover:text-content-secondary transition-colors"
+                  >
+                    Disclosures
+                  </button>
+                  {showDisclosure && (
+                    <div className="absolute right-0 bottom-full mb-2 w-80 rounded-xl border border-subtle bg-surface-glass p-3 text-[11px] text-content-secondary shadow-2xl z-50 text-left">
+                      {DISCLOSURE_COPY}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -649,6 +690,34 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
   useEffect(() => {
     if (!isSettingsOpen) setIsDisclosureOpen(false);
   }, [isSettingsOpen]);
+
+  const sirkisms = SIRKISMS;
+  const sirkismCount = sirkisms.length;
+  const activeSirkismIndex = getSafeSirkismIndex(quoteIndex, sirkismCount);
+  const activeSirkism = sirkismCount > 0 ? sirkisms[activeSirkismIndex] : '';
+  const resolvedSubhead = resolveSubhead(theme.branding, capabilities.subheadMode, capabilities.subheadWidowControl);
+  const subheadWrapClass = getSubheadWrapClass(capabilities.subheadWrap);
+  const heroVisibility = getHeroVisibility({
+    capabilities,
+    branding: theme.branding,
+    hasLogoComponent: Boolean(Logo),
+    hasSubhead: resolvedSubhead.kind !== 'none',
+    sirkismsCount: sirkismCount,
+  });
+  const heroLine1 = theme.branding.heroLine1.trim();
+  const heroLine2 = theme.branding.heroLine2.trim();
+  const showHeroLine1Text = capabilities.showHeroLine1 && heroLine1.length > 0;
+  const structuredSubheadPieces = resolvedSubhead.kind === 'structured'
+    ? getStructuredSubheadPieces(resolvedSubhead.leading, resolvedSubhead.emphasis, resolvedSubhead.trailing)
+    : [];
+  const emphasisClassName =
+    capabilities.subheadMode === 'bold'
+      ? 'font-bold text-content-secondary'
+      : capabilities.subheadMode === 'italic'
+        ? 'italic text-content-secondary'
+        : capabilities.subheadMode === 'boldItalic'
+          ? 'font-bold italic text-content-secondary'
+          : 'text-content-secondary';
 
   const summarySalary = inputs.currentSalary >= 999500 ? `$${(Math.round(inputs.currentSalary / 100000) / 10).toFixed(1)}M` : `$${Math.round(inputs.currentSalary / 1000)}k`;
   const summaryContribution = inputs.enable401k ? `${inputs.contribution401k}%` : 'Off';
@@ -778,7 +847,15 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
       {/* DESKTOP SIDEBAR (GLASS PANEL) */}
       <div role="complementary" aria-label="Settings" className="hidden lg:flex flex-col w-[420px] bg-surface-glass border-r border-black/30 z-20 relative shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
         <div className="flex-1 overflow-hidden p-8 hover:overflow-y-auto custom-scrollbar">
-          <SettingsPanel inputs={inputs} handleInputChange={handleInputChange} formatCurrency={formatCurrency} onOpenSettings={onOpenSettings} />
+          <SettingsPanel
+            inputs={inputs}
+            handleInputChange={handleInputChange}
+            formatCurrency={formatCurrency}
+            onOpenSettings={onOpenSettings}
+            showDisclosure={isDisclosureOpen}
+            onToggleDisclosure={() => setIsDisclosureOpen((prev) => !prev)}
+            disclosureContainerRef={desktopDisclosureRef}
+          />
         </div>
       </div>
       {/* MAIN CONTENT AREA */}
@@ -786,7 +863,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
         {/* MOBILE HEADER */}
         <div role="banner" className={`lg:hidden flex justify-between items-center px-4 bg-surface border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
           <div className="flex items-center gap-2">
-            {capabilities.showLogo && (
+            {heroVisibility.showLogo && (
               <div style={capabilities.logoColorMode === 'themed' ? { color: theme.branding.logoColor } : undefined}>
                 <div
                   className="transition-transform duration-300 ease-in-out"
@@ -798,7 +875,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
             )}
             <div className="flex flex-col">
               <div className="font-display font-black tracking-tight leading-tight text-2xl" style={{ color: theme.colors.brand }}>{theme.branding.appName}</div>
-              {capabilities.showTagline && (
+              {heroVisibility.showTagline && (
                 <div className={`font-medium text-content-subtle leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>{theme.branding.tagline}</div>
               )}
             </div>
@@ -817,54 +894,49 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
         {/* SCROLLABLE DASHBOARD */}
         <div className="overflow-x-clip custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
           <div className="relative max-w-[1180px] mx-auto px-4 py-4 pb-20 lg:pb-8 lg:px-10 lg:py-8 space-y-4">
-            <div className="hidden lg:block absolute top-8 right-10" ref={desktopDisclosureRef}>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsDisclosureOpen((prev) => !prev)}
-                  className="text-[11px] font-medium text-content-subtle hover:text-content-secondary transition-colors"
-                >
-                  Disclosures
-                </button>
-                {isDisclosureOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-subtle bg-surface-glass p-3 text-[11px] text-content-secondary shadow-2xl z-50 text-left">
-                    {DISCLOSURE_COPY}
-                  </div>
-                )}
-              </div>
-            </div>
             {/* BRANDING HERO SECTION */}
-            {capabilities.showHero && (
+            {heroVisibility.showHeroContainer && (
               <div className="text-left space-y-3 pt-2 pb-1 animate-in slide-in-from-bottom duration-700 fade-in">
-                <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-display font-black tracking-tight leading-[0.92]">
-                  <span style={{ color: theme.branding.heroLine1Color, textShadow: '0px 1px 0px rgba(255,255,255,0.12), 0px -1px 0px rgba(0,0,0,0.7)' }}>{theme.branding.heroLine1}</span>
-                  {capabilities.showHeroLine2 && (
-                    <>
-                      <br />
-                      <span style={{ color: theme.branding.heroLine2Color, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>{theme.branding.heroLine2}</span>
-                    </>
-                  )}
-                </h1>
-                {capabilities.showSubhead && (
-                  <p className="text-base sm:text-lg text-content-secondary font-medium max-w-2xl lg:ml-1 text-pretty">
-                    {capabilities.subheadMode === 'plain'
-                      ? theme.branding.heroSubhead
-                      : theme.branding.heroSubheadParts
-                        ? <>{theme.branding.heroSubheadParts.leading}<span className="font-bold text-content-secondary">{theme.branding.heroSubheadParts.emphasis}</span>{theme.branding.heroSubheadParts.trailing}</>
-                        : theme.branding.heroSubhead}
+                {heroVisibility.showHeroTitle && (
+                  <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-display font-black tracking-tight leading-[0.92]">
+                    {showHeroLine1Text && (
+                      <span style={{ color: theme.branding.heroLine1Color, textShadow: '0px 1px 0px rgba(255,255,255,0.12), 0px -1px 0px rgba(0,0,0,0.7)' }}>{heroLine1}</span>
+                    )}
+                    {capabilities.showHeroLine2 && heroLine2 && (
+                      <>
+                        {showHeroLine1Text && <br />}
+                        <span style={{ color: theme.branding.heroLine2Color, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>{heroLine2}</span>
+                      </>
+                    )}
+                  </h1>
+                )}
+                {heroVisibility.showSubhead && (
+                  <p className={`text-base sm:text-lg text-content-secondary font-medium max-w-2xl lg:ml-1 ${subheadWrapClass}`.trim()}>
+                    {resolvedSubhead.kind === 'plain'
+                      ? resolvedSubhead.text
+                      : resolvedSubhead.kind === 'structured'
+                        ? <>
+                          {structuredSubheadPieces.map((part, idx) => (
+                            <span key={`subhead-piece-${idx}`}>
+                              {idx > 0 && shouldInsertSubheadBoundarySpace(structuredSubheadPieces[idx - 1].text, part.text) ? ' ' : ''}
+                              {part.emphasis ? <span className={emphasisClassName}>{part.text}</span> : part.text}
+                            </span>
+                          ))}
+                        </>
+                        : null}
                   </p>
                 )}
-                {capabilities.showSirkisms && (
+                {heroVisibility.showSirkisms && (
                   <div
-                    onClick={() => setQuoteIndex(i => (i + 1) % SIRKISMS.length)}
+                    onClick={() => setQuoteIndex(i => getNextSirkismIndex(i, sirkismCount))}
                     className="group cursor-pointer select-none max-w-2xl lg:ml-1"
                     role="button"
                     aria-label="Show next quote"
                     tabIndex={0}
-                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setQuoteIndex(i => (i + 1) % SIRKISMS.length); } }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setQuoteIndex(i => getNextSirkismIndex(i, sirkismCount)); } }}
                   >
                     <p className="text-sm sm:text-base font-display italic text-content-subtle transition-opacity duration-300">
-                      &ldquo;{SIRKISMS[quoteIndex]}&rdquo;
+                      &ldquo;{activeSirkism}&rdquo;
                     </p>
                     <p className="text-[10px] text-content-subtle/60 mt-1 font-medium tracking-wide uppercase group-hover:text-content-subtle transition-colors">
                       <span className="hidden sm:inline">Click</span><span className="sm:hidden">Tap</span> for a new Sirkism

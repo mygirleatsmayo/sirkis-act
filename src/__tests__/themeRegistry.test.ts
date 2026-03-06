@@ -6,8 +6,10 @@ describe('theme registry compatibility', () => {
   it('resolves all registered themes with capability and editor metadata', () => {
     Object.values(themes).forEach((theme) => {
       const resolved = resolveTheme(theme);
-      expect(resolved.capabilities.showHero).toBeTypeOf('boolean');
+      expect(resolved.capabilities.showHeroLine1).toBeTypeOf('boolean');
       expect(resolved.capabilities.logoColorMode).toMatch(/themed|intrinsic/);
+      expect(resolved.capabilities.subheadWrap).toMatch(/pretty|balance|none/);
+      expect(resolved.capabilities.subheadWidowControl).toBeTypeOf('boolean');
       expect(resolved.editor.kind).toMatch(/studio|locked/);
       expect(resolved.editor.logoColorModeEditable).toBeTypeOf('boolean');
     });
