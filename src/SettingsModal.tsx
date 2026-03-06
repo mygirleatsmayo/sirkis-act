@@ -75,6 +75,7 @@ export const SettingsModal = ({
   onToggleFab,
 }: SettingsModalProps) => {
   const { theme } = useTheme();
+  const isThemeLabLocked = theme.editor.kind === 'locked';
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Focus trap, Escape key, and body scroll lock
@@ -114,11 +115,18 @@ export const SettingsModal = ({
     };
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (isThemeLabLocked && showFab) {
+      onToggleFab(false);
+    }
+  }, [isThemeLabLocked, onToggleFab, showFab]);
+
   if (!isOpen) return null;
 
   // Close modal first, then open Theme Lab on the next frame so it
   // doesn't render behind the still-mounted modal backdrop.
   const handleOpenThemeLab = () => {
+    if (isThemeLabLocked) return;
     onClose();
     requestAnimationFrame(() => onOpenThemeLab());
   };
@@ -179,22 +187,27 @@ export const SettingsModal = ({
             <button
               type="button"
               onClick={handleOpenThemeLab}
+              disabled={isThemeLabLocked}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
               // Intentional: contrast is controlled by theme token choices (brand/textPrimary), not forced logic.
-              style={{ backgroundColor: theme.colors.brand, color: theme.colors.textPrimary }}
+              style={{ backgroundColor: theme.colors.brand, color: theme.colors.textPrimary, opacity: isThemeLabLocked ? 0.45 : 1 }}
             >
               <Palette size={16} />
               Open Theme Lab
             </button>
+            {isThemeLabLocked && (
+              <p className="mt-2 text-[11px] text-content-subtle">This theme is brand\u2011locked and cannot be edited in Theme Lab.</p>
+            )}
             <label className="flex items-center gap-3 mt-3 cursor-pointer select-none">
               <div className="relative">
                 <input
                   type="checkbox"
                   checked={showFab}
                   onChange={(e) => onToggleFab(e.target.checked)}
+                  disabled={isThemeLabLocked}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 rounded-full bg-white/15 peer-checked:bg-accent-brand transition-colors" />
+                <div className={`w-9 h-5 rounded-full transition-colors ${isThemeLabLocked ? 'bg-white/10' : 'bg-white/15 peer-checked:bg-accent-brand'}`} />
                 <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4" />
               </div>
               <div>
@@ -202,7 +215,7 @@ export const SettingsModal = ({
                   Show floating button
                 </span>
                 <span className="block text-[11px] text-content-subtle">
-                  Quick access while editing
+                  {isThemeLabLocked ? 'Unavailable for locked themes' : 'Quick access while editing'}
                 </span>
               </div>
             </label>

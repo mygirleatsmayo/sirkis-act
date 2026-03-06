@@ -1,11 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import App from "./App";
 import { ThemeProvider } from "./themes/ThemeProvider";
 import { ThemeLab } from "./ThemeLab";
 import { SettingsModal } from "./SettingsModal";
 import { Palette } from "lucide-react";
+import { useTheme } from "./themes/useTheme";
 
-export const Root = () => {
+const RootContent = () => {
+  const { theme } = useTheme();
+  const isThemeLabLocked = theme.editor.kind === 'locked';
   const [labOpen, setLabOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showFab, setShowFab] = useState(false);
@@ -15,8 +18,15 @@ export const Root = () => {
   const openLab = useCallback(() => setLabOpen(true), []);
   const closeLab = useCallback(() => setLabOpen(false), []);
 
+  useEffect(() => {
+    if (isThemeLabLocked) {
+      if (labOpen) setLabOpen(false);
+      if (showFab) setShowFab(false);
+    }
+  }, [isThemeLabLocked, labOpen, showFab]);
+
   return (
-    <ThemeProvider>
+    <>
       <App onOpenSettings={openSettings} />
       <ThemeLab isOpen={labOpen} onClose={closeLab} />
       <SettingsModal
@@ -27,7 +37,7 @@ export const Root = () => {
         onToggleFab={setShowFab}
       />
       {/* Opt-in FAB for Theme Lab quick access */}
-      {showFab && !labOpen && !settingsOpen && (
+      {showFab && !isThemeLabLocked && !labOpen && !settingsOpen && (
         <button
           type="button"
           onClick={openLab}
@@ -37,6 +47,12 @@ export const Root = () => {
           <Palette size={18} />
         </button>
       )}
-    </ThemeProvider>
+    </>
   );
 };
+
+export const Root = () => (
+  <ThemeProvider>
+    <RootContent />
+  </ThemeProvider>
+);

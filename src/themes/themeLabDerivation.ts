@@ -25,6 +25,8 @@ const cloneTheme = (t: ThemeConfig): ThemeConfig => ({
   colors: { ...t.colors },
   branding: { ...t.branding },
   fonts: { ...t.fonts },
+  capabilities: t.capabilities ? { ...t.capabilities } : undefined,
+  editor: t.editor ? { ...t.editor } : undefined,
   effects: {
     ...t.effects,
     blobs: t.effects.blobs.map((b) => ({ ...b })),

@@ -74,6 +74,21 @@ export interface ThemeEffects {
   glowColors: string[];         // rgba strings for pulse-glow animation
 }
 
+export interface ThemeCapabilities {
+  showLogo: boolean;
+  showTagline: boolean;
+  showHero: boolean;
+  showHeroLine2: boolean;
+  showSubhead: boolean;
+  showSirkisms: boolean;
+  subheadMode: 'structured' | 'plain';
+  logoColorMode: 'themed' | 'intrinsic';
+}
+
+export interface ThemeEditorConfig {
+  kind: 'studio' | 'locked';
+}
+
 export interface ThemeConfig {
   id: string;
   name: string;
@@ -81,4 +96,11 @@ export interface ThemeConfig {
   branding: ThemeBranding;
   fonts: ThemeFonts;
   effects: ThemeEffects;
+  capabilities?: Partial<ThemeCapabilities>;
+  editor?: Partial<ThemeEditorConfig>;
+}
+
+export interface ResolvedThemeConfig extends ThemeConfig {
+  capabilities: ThemeCapabilities;
+  editor: ThemeEditorConfig;
 }

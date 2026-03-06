@@ -3,6 +3,7 @@ import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDow
 import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
 import { useTheme } from './themes/useTheme';
+import { DEFAULT_THEME_CAPABILITIES } from './themes/resolveTheme';
 import { hexToRgb, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
 import type { Primaries, ThemeMode } from './themes/derivationRules';
 import { applyLockedDerivations, isTokenLocked } from './themes/themeLabDerivation';
@@ -45,6 +46,8 @@ const cloneTheme = (t: ThemeConfig): ThemeConfig => ({
   colors: { ...t.colors },
   branding: { ...t.branding },
   fonts: { ...t.fonts },
+  capabilities: t.capabilities ? { ...t.capabilities } : undefined,
+  editor: t.editor ? { ...t.editor } : undefined,
   effects: {
     ...t.effects,
     blobs: t.effects.blobs.map(b => ({ ...b })),
@@ -586,6 +589,17 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     });
   }, []);
 
+  const setCapability = useCallback((key: keyof typeof DEFAULT_THEME_CAPABILITIES, value: boolean | 'structured' | 'plain' | 'themed' | 'intrinsic') => {
+    setThemeLocal((prev) => ({
+      ...prev,
+      capabilities: {
+        ...DEFAULT_THEME_CAPABILITIES,
+        ...prev.capabilities,
+        [key]: value,
+      },
+    }));
+  }, []);
+
   // ── Reset ──
 
   const handleReset = useCallback(() => {
@@ -658,6 +672,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const def = defaults;
   const parts = theme.branding.heroSubheadParts ?? { leading: '', emphasis: '', trailing: '' };
   const defParts = def.branding.heroSubheadParts ?? { leading: '', emphasis: '', trailing: '' };
+  const capabilities = { ...DEFAULT_THEME_CAPABILITIES, ...theme.capabilities };
 
   return (
     <div
@@ -926,6 +941,67 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <TextInput label="Leading" value={parts.leading} defaultValue={defParts.leading} onChange={(v) => setSubheadPart('leading', v)} />
         <TextInput label="Emphasis" value={parts.emphasis} defaultValue={defParts.emphasis} onChange={(v) => setSubheadPart('emphasis', v)} />
         <TextInput label="Trailing" value={parts.trailing} defaultValue={defParts.trailing} onChange={(v) => setSubheadPart('trailing', v)} />
+
+        {/* ── Capabilities ── */}
+        <SectionHeader label="Capabilities" />
+        <div className="space-y-1.5">
+          {([
+            ['showLogo', 'Show Logo'],
+            ['showTagline', 'Show Tagline'],
+            ['showHero', 'Show Hero'],
+            ['showHeroLine2', 'Show Hero Line 2'],
+            ['showSubhead', 'Show Subhead'],
+            ['showSirkisms', 'Show Sirkisms'],
+          ] as const).map(([key, label]) => (
+            <label key={key} className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-white/70 py-0.5">
+              <span>{label}</span>
+              <input
+                type="checkbox"
+                checked={Boolean(capabilities[key])}
+                onChange={(e) => setCapability(key, e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-white/20 bg-black/30 text-teal-400 focus:ring-teal-400/40"
+              />
+            </label>
+          ))}
+          <div className="pt-1">
+            <div className="text-[9px] text-white/30 mb-1">Subhead Mode</div>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setCapability('subheadMode', 'structured')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadMode === 'structured' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Structured
+              </button>
+              <button
+                type="button"
+                onClick={() => setCapability('subheadMode', 'plain')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.subheadMode === 'plain' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Plain
+              </button>
+            </div>
+          </div>
+          <div className="pt-1">
+            <div className="text-[9px] text-white/30 mb-1">Logo Color Mode</div>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setCapability('logoColorMode', 'themed')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.logoColorMode === 'themed' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Themed
+              </button>
+              <button
+                type="button"
+                onClick={() => setCapability('logoColorMode', 'intrinsic')}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.logoColorMode === 'intrinsic' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+              >
+                Intrinsic
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* ── Logo ── */}
         <SectionHeader label="Logo" />

@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode, RefObject } from 'react';
 
 export interface Inputs {
   currentAge: number;
@@ -75,6 +75,9 @@ export type SettingsPanelProps = {
   formatCurrency: (value: number) => string;
   isMobile?: boolean;
   onOpenSettings?: () => void;
+  showDisclosure?: boolean;
+  onToggleDisclosure?: () => void;
+  disclosureContainerRef?: RefObject<HTMLDivElement | null>;
 };
 export type InputKey = keyof Inputs;
 export type NumericInputKey =

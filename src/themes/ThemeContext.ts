@@ -1,8 +1,8 @@
 import { createContext } from 'react';
-import type { ThemeConfig } from './types';
+import type { ThemeConfig, ResolvedThemeConfig } from './types';
 
 export interface ThemeContextValue {
-  theme: ThemeConfig;
+  theme: ResolvedThemeConfig;
   themeId: string;
   setThemeId: (id: string) => void;
   setThemeOverride: (theme: ThemeConfig | null) => void;

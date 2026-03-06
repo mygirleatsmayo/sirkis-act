@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { getTheme, defaultThemeId } from './index';
+import { resolveTheme } from './resolveTheme';
 import { ThemeContext } from './ThemeContext';
 import { syncCssVars } from './syncCssVars';
 import type { ThemeConfig } from './types';
@@ -19,7 +20,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [themeOverride, setThemeOverride] = useState<ThemeConfig | null>(null);
 
   const baseTheme = useMemo(() => getTheme(themeId), [themeId]);
-  const theme = themeOverride ?? baseTheme;
+  const theme = useMemo(
+    () => resolveTheme(themeOverride ?? baseTheme),
+    [baseTheme, themeOverride],
+  );
 
   const setThemeId = useCallback((id: string) => {
     setThemeIdState(id);

@@ -69,4 +69,17 @@ export const cyprusTheme: ThemeConfig = {
       'rgba(230, 195, 0, 0.20)',
     ],
   },
+  capabilities: {
+    showLogo: true,
+    showTagline: true,
+    showHero: true,
+    showHeroLine2: true,
+    showSubhead: true,
+    showSirkisms: true,
+    subheadMode: 'structured',
+    logoColorMode: 'themed',
+  },
+  editor: {
+    kind: 'studio',
+  },
 };
