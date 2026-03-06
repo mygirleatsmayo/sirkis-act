@@ -87,6 +87,7 @@ export interface ThemeCapabilities {
 
 export interface ThemeEditorConfig {
   kind: 'studio' | 'locked';
+  logoColorModeEditable: boolean;
 }
 
 export interface ThemeConfig {

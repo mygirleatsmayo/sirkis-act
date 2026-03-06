@@ -9,8 +9,8 @@ export const playgroundTheme: ThemeConfig = {
   colors: { ...cyprusTheme.colors },
   branding: { ...cyprusTheme.branding },
   fonts: { ...cyprusTheme.fonts },
-  capabilities: { ...cyprusTheme.capabilities },
-  editor: { ...cyprusTheme.editor },
+  capabilities: { ...cyprusTheme.capabilities, logoColorMode: 'intrinsic' },
+  editor: { ...cyprusTheme.editor, logoColorModeEditable: true },
   effects: {
     blobs: cyprusTheme.effects.blobs.map((b) => ({ ...b })),
     glowColors: [...cyprusTheme.effects.glowColors],

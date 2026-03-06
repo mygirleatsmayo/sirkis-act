@@ -9,6 +9,7 @@ describe('theme registry compatibility', () => {
       expect(resolved.capabilities.showHero).toBeTypeOf('boolean');
       expect(resolved.capabilities.logoColorMode).toMatch(/themed|intrinsic/);
       expect(resolved.editor.kind).toMatch(/studio|locked/);
+      expect(resolved.editor.logoColorModeEditable).toBeTypeOf('boolean');
     });
   });
 

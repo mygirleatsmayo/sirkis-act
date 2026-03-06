@@ -18,16 +18,25 @@ export const DEFAULT_THEME_CAPABILITIES: ThemeCapabilities = {
 
 export const DEFAULT_THEME_EDITOR: ThemeEditorConfig = {
   kind: 'studio',
+  logoColorModeEditable: true,
 };
 
-export const resolveTheme = (theme: ThemeConfig): ResolvedThemeConfig => ({
-  ...theme,
-  capabilities: {
+export const resolveTheme = (theme: ThemeConfig): ResolvedThemeConfig => {
+  const capabilities: ThemeCapabilities = {
     ...DEFAULT_THEME_CAPABILITIES,
     ...theme.capabilities,
-  },
-  editor: {
+  };
+
+  const editor: ThemeEditorConfig = {
     ...DEFAULT_THEME_EDITOR,
     ...theme.editor,
-  },
-});
+    logoColorModeEditable:
+      theme.editor?.logoColorModeEditable ?? capabilities.logoColorMode === 'themed',
+  };
+
+  return {
+    ...theme,
+    capabilities,
+    editor,
+  };
+};

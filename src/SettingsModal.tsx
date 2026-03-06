@@ -196,9 +196,9 @@ export const SettingsModal = ({
               Open Theme Lab
             </button>
             {isThemeLabLocked && (
-              <p className="mt-2 text-[11px] text-content-subtle">This theme is brand\u2011locked and cannot be edited in Theme Lab.</p>
+              <p className="mt-2 text-[11px] text-amber-300/90">This theme is brand locked and cannot be edited in Theme Lab.</p>
             )}
-            <label className="flex items-center gap-3 mt-3 cursor-pointer select-none">
+            <label className={`flex items-center gap-3 mt-3 select-none ${isThemeLabLocked ? 'cursor-not-allowed opacity-65' : 'cursor-pointer'}`}>
               <div className="relative">
                 <input
                   type="checkbox"
@@ -208,7 +208,7 @@ export const SettingsModal = ({
                   className="sr-only peer"
                 />
                 <div className={`w-9 h-5 rounded-full transition-colors ${isThemeLabLocked ? 'bg-white/10' : 'bg-white/15 peer-checked:bg-accent-brand'}`} />
-                <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4" />
+                <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform peer-checked:translate-x-4 ${isThemeLabLocked ? 'bg-white/70' : 'bg-white'}`} />
               </div>
               <div>
                 <span className="text-sm font-semibold text-content-secondary">

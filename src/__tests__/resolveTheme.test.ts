@@ -28,4 +28,26 @@ describe('resolveTheme', () => {
     expect(resolved.capabilities.showHero).toBe(true);
     expect(resolved.editor.kind).toBe('locked');
   });
+
+  it('locks logo color mode editing by default when capability is intrinsic', () => {
+    const resolved = resolveTheme({
+      ...cyprusTheme,
+      capabilities: { ...cyprusTheme.capabilities, logoColorMode: 'intrinsic' },
+      editor: { kind: 'studio' },
+    });
+
+    expect(resolved.capabilities.logoColorMode).toBe('intrinsic');
+    expect(resolved.editor.logoColorModeEditable).toBe(false);
+  });
+
+  it('respects explicit logo color mode editability override', () => {
+    const resolved = resolveTheme({
+      ...cyprusTheme,
+      capabilities: { ...cyprusTheme.capabilities, logoColorMode: 'intrinsic' },
+      editor: { kind: 'studio', logoColorModeEditable: true },
+    });
+
+    expect(resolved.capabilities.logoColorMode).toBe('intrinsic');
+    expect(resolved.editor.logoColorModeEditable).toBe(true);
+  });
 });

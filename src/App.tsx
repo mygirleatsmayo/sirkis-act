@@ -360,7 +360,7 @@ const SettingsPanel = ({
         )}
         {/* Timeline Section */}
         <section>
-          <div className="flex items-start justify-between gap-3 mb-6 ml-1">
+          <div className="flex items-center justify-between gap-3 mb-6 ml-1">
             <h3 className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest" style={{ color: theme.colors.brandAccent }}>
               <Clock size={14} /> Timeline
             </h3>
@@ -369,7 +369,7 @@ const SettingsPanel = ({
                 <button
                   type="button"
                   onClick={onToggleDisclosure}
-                  className="text-[11px] font-medium text-content-subtle hover:text-content-secondary transition-colors"
+                  className="text-[11px] font-medium text-content-subtle hover:text-content-secondary transition-colors leading-none"
                 >
                   Disclosures
                 </button>
@@ -816,8 +816,8 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
         </div>
         {/* SCROLLABLE DASHBOARD */}
         <div className="overflow-x-clip custom-scrollbar main-scroll lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
-          <div className="max-w-[1180px] mx-auto px-4 py-4 pb-20 lg:pb-8 lg:px-10 lg:py-8 space-y-4">
-            <div className="hidden lg:flex justify-end" ref={desktopDisclosureRef}>
+          <div className="relative max-w-[1180px] mx-auto px-4 py-4 pb-20 lg:pb-8 lg:px-10 lg:py-8 space-y-4">
+            <div className="hidden lg:block absolute top-8 right-10" ref={desktopDisclosureRef}>
               <div className="relative">
                 <button
                   type="button"

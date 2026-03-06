@@ -180,12 +180,13 @@ interface ColorInputProps {
   onFlash?: () => void;
   highlighted?: boolean;
   hint?: string;
+  disabled?: boolean;
 }
 
-const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock, onFlash, highlighted, hint }: ColorInputProps) => {
+const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock, onFlash, highlighted, hint, disabled = false }: ColorInputProps) => {
   const hex = toHex(value);
   const isDefault = value === defaultValue;
-  const isLocked = locked === true;
+  const isLocked = locked === true || disabled;
   const hasLockBehavior = locked !== undefined;
 
   return (
@@ -221,8 +222,9 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
       {hasLockBehavior && (
         <button
           type="button"
+          disabled={disabled}
           onClick={() => { if (isLocked && onUnlock) onUnlock(); else if (!isLocked && onRelock) onRelock(); }}
-          className={`p-0.5 shrink-0 transition-colors ${isLocked ? 'text-white/40 hover:text-white/60' : 'text-teal-400 hover:text-teal-300'}`}
+          className={`p-0.5 shrink-0 transition-colors ${disabled ? 'text-white/20 cursor-not-allowed' : isLocked ? 'text-white/40 hover:text-white/60' : 'text-teal-400 hover:text-teal-300'}`}
           title={isLocked ? 'Unlock for manual editing' : 'Re-lock (snap to derived value)'}
         >
           {isLocked ? <Lock size={10} /> : <Unlock size={10} />}
@@ -230,11 +232,12 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
       )}
       <button
         type="button"
+        disabled={disabled}
         onClick={() => {
           if (!isDefault) onChange(defaultValue);
           if (hasLockBehavior && !isLocked) onRelock?.();
         }}
-        className={`p-0.5 shrink-0 transition-colors ${isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
+        className={`p-0.5 shrink-0 transition-colors ${disabled ? 'text-white/[0.08] cursor-not-allowed' : isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
         title={hasLockBehavior && !isLocked ? 'Reset and re-lock' : 'Reset to default'}
         aria-disabled={isDefault}
       >
@@ -673,6 +676,8 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const parts = theme.branding.heroSubheadParts ?? { leading: '', emphasis: '', trailing: '' };
   const defParts = def.branding.heroSubheadParts ?? { leading: '', emphasis: '', trailing: '' };
   const capabilities = { ...DEFAULT_THEME_CAPABILITIES, ...theme.capabilities };
+  const logoColorModeEditable =
+    theme.editor?.logoColorModeEditable ?? capabilities.logoColorMode === 'themed';
 
   return (
     <div
@@ -946,23 +951,30 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <SectionHeader label="Capabilities" />
         <div className="space-y-1.5">
           {([
-            ['showLogo', 'Show Logo'],
-            ['showTagline', 'Show Tagline'],
-            ['showHero', 'Show Hero'],
-            ['showHeroLine2', 'Show Hero Line 2'],
-            ['showSubhead', 'Show Subhead'],
-            ['showSirkisms', 'Show Sirkisms'],
-          ] as const).map(([key, label]) => (
-            <label key={key} className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-white/70 py-0.5">
-              <span>{label}</span>
-              <input
-                type="checkbox"
-                checked={Boolean(capabilities[key])}
-                onChange={(e) => setCapability(key, e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-white/20 bg-black/30 text-teal-400 focus:ring-teal-400/40"
-              />
-            </label>
-          ))}
+            ['showLogo', 'Logo'],
+            ['showTagline', 'Tagline'],
+            ['showHero', 'Hero'],
+            ['showHeroLine2', 'Hero Line 2'],
+            ['showSubhead', 'Subhead'],
+            ['showSirkisms', 'Sirkisms'],
+          ] as const).map(([key, label]) => {
+            const enabled = Boolean(capabilities[key]);
+            return (
+              <button
+                key={key}
+                type="button"
+                role="switch"
+                aria-checked={enabled}
+                onClick={() => setCapability(key, !enabled)}
+                className="w-full flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-white/70 py-0.5"
+              >
+                <span>{label}</span>
+                <span className={`w-8 h-4 rounded-full p-0.5 transition-colors ${enabled ? 'bg-teal-400/70' : 'bg-white/15'}`}>
+                  <span className={`block w-3 h-3 rounded-full bg-white shadow-sm transition-transform ${enabled ? 'translate-x-4' : ''}`} />
+                </span>
+              </button>
+            );
+          })}
           <div className="pt-1">
             <div className="text-[9px] text-white/30 mb-1">Subhead Mode</div>
             <div className="flex gap-1">
@@ -987,19 +999,30 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
             <div className="flex gap-1">
               <button
                 type="button"
-                onClick={() => setCapability('logoColorMode', 'themed')}
-                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.logoColorMode === 'themed' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+                disabled={!logoColorModeEditable}
+                onClick={() => {
+                  if (!logoColorModeEditable) return;
+                  setCapability('logoColorMode', 'themed');
+                }}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.logoColorMode === 'themed' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'} ${!logoColorModeEditable ? 'opacity-40 cursor-not-allowed hover:text-white/45 hover:bg-transparent' : ''}`}
               >
                 Themed
               </button>
               <button
                 type="button"
-                onClick={() => setCapability('logoColorMode', 'intrinsic')}
-                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.logoColorMode === 'intrinsic' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'}`}
+                disabled={!logoColorModeEditable}
+                onClick={() => {
+                  if (!logoColorModeEditable) return;
+                  setCapability('logoColorMode', 'intrinsic');
+                }}
+                className={`px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${capabilities.logoColorMode === 'intrinsic' ? 'bg-white/15 text-white' : 'text-white/45 hover:text-white/70 hover:bg-white/10'} ${!logoColorModeEditable ? 'opacity-40 cursor-not-allowed hover:text-white/45 hover:bg-transparent' : ''}`}
               >
                 Intrinsic
               </button>
             </div>
+            {!logoColorModeEditable && (
+              <div className="text-[9px] text-white/25 mt-1">Logo color mode is locked for this theme.</div>
+            )}
           </div>
         </div>
 
@@ -1044,8 +1067,13 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               onRelock={() => relockToken('branding.logoColor')}
               onFlash={() => flashToken('branding.logoColor')}
               highlighted={highlightedPaths.has('branding.logoColor')}
+              disabled={capabilities.logoColorMode === 'intrinsic'}
             />
-            <div className="text-[9px] text-white/25">Derived from Brand while locked. Changing this affects only the logo.</div>
+            <div className="text-[9px] text-white/25">
+              {capabilities.logoColorMode === 'intrinsic'
+                ? 'Disabled in intrinsic mode. Switch logo color mode to themed to edit.'
+                : 'Derived from Brand while locked. Changing this affects only the logo.'}
+            </div>
           </div>
         </div>
 
