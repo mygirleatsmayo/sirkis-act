@@ -413,6 +413,13 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     setTokenLocks(nextLocks);
   }, []);
 
+  const resolveModeForTheme = useCallback((candidateTheme: ThemeConfig): ThemeMode => {
+    if (themeMode === 'auto') {
+      return relativeLuminance(candidateTheme.colors.bg) >= 0.5 ? 'light' : 'dark';
+    }
+    return themeMode;
+  }, [themeMode]);
+
   useEffect(() => {
     tokenLocksRef.current = tokenLocks;
   }, [tokenLocks]);
@@ -475,9 +482,11 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
       const base = cloneTheme(activeTheme);
-      baseThemeRef.current = base;
-      setResetBaseTheme(base);
-      setThemeLocal(cloneTheme(base));
+      const openMode = resolveModeForTheme(base);
+      const normalizedBase = applyLockedDerivations(base, openMode, {});
+      baseThemeRef.current = normalizedBase;
+      setResetBaseTheme(normalizedBase);
+      setThemeLocal(cloneTheme(normalizedBase));
       setTokenLocksAndRef({});
       if (themeId !== 'playground') {
         prevThemeId.current = themeId;
@@ -487,7 +496,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     wasOpenRef.current = isOpen;
     // Override persists when panel closes so changes remain visible
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, activeTheme, setTokenLocksAndRef]);
+  }, [isOpen, activeTheme, resolveModeForTheme, setTokenLocksAndRef]);
 
   // ── Value setters ──
 
