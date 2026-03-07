@@ -3,6 +3,15 @@
 
 ## [Unreleased]
 
+- **Theme Design Compatibility (Wave 1 + Wave 2)**: Added robust per-theme capability handling, locked/studio editor behavior, and safe defaults/fallback resolution for compatibility across preinstalled and future themes.
+- **Graceful Branding Degradation**: App now handles missing/empty logo/tagline/hero/subhead/sirkisms content without layout artifacts, with clearer hero visibility rules.
+- **Subhead Authoring Controls**: Added subhead wrap and widow controls, upgraded subhead emphasis modes (`plain`, `bold`, `italic`, `boldItalic`), and improved spacing logic so Theme Lab users do not need manual boundary spaces between subhead parts.
+- **Disclosure UX Finalization**: Disclosure trigger behavior stabilized across desktop/mobile; desktop disclosure moved to sidebar footer adjacent to reset action to avoid top-content overlap/shift issues.
+- **Theme Lab Reliability**: Fixed false-active reset icon regression by normalizing lab-open baseline via derivation engine and resetting token lock state on open.
+- **Theme Lab Capabilities UX**: Added mobile-friendly toggles/segmented controls for capabilities and logo-color-mode lock semantics for intrinsic brand logos.
+- **Theme Fixtures for QA**: Added locked fixture and intrinsic-logo fixture paths for brand-lock and logo-color-mode validation.
+- **Tests Expanded**: Added branding utility coverage (subhead rendering, hero visibility, sirkism safety) and strengthened theme resolver/registry compatibility tests.
+
 ---
 
 ## [1.3.1] - 2026-03-04 — Tooltip Hover Scope Fix
