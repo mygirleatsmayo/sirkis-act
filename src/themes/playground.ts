@@ -13,6 +13,6 @@ export const playgroundTheme: ThemeConfig = {
   editor: { ...cyprusTheme.editor, logoColorModeEditable: true },
   effects: {
     blobs: cyprusTheme.effects.blobs.map((b) => ({ ...b })),
-    glowColors: [...cyprusTheme.effects.glowColors],
+    glowColor: cyprusTheme.effects.glowColor,
   },
 };

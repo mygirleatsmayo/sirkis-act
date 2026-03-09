@@ -3,21 +3,28 @@ import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDow
 import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
 import { useTheme } from './themes/useTheme';
-import { DEFAULT_THEME_CAPABILITIES } from './themes/resolveTheme';
+import { DEFAULT_THEME_CAPABILITIES, DEFAULT_THEME_EDITOR } from './themes/resolveTheme';
 import { hexToRgb, parseRgba, toHex, relativeLuminance } from './utils/colorMath';
 import type { Primaries, ThemeMode } from './themes/derivationRules';
 import { applyLockedDerivations, isTokenLocked } from './themes/themeLabDerivation';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
+const PRIMARY_LABEL_OVERRIDES: Record<string, string> = {
+  returns: 'Growth',
+  opm: 'Employer Funded',
+  textNeutral: 'Real Value',
+};
+
 const camelToLabel = (s: string): string =>
+  PRIMARY_LABEL_OVERRIDES[s] ??
   s.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).trim();
 
 /** Convert a derived token path to a readable label for tooltips */
 const pathToLabel = (path: string): string => {
   if (path.startsWith('colors.')) return camelToLabel(path.slice(7));
   if (path.startsWith('branding.')) return camelToLabel(path.slice(9));
-  if (path.startsWith('effects.glowColors.')) return `Glow ${+path.slice(19) + 1}`;
+  if (path === 'effects.glowColor') return 'Glow';
   if (path.startsWith('effects.blobs.')) {
     const idx = +path.charAt(14);
     return `Blob ${idx + 1}`;
@@ -51,7 +58,7 @@ const cloneTheme = (t: ThemeConfig): ThemeConfig => ({
   effects: {
     ...t.effects,
     blobs: t.effects.blobs.map(b => ({ ...b })),
-    glowColors: [...t.effects.glowColors],
+    glowColor: t.effects.glowColor,
   },
 });
 
@@ -85,6 +92,7 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
       { key: 'bgGlass', label: 'Glass' },
       { key: 'bgInput', label: 'Input' },
       { key: 'bgOverlay', label: 'Overlay' },
+      { key: 'mutedBg', label: 'Muted' },
     ],
   },
   {
@@ -95,13 +103,6 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
     ],
   },
   {
-    section: 'Text',
-    tokens: [
-      { key: 'textSecondary', label: 'Text Secondary' },
-      { key: 'textSubtle', label: 'Text Subtle' },
-    ],
-  },
-  {
     section: 'Accents',
     tokens: [
       { key: 'brandBg', label: 'Brand BG' },
@@ -109,6 +110,8 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
       { key: 'returnsBg', label: 'Returns BG' },
       { key: 'lossBg', label: 'Loss BG' },
       { key: 'neutralBg', label: 'Neutral BG' },
+      { key: 'targetBg', label: 'Target BG' },
+      { key: 'selfFundedBg', label: 'Self Funded BG' },
     ],
   },
   {
@@ -118,8 +121,6 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
       { key: 'sliderAccent', label: 'Slider' },
       { key: 'sliderAccentHover', label: 'Slider Hover' },
       { key: 'toggleOff', label: 'Toggle Off' },
-      { key: 'scrollbarThumb', label: 'Scrollbar' },
-      { key: 'scrollbarThumbHover', label: 'Scrollbar Hover' },
     ],
   },
 ];
@@ -130,19 +131,23 @@ const TOKEN_HINTS: Partial<Record<keyof ThemeColors, string>> = {
 };
 
 /** Keys that are primaries — shown in Primaries picker, skip lock/unlock UI in sections */
-const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral', 'textPrimary']);
+const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral', 'textPrimary', 'textSecondary', 'textSubtle', 'target', 'selfFunded']);
 
 /** Derived token paths per primary — used for flash, sticky highlight, and tooltip content */
 const DERIVED_PATHS: Record<string, string[]> = {
-  bg: ['colors.bgGlass', 'colors.bgInput', 'colors.borderDefault'],
+  bg: ['colors.bgGlass', 'colors.bgInput', 'colors.borderDefault', 'colors.mutedBg', 'colors.bgOverlay', 'colors.borderSubtle', 'colors.toggleOff'],
   brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color', 'branding.logoColor'],
-  brandAccent: ['branding.heroLine2Color', 'effects.glowColors.0', 'effects.glowColors.1', 'effects.glowColors.2', 'effects.blobs.0.color', 'effects.blobs.1.color'],
+  brandAccent: ['branding.heroLine2Color', 'effects.glowColor', 'effects.blobs.0.color', 'effects.blobs.1.color'],
   returns: ['colors.returnsBg'],
   loss: ['colors.lossBg'],
   startNow: [],
   opm: ['colors.opmBg'],
   textNeutral: ['colors.neutralBg'],
   textPrimary: [],
+  textSecondary: [],
+  textSubtle: [],
+  target: ['colors.targetBg'],
+  selfFunded: ['colors.selfFundedBg'],
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────
@@ -169,6 +174,69 @@ const SubSectionHeader = ({ label }: { label: string }) => (
   </div>
 );
 
+/** Detect touch device once, shared across all LabTooltip instances */
+const useIsTouch = () => {
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(hover: none) and (pointer: coarse)');
+    const update = () => setIsTouch(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  return isTouch;
+};
+
+/** Tooltip that shows on hover (instant, desktop) or tap (mobile) with outside-click dismiss */
+const LabTooltip = ({
+  content,
+  children,
+  isTouch,
+  align = 'center',
+}: {
+  content: string;
+  children: React.ReactNode;
+  isTouch: boolean;
+  align?: 'left' | 'right' | 'center';
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!isOpen || !isTouch) return;
+    const handleOutside = (e: Event) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handleOutside);
+    return () => document.removeEventListener('pointerdown', handleOutside);
+  }, [isOpen, isTouch]);
+
+  const visibilityClass = isTouch
+    ? (isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')
+    : 'opacity-0 pointer-events-none group-hover/tip:opacity-100 group-hover/tip:pointer-events-auto';
+
+  return (
+    <span
+      ref={ref}
+      className="relative group/tip inline-flex"
+      onClick={(e) => {
+        if (isTouch) {
+          e.stopPropagation();
+          setIsOpen((o) => !o);
+        }
+      }}
+    >
+      {children}
+      <span className={`absolute bottom-full mb-1.5 w-48 max-w-[70vw] rounded-md border border-white/15 bg-[#1a2a2a] px-2 py-1.5 text-[10px] font-medium text-white/70 text-left shadow-lg transition-opacity duration-150 z-50 ${align === 'left' ? 'left-0' : align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'} ${visibilityClass}`}>
+        {content}
+      </span>
+    </span>
+  );
+};
+
 interface ColorInputProps {
   label: string;
   value: string;
@@ -181,9 +249,10 @@ interface ColorInputProps {
   highlighted?: boolean;
   hint?: string;
   disabled?: boolean;
+  isTouch?: boolean;
 }
 
-const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock, onFlash, highlighted, hint, disabled = false }: ColorInputProps) => {
+const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, onRelock, onFlash, highlighted, hint, disabled = false, isTouch = false }: ColorInputProps) => {
   const hex = toHex(value);
   const isDefault = value === defaultValue;
   const isLocked = locked === true || disabled;
@@ -202,7 +271,6 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
           type="button"
           onClick={onFlash}
           className={`text-[10px] font-bold uppercase tracking-wider truncate leading-tight text-left transition-colors cursor-pointer ${highlighted ? 'text-[#ff00ff]' : 'text-white/70 hover:text-white/90'}`}
-          title="Click to flash in app."
         >
           {label}
         </button>
@@ -214,21 +282,24 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
         </div>
       )}
       {hint && (
-        <span className="shrink-0 text-white/25" title={hint}>
-          <Info size={10} />
-        </span>
+        <LabTooltip content={hint} isTouch={isTouch} align="left">
+          <span className="shrink-0 text-white/25 cursor-help">
+            <Info size={10} />
+          </span>
+        </LabTooltip>
       )}
       <div className="flex-1 min-w-0" />
       {hasLockBehavior && (
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => { if (isLocked && onUnlock) onUnlock(); else if (!isLocked && onRelock) onRelock(); }}
-          className={`p-0.5 shrink-0 transition-colors ${disabled ? 'text-white/20 cursor-not-allowed' : isLocked ? 'text-white/40 hover:text-white/60' : 'text-teal-400 hover:text-teal-300'}`}
-          title={isLocked ? 'Unlock for manual editing' : 'Re-lock (snap to derived value)'}
-        >
-          {isLocked ? <Lock size={10} /> : <Unlock size={10} />}
-        </button>
+        <LabTooltip content={isLocked ? 'Unlock for manual editing' : 'Re-lock (snap to derived value)'} isTouch={isTouch} align="right">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => { if (isLocked && onUnlock) onUnlock(); else if (!isLocked && onRelock) onRelock(); }}
+            className={`p-0.5 shrink-0 transition-colors ${disabled ? 'text-white/20 cursor-not-allowed' : isLocked ? 'text-white/40 hover:text-white/60' : 'text-teal-400 hover:text-teal-300'}`}
+          >
+            {isLocked ? <Lock size={10} /> : <Unlock size={10} />}
+          </button>
+        </LabTooltip>
       )}
       <button
         type="button"
@@ -238,7 +309,6 @@ const ColorInput = ({ label, value, defaultValue, onChange, locked, onUnlock, on
           if (hasLockBehavior && !isLocked) onRelock?.();
         }}
         className={`p-0.5 shrink-0 transition-colors ${disabled ? 'text-white/[0.08] cursor-not-allowed' : isDefault ? 'text-white/[0.06] cursor-default' : 'text-white/30 hover:text-white/60'}`}
-        title={hasLockBehavior && !isLocked ? 'Reset and re-lock' : 'Reset to default'}
         aria-disabled={isDefault}
       >
         <RotateCcw size={10} />
@@ -334,11 +404,12 @@ const LabInstructions = ({
       {open && (
         <ul className="mt-2 space-y-1 text-[10px] text-white/40 leading-relaxed pl-4">
           <li><strong className="text-white/55">SWATCHES</strong> Click a swatch to change that color.</li>
-          <li><strong className="text-white/55">PRIMARIES</strong> The primary colors from which others derive. Changes update linked (derived) colors while those rows are locked.</li>
+          <li><strong className="text-white/55">PALETTE</strong> Source colors auto-derive linked tokens (when auto-derivation is on). Standalone colors have no linked tokens.</li>
+          <li><strong className="text-white/55">AUTO / MANUAL</strong> Toggle auto-derivation on or off. When off, every color is independently editable.</li>
           <li><strong className="text-white/55">MODE</strong> Toggle dark, light, or auto to preview how colors behave.</li>
-          <li><strong className="text-white/55">PRIMARY LABELS</strong> Click to flash that color in app and highlight linked rows. Click again to clear highlights.</li>
+          <li><strong className="text-white/55">SOURCE LABELS</strong> Click to flash that color in app and highlight linked rows. Click again to clear highlights.</li>
           <li><strong className="text-white/55">ROW LABELS</strong> Click to flash only that row in app.</li>
-          <li><strong className="text-white/55">LOCKING</strong> Unlocked rows keep manual edits. Re-lock snaps back to the derived color.</li>
+          <li><strong className="text-white/55">LOCKING</strong> Unlocked rows keep manual edits. Re-lock snaps back to the derived color. Hidden when auto-derivation is off.</li>
           <li><strong className="text-white/55">LOGO</strong> Upload any SVG; stroke color defaults to Brand and can be changed independently.</li>
           <li><strong className="text-white/55">RESET</strong> Row reset restores row. Header reset restores everything.</li>
           <li><strong className="text-white/55">SAVE</strong> Exports a TypeScript file you can share with the developer.</li>
@@ -380,6 +451,7 @@ interface ThemeLabProps {
 
 export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const { theme: activeTheme, setThemeId, themeId, setThemeOverride } = useTheme();
+  const isTouch = useIsTouch();
   const prevThemeId = useRef(themeId);
   const wasOpenRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -403,6 +475,12 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
 
   // Dark/Light/Auto mode
   const [themeMode, setThemeMode] = useState<'dark' | 'light' | 'auto'>('auto');
+
+  // Derivation toggle: studio → on, studioNoDerivation → off, locked → N/A
+  const editorKind = theme.editor?.kind ?? DEFAULT_THEME_EDITOR.kind;
+  const [derivationEnabled, setDerivationEnabled] = useState(() =>
+    editorKind !== 'studioNoDerivation',
+  );
 
   // Per-token lock state: absence = locked; stored as false = unlocked
   const [tokenLocks, setTokenLocks] = useState<Record<string, boolean>>(() => ({}));
@@ -434,11 +512,11 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   // Combined set of paths to highlight (flash + sticky)
   const highlightedPaths = useMemo(() => {
     const paths = new Set(flashedPaths);
-    if (highlightedPrimary) {
+    if (highlightedPrimary && derivationEnabled) {
       for (const p of DERIVED_PATHS[highlightedPrimary] ?? []) paths.add(p);
     }
     return paths;
-  }, [flashedPaths, highlightedPrimary]);
+  }, [flashedPaths, highlightedPrimary, derivationEnabled]);
 
   const unlockToken = useCallback((path: string) => {
     const nextLocks = { ...tokenLocksRef.current, [path]: false };
@@ -457,21 +535,25 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     const nextLocks = { ...tokenLocksRef.current };
     delete nextLocks[path];
     setTokenLocksAndRef(nextLocks);
-    setThemeLocal((prev) =>
-      applyLockedDerivations(prev, effectiveMode, nextLocks, { onlyPaths: [path] }),
-    );
-  }, [effectiveMode, setTokenLocksAndRef]);
+    if (derivationEnabled) {
+      setThemeLocal((prev) =>
+        applyLockedDerivations(prev, effectiveMode, nextLocks, { onlyPaths: [path] }),
+      );
+    }
+  }, [effectiveMode, setTokenLocksAndRef, derivationEnabled]);
 
   // Defaults computed through derivation engine from the current lab base theme.
   const defaults = useMemo(() => {
+    if (!derivationEnabled) return resetBaseTheme;
     return applyLockedDerivations(resetBaseTheme, effectiveMode, {});
-  }, [effectiveMode, resetBaseTheme]);
+  }, [effectiveMode, resetBaseTheme, derivationEnabled]);
 
   // ── Re-derive locked tokens when mode changes ──
 
   useEffect(() => {
+    if (!derivationEnabled) return;
     setThemeLocal((prev) => applyLockedDerivations(prev, effectiveMode, tokenLocksRef.current));
-  }, [effectiveMode]);
+  }, [effectiveMode, derivationEnabled]);
 
   // ── Sync to ThemeProvider ──
 
@@ -483,7 +565,12 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     if (isOpen && !wasOpenRef.current) {
       const base = cloneTheme(activeTheme);
       const openMode = resolveModeForTheme(base);
-      const normalizedBase = applyLockedDerivations(base, openMode, {});
+      const openEditorKind = base.editor?.kind ?? DEFAULT_THEME_EDITOR.kind;
+      const openDerivation = openEditorKind !== 'studioNoDerivation';
+      setDerivationEnabled(openDerivation);
+      const normalizedBase = openDerivation
+        ? applyLockedDerivations(base, openMode, {})
+        : base;
       baseThemeRef.current = normalizedBase;
       setResetBaseTheme(normalizedBase);
       setThemeLocal(cloneTheme(normalizedBase));
@@ -548,22 +635,33 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   /** Flash a primary and all its locked derived tokens + toggle sticky highlight */
   const flashPrimary = useCallback((primaryKey: string) => {
     const allPaths = [`colors.${primaryKey}`];
-    for (const path of DERIVED_PATHS[primaryKey] ?? []) {
-      if (isTokenLocked(tokenLocksRef.current, path)) allPaths.push(path);
+    if (derivationEnabled) {
+      for (const path of DERIVED_PATHS[primaryKey] ?? []) {
+        if (isTokenLocked(tokenLocksRef.current, path)) allPaths.push(path);
+      }
     }
     flashPaths(allPaths);
 
     // Toggle sticky highlight
     setHighlightedPrimary(prev => prev === primaryKey ? null : primaryKey);
-  }, [flashPaths]);
+  }, [flashPaths, derivationEnabled]);
 
   /** Change a primary color and auto-update all locked derived tokens */
   const setPrimaryColor = useCallback((primaryKey: keyof Primaries, newHex: string) => {
     setThemeLocal((prev) => {
       const next = cloneTheme(prev);
       (next.colors as unknown as Record<string, string>)[primaryKey] = newHex;
+      if (!derivationEnabled) return next;
       return applyLockedDerivations(next, effectiveMode, tokenLocksRef.current);
     });
+  }, [effectiveMode, derivationEnabled]);
+
+  /** Toggle derivation on/off. Turning on re-derives all locked tokens. */
+  const toggleDerivation = useCallback((enabled: boolean) => {
+    setDerivationEnabled(enabled);
+    if (enabled) {
+      setThemeLocal((prev) => applyLockedDerivations(prev, effectiveMode, tokenLocksRef.current));
+    }
   }, [effectiveMode]);
 
   const setBranding = useCallback((key: string, value: string) => {
@@ -616,6 +714,8 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   // ── Reset ──
 
   const handleReset = useCallback(() => {
+    const baseKind = baseThemeRef.current.editor?.kind ?? DEFAULT_THEME_EDITOR.kind;
+    setDerivationEnabled(baseKind !== 'studioNoDerivation');
     setThemeLocal(() => {
       const next = cloneTheme(baseThemeRef.current);
       return {
@@ -772,25 +872,42 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
           ))}
         </div>
 
-        {/* ── Primaries ── */}
-        <SectionHeader label="Primaries" />
-        <div className="text-[9px] text-white/30 -mt-1 mb-2">
-          Set primary colors. Derived tokens auto-update unless unlocked.
-        </div>
         {theme.colors.bg !== defaults.colors.bg && (
           <p className="hidden max-sm:block text-[9px] font-bold text-white bg-red-600 rounded px-2 py-1 -mt-1 mb-2">
             ⚠ Address bar color updates when panel closes
           </p>
         )}
 
-        {/* Primary color pickers */}
-        {(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral', 'textPrimary'] as const).map(key => {
+        {/* ── Palette ── */}
+        <SectionHeader label="Palette" showDivider={false} />
+        <div className="text-[9px] text-white/30 -mt-1 mb-2">
+          Set palette colors. Derived colors auto-update from source colors unless unlocked.
+        </div>
+
+        <div className="flex items-center justify-between mt-2.5 mb-1">
+          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-white/35">SOURCE</div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={derivationEnabled}
+            onClick={() => toggleDerivation(!derivationEnabled)}
+            className="flex items-center gap-1 group/deriv"
+          >
+            <span className={`text-[8px] uppercase tracking-wider ${derivationEnabled ? 'text-teal-400/70' : 'text-white/25'}`}>
+              {derivationEnabled ? 'Auto' : 'Manual'}
+            </span>
+            <span className={`w-6 h-3 rounded-full p-0.5 transition-colors ${derivationEnabled ? 'bg-teal-400/70' : 'bg-white/15'}`}>
+              <span className={`block w-2 h-2 rounded-full bg-white shadow-sm transition-transform ${derivationEnabled ? 'translate-x-3' : ''}`} />
+            </span>
+          </button>
+        </div>
+        {(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'opm', 'textNeutral', 'target', 'selfFunded'] as const).map(key => {
           const derivedCount = DERIVED_PATHS[key]?.length ?? 0;
           const handleChange = (hex: string) => {
             setPrimaryColor(key as keyof Primaries, hex);
           };
           const handleReset = () => handleChange(def.colors[key]);
-          const infoHint = (key === 'startNow' || key === 'loss') ? 'Visible when Start Age is adjusted' : undefined;
+          const infoHint = key === 'loss' ? 'Visible when Start Age is adjusted' : undefined;
           return (
             <div key={key} className="flex items-center gap-1.5 py-0.5">
               <input
@@ -803,24 +920,26 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                 type="button"
                 onClick={() => flashPrimary(key)}
                 className={`text-[10px] font-bold uppercase tracking-wider truncate leading-tight text-left transition-colors cursor-pointer ${highlightedPrimary === key ? 'text-[#ff00ff]' : 'text-white/70 hover:text-white/90'}`}
-                title="Click to flash in app and highlight derived colors."
               >
                 {camelToLabel(key)}
                 {highlightedPrimary === key && <span className="ml-1 text-[8px] opacity-60">●</span>}
               </button>
               {infoHint && (
-                <span className="shrink-0 text-white/25" title={infoHint}>
-                  <Info size={10} />
-                </span>
+                <LabTooltip content={infoHint} isTouch={isTouch} align="left">
+                  <span className="shrink-0 text-white/25 cursor-help">
+                    <Info size={10} />
+                  </span>
+                </LabTooltip>
               )}
               <div className="flex-1 min-w-0" />
-              {derivedCount > 0 && (
-                <span
-                  className={`text-[8px] tabular-nums cursor-default ${highlightedPrimary === key ? 'text-[#ff00ff]' : 'text-white/25'}`}
-                  title={(DERIVED_PATHS[key] ?? []).map(pathToLabel).join(', ')}
-                >
-                  {derivedCount} derived
-                </span>
+              {derivationEnabled && derivedCount > 0 && (
+                <LabTooltip content={(DERIVED_PATHS[key] ?? []).map(pathToLabel).join(', ')} isTouch={isTouch} align="right">
+                  <span
+                    className={`text-[8px] tabular-nums cursor-help ${highlightedPrimary === key ? 'text-[#ff00ff]' : 'text-white/25'}`}
+                  >
+                    {derivedCount} derived
+                  </span>
+                </LabTooltip>
               )}
               <button
                 type="button"
@@ -829,7 +948,51 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                   ? 'text-white/[0.06] cursor-default'
                   : 'text-white/30 hover:text-white/60'
                   }`}
-                title="Reset to default"
+              >
+                <RotateCcw size={10} />
+              </button>
+            </div>
+          );
+        })}
+
+        <SubSectionHeader label="Standalone" />
+        {(['startNow', 'textPrimary', 'textSecondary', 'textSubtle'] as const).map(key => {
+          const handleChange = (hex: string) => {
+            setPrimaryColor(key as keyof Primaries, hex);
+          };
+          const handleReset = () => handleChange(def.colors[key]);
+          const infoHint = key === 'startNow' ? 'Visible when Start Age is adjusted' : undefined;
+          return (
+            <div key={key} className="flex items-center gap-1.5 py-0.5">
+              <input
+                type="color"
+                value={toHex(theme.colors[key])}
+                onChange={(e) => handleChange(e.target.value)}
+                className="w-6 h-6 rounded border border-white/20 cursor-pointer bg-transparent p-0 shrink-0"
+              />
+              <button
+                type="button"
+                onClick={() => flashPrimary(key)}
+                className={`text-[10px] font-bold uppercase tracking-wider truncate leading-tight text-left transition-colors cursor-pointer ${highlightedPrimary === key ? 'text-[#ff00ff]' : 'text-white/70 hover:text-white/90'}`}
+              >
+                {camelToLabel(key)}
+                {highlightedPrimary === key && <span className="ml-1 text-[8px] opacity-60">●</span>}
+              </button>
+              {infoHint && (
+                <LabTooltip content={infoHint} isTouch={isTouch} align="left">
+                  <span className="shrink-0 text-white/25 cursor-help">
+                    <Info size={10} />
+                  </span>
+                </LabTooltip>
+              )}
+              <div className="flex-1 min-w-0" />
+              <button
+                type="button"
+                onClick={handleReset}
+                className={`p-0.5 shrink-0 transition-colors ${theme.colors[key] === def.colors[key]
+                  ? 'text-white/[0.06] cursor-default'
+                  : 'text-white/30 hover:text-white/60'
+                  }`}
               >
                 <RotateCcw size={10} />
               </button>
@@ -838,36 +1001,38 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         })}
 
         {/* ── Derived ── */}
-        <SectionHeader label="Derived" />
+        <SectionHeader label={derivationEnabled ? 'Derived' : 'Derived (manual)'} />
+
+        {/* Hero branding colors */}
+        <SubSectionHeader label="Hero" />
+        <ColorInput
+          label="Hero Line 1 Color"
+          value={theme.branding.heroLine1Color}
+          defaultValue={def.branding.heroLine1Color}
+          onChange={(hex) => setColorAtPath('branding.heroLine1Color', hex)}
+          locked={derivationEnabled ? isTokenLocked(tokenLocks, 'branding.heroLine1Color') : undefined}
+          onUnlock={derivationEnabled ? () => unlockToken('branding.heroLine1Color') : undefined}
+          onRelock={derivationEnabled ? () => relockToken('branding.heroLine1Color') : undefined}
+          onFlash={() => flashToken('branding.heroLine1Color')}
+          highlighted={highlightedPaths.has('branding.heroLine1Color')}
+          isTouch={isTouch}
+        />
+        <ColorInput
+          label="Hero Line 2 Color"
+          value={theme.branding.heroLine2Color}
+          defaultValue={def.branding.heroLine2Color}
+          onChange={(hex) => setColorAtPath('branding.heroLine2Color', hex)}
+          locked={derivationEnabled ? isTokenLocked(tokenLocks, 'branding.heroLine2Color') : undefined}
+          onUnlock={derivationEnabled ? () => unlockToken('branding.heroLine2Color') : undefined}
+          onRelock={derivationEnabled ? () => relockToken('branding.heroLine2Color') : undefined}
+          onFlash={() => flashToken('branding.heroLine2Color')}
+          highlighted={highlightedPaths.has('branding.heroLine2Color')}
+          isTouch={isTouch}
+        />
+
         {TOKEN_SECTIONS.map(({ section, tokens }) => (
           <div key={section}>
             <SubSectionHeader label={section} />
-            {section === 'Text' && (
-              <>
-                <ColorInput
-                  label="Hero Line 1 Color"
-                  value={theme.branding.heroLine1Color}
-                  defaultValue={def.branding.heroLine1Color}
-                  onChange={(hex) => setColorAtPath('branding.heroLine1Color', hex)}
-                  locked={isTokenLocked(tokenLocks, 'branding.heroLine1Color')}
-                  onUnlock={() => unlockToken('branding.heroLine1Color')}
-                  onRelock={() => relockToken('branding.heroLine1Color')}
-                  onFlash={() => flashToken('branding.heroLine1Color')}
-                  highlighted={highlightedPaths.has('branding.heroLine1Color')}
-                />
-                <ColorInput
-                  label="Hero Line 2 Color"
-                  value={theme.branding.heroLine2Color}
-                  defaultValue={def.branding.heroLine2Color}
-                  onChange={(hex) => setColorAtPath('branding.heroLine2Color', hex)}
-                  locked={isTokenLocked(tokenLocks, 'branding.heroLine2Color')}
-                  onUnlock={() => unlockToken('branding.heroLine2Color')}
-                  onRelock={() => relockToken('branding.heroLine2Color')}
-                  onFlash={() => flashToken('branding.heroLine2Color')}
-                  highlighted={highlightedPaths.has('branding.heroLine2Color')}
-                />
-              </>
-            )}
             {tokens.map(({ key, label }) => {
               const path = `colors.${key}`;
               const isPrimary = PRIMARY_KEYS.has(key);
@@ -878,12 +1043,13 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                   value={theme.colors[key]}
                   defaultValue={def.colors[key]}
                   onChange={(hex) => setColorAtPath(path, hex)}
-                  locked={!isPrimary ? isTokenLocked(tokenLocks, path) : undefined}
-                  onUnlock={!isPrimary ? () => unlockToken(path) : undefined}
-                  onRelock={!isPrimary ? () => relockToken(path) : undefined}
+                  locked={!isPrimary && derivationEnabled ? isTokenLocked(tokenLocks, path) : undefined}
+                  onUnlock={!isPrimary && derivationEnabled ? () => unlockToken(path) : undefined}
+                  onRelock={!isPrimary && derivationEnabled ? () => relockToken(path) : undefined}
                   onFlash={() => flashToken(path)}
                   highlighted={highlightedPaths.has(path)}
                   hint={TOKEN_HINTS[key]}
+                  isTouch={isTouch}
                 />
               );
             })}
@@ -894,26 +1060,21 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <div className="mt-3 pt-3 border-t border-white/10">
           <SectionHeader label="Effects" showDivider={false} compactTop />
           <div className="flex items-baseline gap-2 mb-1">
-            <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Glow Colors</div>
+            <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Glow Color</div>
             <span className="text-[8px] text-white/25 uppercase tracking-wider">Mobile only</span>
           </div>
-          {theme.effects.glowColors.map((gc, i) => {
-            const path = `effects.glowColors.${i}`;
-            return (
-              <ColorInput
-                key={`glow-${i}`}
-                label={`Glow ${i + 1}`}
-                value={gc}
-                defaultValue={def.effects.glowColors[i]}
-                onChange={(hex) => setColorAtPath(path, hex)}
-                locked={isTokenLocked(tokenLocks, path)}
-                onUnlock={() => unlockToken(path)}
-                onRelock={() => relockToken(path)}
-                onFlash={() => flashToken(path)}
-                highlighted={highlightedPaths.has(path)}
-              />
-            );
-          })}
+          <ColorInput
+            label="Glow"
+            value={theme.effects.glowColor}
+            defaultValue={def.effects.glowColor}
+            onChange={(hex) => setColorAtPath('effects.glowColor', hex)}
+            locked={derivationEnabled ? isTokenLocked(tokenLocks, 'effects.glowColor') : undefined}
+            onUnlock={derivationEnabled ? () => unlockToken('effects.glowColor') : undefined}
+            onRelock={derivationEnabled ? () => relockToken('effects.glowColor') : undefined}
+            onFlash={() => flashToken('effects.glowColor')}
+            highlighted={highlightedPaths.has('effects.glowColor')}
+            isTouch={isTouch}
+          />
 
           <div className="flex items-baseline gap-2 mt-3 mb-1">
             <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Background Blobs</div>
@@ -928,11 +1089,12 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
                   value={blob.color}
                   defaultValue={def.effects.blobs[i].color}
                   onChange={(hex) => setColorAtPath(path, hex)}
-                  locked={isTokenLocked(tokenLocks, path)}
-                  onUnlock={() => unlockToken(path)}
+                  locked={derivationEnabled ? isTokenLocked(tokenLocks, path) : undefined}
+                  onUnlock={derivationEnabled ? () => unlockToken(path) : undefined}
                   onFlash={() => flashToken(path)}
-                  onRelock={() => relockToken(path)}
+                  onRelock={derivationEnabled ? () => relockToken(path) : undefined}
                   highlighted={highlightedPaths.has(path)}
+                  isTouch={isTouch}
                 />
                 <div className="flex items-center gap-2 ml-8 -mt-0.5 mb-1">
                   <span className="text-[9px] text-white/30">Opacity</span>
@@ -1132,17 +1294,20 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
               value={theme.branding.logoColor}
               defaultValue={def.branding.logoColor}
               onChange={(hex) => setColorAtPath('branding.logoColor', hex)}
-              locked={isTokenLocked(tokenLocks, 'branding.logoColor')}
-              onUnlock={() => unlockToken('branding.logoColor')}
-              onRelock={() => relockToken('branding.logoColor')}
+              locked={derivationEnabled ? isTokenLocked(tokenLocks, 'branding.logoColor') : undefined}
+              onUnlock={derivationEnabled ? () => unlockToken('branding.logoColor') : undefined}
+              onRelock={derivationEnabled ? () => relockToken('branding.logoColor') : undefined}
               onFlash={() => flashToken('branding.logoColor')}
               highlighted={highlightedPaths.has('branding.logoColor')}
               disabled={capabilities.logoColorMode === 'intrinsic'}
+              isTouch={isTouch}
             />
             <div className="text-[9px] text-white/25">
               {capabilities.logoColorMode === 'intrinsic'
                 ? 'Disabled in intrinsic mode. Switch logo color mode to themed to edit.'
-                : 'Derived from Brand while locked. Changing this affects only the logo.'}
+                : derivationEnabled
+                  ? 'Derived from Brand while locked. Changing this affects only the logo.'
+                  : 'Auto-derivation is off. Edit freely.'}
             </div>
           </div>
         </div>

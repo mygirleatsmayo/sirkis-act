@@ -75,6 +75,7 @@ const Badge = ({ children, color = "brand" }: BadgeProps) => {
   const c = theme.colors;
   const palette: Record<BadgeColor, { bg: string; text: string; border: string }> = {
     brand: { bg: c.brandBg, text: c.brand, border: hexAlpha(c.brand, 0.20) },
+    target: { bg: c.targetBg, text: c.target, border: hexAlpha(c.target, 0.20) },
     returns: { bg: c.returnsBg, text: c.returns, border: hexAlpha(c.returns, 0.20) },
     loss: { bg: hexAlpha(c.loss, 0.15), text: c.loss, border: hexAlpha(c.loss, 0.20) },
     neutral: { bg: c.neutralBg, text: c.textNeutral, border: c.borderSubtle },
@@ -123,7 +124,7 @@ const MetricCard = memo(({ badgeLabel, badgeColor, value, label, isHero = false,
           <p className={labelClassName}>{label}</p>
           {useThreeColumnPanels ? (
             comparisonValue != null && (
-              <div className="rounded-xl bg-surface/60 p-2.5 border border-accent-brand/25 mt-3 text-center">
+              <div className="rounded-xl p-2.5 border border-accent-brand/25 mt-3 text-center" style={{ background: theme.colors.mutedBg }}>
                 <div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: theme.colors.startNow }}>Start Early</div>
                 <div className="text-[clamp(0.9rem,1.8vw,1.25rem)] font-black font-mono text-content-primary tracking-tight">
                   {comparisonValue}
@@ -763,7 +764,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
   // Intentional: "Start Now Difference" is represented by the top overlay curve
   // (Immediate Total Nominal), while the tooltip computes the numeric gap vs delayed total.
   const legendItems = useMemo(() => [
-    { label: 'Your Contributions', color: theme.colors.brand, visible: true },
+    { label: 'Your Contributions', color: theme.colors.selfFunded, visible: true },
     { label: 'Employer Match (OPM)', color: theme.colors.opm, visible: true },
     { label: 'Investment Returns', color: theme.colors.returns, visible: true },
     { label: 'Start Now Difference', color: theme.colors.startNow, visible: isDelayed && showImmediateLine }
@@ -794,7 +795,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
   const lossYearLabel = delayYears === 1 ? 'year' : 'years';
   const quickStats = useMemo(() => [
     { label: "Market Funded", value: finalData['Investment Returns'], colorStyle: { color: theme.colors.returns }, bgStyle: { background: theme.colors.returnsBg }, icon: TrendingUp },
-    { label: "Self Funded", value: finalData['Your Contributions'], colorStyle: { color: theme.colors.brand }, bgStyle: { background: theme.colors.brandBg }, icon: PiggyBank },
+    { label: "Self Funded", value: finalData['Your Contributions'], colorStyle: { color: theme.colors.selfFunded }, bgStyle: { background: theme.colors.selfFundedBg }, icon: PiggyBank },
     { label: "Employer (OPM)", value: finalData['Employer Match'], colorStyle: { color: theme.colors.opm }, bgStyle: { background: theme.colors.opmBg }, icon: Building2 },
   ], [theme, finalData]);
   const handleInputChange = useCallback((key: InputKey | 'RESET', value: InputValue) => {
@@ -950,7 +951,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
               {/* TARGET CARD */}
               <MetricCard
                 badgeLabel="Target"
-                badgeColor="brand"
+                badgeColor="target"
                 value={formatCurrency(finalData['Total Nominal'])}
                 label="Projected Nest Egg"
                 isHero
@@ -960,7 +961,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                 twoColumnDelayedContent={isDelayed ? (
                   <>
                     <div className="grid grid-cols-2 gap-2 mt-3">
-                      <div className="rounded-xl bg-surface/60 p-2.5 border border-accent-brand/25">
+                      <div className="rounded-xl p-2.5 border border-accent-brand/25" style={{ background: theme.colors.mutedBg }}>
                         <div className="text-[clamp(0.625rem,2.5vw,0.75rem)] font-black uppercase tracking-widest" style={{ color: theme.colors.startNow }}>Start Early</div>
                         <div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black font-mono text-content-primary">{formatCurrency(comparisonData['Total Nominal'])}</div>
                       </div>
@@ -1031,13 +1032,13 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       {showImmediateLine ? 'Remove Start-Now' : 'Add Start-Now'}
                     </button>
                   )}
-                  <div role="tablist" aria-label="View toggle" className="bg-black/25 p-1 rounded-xl flex text-xs font-bold shadow-inner">
+                  <div role="tablist" aria-label="View toggle" className="bg-black/20 p-1 rounded-xl flex text-xs font-bold shadow-inner border border-subtle">
                     <button
                       role="tab"
                       aria-selected={activeTab === 'chart'}
                       aria-controls="projection-tabpanel"
                       onClick={() => setActiveTab('chart')}
-                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { backgroundColor: theme.colors.borderDefault, color: theme.colors.brand } : undefined}
+                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { background: theme.colors.brand } : undefined}
                     >
                       Chart
                     </button>
@@ -1046,7 +1047,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       aria-selected={activeTab === 'table'}
                       aria-controls="projection-tabpanel"
                       onClick={() => setActiveTab('table')}
-                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { backgroundColor: theme.colors.borderDefault, color: theme.colors.brand } : undefined}
+                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { background: theme.colors.brand } : undefined}
                     >
                       Table
                     </button>
@@ -1077,8 +1078,8 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                           <stop offset="95%" stopColor={theme.colors.returns} stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="colorUser" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={theme.colors.brand} stopOpacity={0.6} />
-                          <stop offset="95%" stopColor={theme.colors.brand} stopOpacity={0} />
+                          <stop offset="5%" stopColor={theme.colors.selfFunded} stopOpacity={0.6} />
+                          <stop offset="95%" stopColor={theme.colors.selfFunded} stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="colorEmployer" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor={theme.colors.opm} stopOpacity={0.6} />
@@ -1138,7 +1139,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                           );
                         }}
                       />
-                      <Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke={theme.colors.brand} strokeWidth={3} fill="url(#colorUser)" stackId="1" />
+                      <Area name="Your Contributions" type="monotone" dataKey="Your Contributions" stroke={theme.colors.selfFunded} strokeWidth={3} fill="url(#colorUser)" stackId="1" />
                       <Area name="Employer Match" type="monotone" dataKey="Employer Match" stroke={theme.colors.opm} strokeWidth={3} fill="url(#colorEmployer)" stackId="1" />
                       <Area name="Investment Returns" type="monotone" dataKey="Investment Returns" stroke={theme.colors.returns} strokeWidth={3} fill="url(#colorReturns)" stackId="1" />
                       {isDelayed && showImmediateLine && (
@@ -1150,9 +1151,9 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                     <div className="h-full w-full rounded-xl bg-white/5" />
                   )
                 ) : (
-                  <div className="h-full overflow-y-auto overflow-x-auto custom-scrollbar border border-subtle rounded-xl bg-surface/60">
+                  <div className="h-full overflow-y-auto overflow-x-auto custom-scrollbar border border-subtle rounded-xl" style={{ background: theme.colors.mutedBg }}>
                     <table className="w-full text-left text-[11px] sm:text-sm" aria-label="Projection data">
-                      <thead className="bg-surface/80 sticky top-0 font-bold text-content-subtle backdrop-blur z-10">
+                      <thead className="sticky top-0 font-bold text-content-subtle backdrop-blur z-10 bg-black/20">
                         <tr className="text-[12px] text-center">
                           <th className="p-2 align-middle text-center" rowSpan={2}>Age</th>
                           <th className="p-2 text-center" colSpan={3}>Contributions</th>
@@ -1169,7 +1170,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                           <th className="p-2 text-center">Real (Today)</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/[0.06] font-mono">
+                      <tbody className="divide-y divide-white/[0.06] font-mono tabular-nums">
                         {results.flatMap((row, idx) => {
                           const isStartYear = row.age === inputs.startAge && isDelayed;
                           const isWaiting = row.age < inputs.startAge;
@@ -1198,7 +1199,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                             return [];
                           }
                           return [(
-                            <tr key={idx} className={`transition-colors ${isStartYear ? '' : 'hover:bg-white/[0.05]'} ${isWaiting ? 'opacity-50 grayscale' : ''}`} style={isStartYear ? { background: theme.colors.brandBg } : undefined}>
+                            <tr key={idx} className={`transition-colors ${isStartYear ? '' : 'hover:bg-white/[0.05]'} ${isWaiting ? 'opacity-50 grayscale' : ''}`} style={isStartYear ? { background: theme.colors.bgGlass } : undefined}>
                               <td className="p-2.5 font-bold text-content-subtle text-center">
                                 {row.age}
                               </td>
@@ -1231,7 +1232,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       <stat.icon size={isHero ? 36 : chartSize.width >= 750 ? 22 : 20} />
                     </div>
                     <div className="min-w-0">
-                      <div className={`${isHero ? 'text-[clamp(2rem,6vw,2.8rem)]' : !useThreeColumnPanels ? 'text-[clamp(0.95rem,4vw,1.35rem)]' : 'text-[clamp(1.1rem,2.1vw,1.55rem)]'} leading-tight font-black font-mono tabular-nums`} style={stat.colorStyle}>{!useThreeColumnPanels && !isHero && stat.value >= 1_000_000 ? formatCompact(stat.value) : (useThreeColumnPanels && chartSize.width < 750 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value))}</div>
+                      <div className={`${isHero ? 'text-[clamp(2rem,6vw,2.8rem)]' : !useThreeColumnPanels ? 'text-[clamp(0.95rem,4vw,1.35rem)]' : 'text-[clamp(1.1rem,2.1vw,1.55rem)]'} leading-tight font-black font-mono`} style={stat.colorStyle}>{!useThreeColumnPanels && !isHero && stat.value >= 1_000_000 ? formatCompact(stat.value) : (useThreeColumnPanels && chartSize.width < 750 && stat.value >= 100_000 ? formatCompact(stat.value) : formatCurrency(stat.value))}</div>
                       {isHero ? (
                         <div className="text-xs font-bold text-content-subtle uppercase tracking-wider leading-tight whitespace-nowrap">
                           {stat.label} · {finalData['Total Nominal'] > 0 ? Math.round((stat.value / finalData['Total Nominal']) * 100) : 0}%
@@ -1259,19 +1260,19 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                 </div>
               </div>
               <div className={`grid ${useThreeColumnPanels ? 'grid-cols-3 gap-3' : 'grid-cols-2 gap-3'} items-stretch min-w-0`} aria-live="polite">
-                <div className={`rounded-2xl bg-surface/60 border border-subtle ${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-3'} shadow-sm h-full flex flex-col min-w-0`}>
+                <div className={`rounded-2xl border border-subtle ${useThreeColumnPanels ? 'p-4' : 'col-span-2 p-3'} shadow-sm h-full flex flex-col min-w-0`} style={{ background: theme.colors.mutedBg }}>
                   <div className="text-[10px] font-black uppercase tracking-widest text-content-subtle">Fixed Purchasing Power</div>
-                  <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black font-mono text-content-primary mt-2 tabular-nums min-w-0">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
+                  <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black font-mono text-content-primary mt-2 min-w-0">{formatCurrency(monthlyRealWithdrawalAtRetirement)}</div>
                   <div className="text-[11px] text-content-subtle mt-1">Starts at age {startWithdrawAge} and grows {inputs.inflationRate}% yearly. Equivalent to {formatCurrency(monthlyRealWithdrawal)} <span className="whitespace-nowrap">today (real $ estimate).</span></div>
                 </div>
-                <div className={`rounded-2xl bg-surface/60 border border-subtle ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
+                <div className={`rounded-2xl border border-subtle ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`} style={{ background: theme.colors.mutedBg }}>
                   <div className="text-[10px] font-black uppercase tracking-widest text-content-subtle">Fixed Monthly</div>
-                  <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black font-mono text-content-primary mt-2 tabular-nums min-w-0">{formatCurrency(monthlyNominalWithdrawal)}</div>
+                  <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black font-mono text-content-primary mt-2 min-w-0">{formatCurrency(monthlyNominalWithdrawal)}</div>
                   <div className="text-[11px] text-content-subtle mt-1">At {startWithdrawAge}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, startWithdrawAge))} (real)<br />At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(monthlyNominalWithdrawal, inputs.lifeExpectancy))} (real)</div>
                 </div>
-                <div className={`rounded-2xl bg-surface/60 border border-subtle ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`}>
+                <div className={`rounded-2xl border border-subtle ${useThreeColumnPanels ? 'p-4' : 'p-3'} shadow-sm h-full flex flex-col min-w-0`} style={{ background: theme.colors.mutedBg }}>
                   <div className="text-[10px] font-black uppercase tracking-widest text-content-subtle">Fixed Annual</div>
-                  <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black font-mono text-content-primary mt-2 tabular-nums min-w-0">{formatCurrency(annualNominalWithdrawal)}</div>
+                  <div className="text-[clamp(1.4rem,2.2vw,1.95rem)] leading-none font-black font-mono text-content-primary mt-2 min-w-0">{formatCurrency(annualNominalWithdrawal)}</div>
                   <div className="text-[11px] text-content-subtle mt-1">At {inputs.retirementAge}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.retirementAge))} (real)<br />At {inputs.lifeExpectancy}: {formatCurrency(nominalToRealToday(annualNominalWithdrawal, inputs.lifeExpectancy))} (real)</div>
                 </div>
               </div>

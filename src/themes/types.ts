@@ -21,7 +21,7 @@ export interface ThemeColors {
   textSubtle: string;         // helper text, timestamps, faint labels
 
   // Semantic accents
-  brand: string;              // primary brand / Your Contributions
+  brand: string;              // primary brand color (UI chrome, toggles, sliders)
   brandBg: string;            // brand tint background
   opm: string;                // Employer Match (OPM)
   opmBg: string;              // OPM tint background (derived from opm)
@@ -32,6 +32,15 @@ export interface ThemeColors {
   loss: string;               // loss / error / destructive
   lossBg: string;             // loss tint background
   neutralBg: string;          // neutral badge background (derived from textNeutral)
+
+  // Muted surfaces
+  mutedBg: string;            // subcards, table container, delayed start-age row
+
+  // Projection-specific (decoupled from brand)
+  target: string;             // Target projection badge/card color
+  targetBg: string;           // Target tint background
+  selfFunded: string;         // Your Contributions chart/stat color
+  selfFundedBg: string;       // Your Contributions tint background
 
   // Interactive
   focusRing: string;          // focus-visible outlines
@@ -71,7 +80,7 @@ export interface ThemeEffects {
     position: 'top-right' | 'bottom-right' | 'bottom-left' | 'top-left';
     opacity: number;
   }[];
-  glowColors: string[];         // rgba strings for pulse-glow animation
+  glowColor: string;             // single rgba string for pulse-glow animation (CSS layers the box-shadow)
 }
 
 export interface ThemeCapabilities {
@@ -88,7 +97,7 @@ export interface ThemeCapabilities {
 }
 
 export interface ThemeEditorConfig {
-  kind: 'studio' | 'locked';
+  kind: 'studio' | 'studioNoDerivation' | 'locked';
   logoColorModeEditable: boolean;
 }
 

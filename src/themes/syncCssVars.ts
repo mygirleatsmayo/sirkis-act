@@ -30,10 +30,8 @@ export const syncCssVars = (theme: ThemeConfig) => {
   root.style.setProperty('--font-sans', theme.fonts.sans);
   root.style.setProperty('--font-mono', theme.fonts.mono);
 
-  // Glow effect colors
-  theme.effects.glowColors.forEach((color, i) => {
-    root.style.setProperty(`--glow-color-${i}`, color);
-  });
+  // Glow effect color (single token — CSS layers the box-shadow)
+  root.style.setProperty('--glow-color', theme.effects.glowColor);
 
   // Meta theme-color (needs full hex, not channels)
   // Note: iOS Safari only updates the address bar color on layout reflow (e.g. drawer close)

@@ -18,6 +18,7 @@ export default {
           glass: 'rgb(var(--color-bg-glass) / <alpha-value>)',
           input: 'rgb(var(--color-bg-input) / <alpha-value>)',
           overlay: 'var(--color-bg-overlay)',
+          muted: 'var(--color-muted-bg)',
         },
         content: {
           primary: 'rgb(var(--color-text-primary) / <alpha-value>)',
@@ -37,6 +38,10 @@ export default {
           loss: 'rgb(var(--color-loss) / <alpha-value>)',
           'loss-bg': 'var(--color-loss-bg)',
           'neutral-bg': 'var(--color-neutral-bg)',
+          target: 'rgb(var(--color-target) / <alpha-value>)',
+          'target-bg': 'var(--color-target-bg)',
+          'self-funded': 'rgb(var(--color-self-funded) / <alpha-value>)',
+          'self-funded-bg': 'var(--color-self-funded-bg)',
         },
         interactive: {
           focus: 'rgb(var(--color-focus-ring) / <alpha-value>)',

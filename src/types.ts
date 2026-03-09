@@ -38,7 +38,7 @@ export interface ProjectionRow {
 }
 
 export type CardProps = { children: ReactNode; className?: string };
-export type BadgeColor = 'brand' | 'returns' | 'loss' | 'neutral';
+export type BadgeColor = 'brand' | 'returns' | 'loss' | 'neutral' | 'target';
 export type BadgeProps = { children: ReactNode; color?: BadgeColor };
 export type IconType = ComponentType<{ size?: number; className?: string }>;
 export type InputFieldProps = {

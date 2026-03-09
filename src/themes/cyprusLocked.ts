@@ -12,7 +12,7 @@ export const cyprusLockedTheme: ThemeConfig = {
   fonts: { ...cyprusTheme.fonts },
   effects: {
     blobs: cyprusTheme.effects.blobs.map((b) => ({ ...b })),
-    glowColors: [...cyprusTheme.effects.glowColors],
+    glowColor: cyprusTheme.effects.glowColor,
   },
   capabilities: {
     ...cyprusTheme.capabilities,

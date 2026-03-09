@@ -16,7 +16,7 @@ export const cyprusTheme: ThemeConfig = {
     textPrimary: '#ffffff',
     textSecondary: '#e2e8f0',
     textNeutral: '#e2e8f0',
-    textSubtle: '#94a3b8',
+    textSubtle: '#8ba3c3',
 
     brand: '#00A499',
     brandBg: 'rgba(0, 164, 153, 0.06)',
@@ -29,6 +29,13 @@ export const cyprusTheme: ThemeConfig = {
     loss: '#E65C5C',
     lossBg: 'rgba(230, 92, 92, 0.07)',
     neutralBg: 'rgba(226, 232, 240, 0.10)',
+
+    mutedBg: 'rgba(0, 0, 0, 0.08)',
+
+    target: '#00A499',
+    targetBg: 'rgba(0, 164, 153, 0.06)',
+    selfFunded: '#00A499',
+    selfFundedBg: 'rgba(0, 164, 153, 0.06)',
 
     focusRing: '#00A499',
     sliderAccent: '#00A499',
@@ -63,11 +70,7 @@ export const cyprusTheme: ThemeConfig = {
       { color: 'rgba(230, 195, 0, 0.10)', position: 'top-right', opacity: 1 },
       { color: 'rgba(230, 195, 0, 0.05)', position: 'bottom-right', opacity: 1 },
     ],
-    glowColors: [
-      'rgba(230, 195, 0, 0.50)',
-      'rgba(230, 195, 0, 0.32)',
-      'rgba(230, 195, 0, 0.20)',
-    ],
+    glowColor: 'rgba(230, 195, 0, 0.50)',
   },
   capabilities: {
     showLogo: true,

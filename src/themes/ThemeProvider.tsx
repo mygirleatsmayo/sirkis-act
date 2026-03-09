@@ -11,7 +11,9 @@ const STORAGE_KEY = 'sirkis-theme';
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [themeId, setThemeIdState] = useState(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) ?? defaultThemeId;
+      const stored = localStorage.getItem(STORAGE_KEY);
+      // Never restore transient working-copy themes from a previous session
+      return stored && stored !== 'playground' ? stored : defaultThemeId;
     } catch {
       return defaultThemeId;
     }
@@ -27,10 +29,13 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const setThemeId = useCallback((id: string) => {
     setThemeIdState(id);
-    try {
-      localStorage.setItem(STORAGE_KEY, id);
-    } catch {
-      // localStorage unavailable
+    // Don't persist transient working-copy themes (e.g. playground used by Theme Lab)
+    if (id !== 'playground') {
+      try {
+        localStorage.setItem(STORAGE_KEY, id);
+      } catch {
+        // localStorage unavailable
+      }
     }
   }, []);
 

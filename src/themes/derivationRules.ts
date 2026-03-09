@@ -1,6 +1,8 @@
 // src/themes/derivationRules.ts
 import type { ThemeColors } from './types';
-import { shiftLightness, hexToRgba } from '../utils/colorMath';
+import { shiftLightness, hexToRgba, hexToHsl, hslToHex, relativeLuminance } from '../utils/colorMath';
+// TODO: Revisit OKLCH-based derivation for textSubtle from textSecondary (perceptually uniform)
+// HSL derivation produced inconsistent results across hues; both are standalone primaries for now.
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -13,7 +15,11 @@ export interface Primaries {
   startNow: string;
   opm: string;
   textPrimary: string;
+  textSecondary: string;
+  textSubtle: string;
   textNeutral: string;
+  target: string;
+  selfFunded: string;
 }
 
 export interface DerivedColors {
@@ -21,7 +27,7 @@ export interface DerivedColors {
   logoColor: string;
   heroLine1Color: string;
   heroLine2Color: string;
-  glowColors: [string, string, string];
+  glowColor: string;
   blobColors: [string, string];
 }
 
@@ -35,25 +41,19 @@ export const extractPrimaries = (colors: ThemeColors): Primaries => ({
   startNow: colors.startNow,
   opm: colors.opm,
   textPrimary: colors.textPrimary,
+  textSecondary: colors.textSecondary,
+  textSubtle: colors.textSubtle,
   textNeutral: colors.textNeutral,
+  target: colors.target,
+  selfFunded: colors.selfFunded,
 });
 
 const DARK_STATICS: Partial<ThemeColors> = {
-  bgOverlay: 'rgba(15, 23, 42, 0.4)',
-  borderSubtle: 'rgba(255, 255, 255, 0.06)',
-  textSecondary: '#e2e8f0',
-  textSubtle: '#94a3b8',
-  toggleOff: '#cbd5e1',
   scrollbarThumb: 'rgba(148, 163, 184, 0.3)',
   scrollbarThumbHover: 'rgba(148, 163, 184, 0.5)',
 };
 
 const LIGHT_STATICS: Partial<ThemeColors> = {
-  bgOverlay: 'rgba(15, 23, 42, 0.4)',
-  borderSubtle: 'rgba(0, 0, 0, 0.06)',
-  textSecondary: '#334155',
-  textSubtle: '#475569',
-  toggleOff: '#94a3b8',
   scrollbarThumb: 'rgba(100, 116, 139, 0.3)',
   scrollbarThumbHover: 'rgba(100, 116, 139, 0.5)',
 };
@@ -85,11 +85,20 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     bgInput: shiftLightness(p.bg, -3 * dir),
     borderDefault: shiftLightness(p.bg, 8 * dir),
 
+    // muted surface (darker than parent glass cards)
+    mutedBg: mode === 'dark' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+
     // brand derivations
     brandBg: hexToRgba(p.brand, 0.06),
     focusRing: p.brand,
     sliderAccent: p.brand,
     sliderAccentHover: shiftLightness(p.brand, -5 * dir),
+
+    // projection primaries + derivations
+    target: p.target,
+    targetBg: hexToRgba(p.target, 0.06),
+    selfFunded: p.selfFunded,
+    selfFundedBg: hexToRgba(p.selfFunded, 0.06),
 
     // returns derivation
     returnsBg: hexToRgba(p.returns, 0.08),
@@ -100,13 +109,22 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     // loss derivation
     lossBg: hexToRgba(p.loss, 0.07),
 
-    // mode-dependent statics
-    bgOverlay: statics.bgOverlay!,
-    borderSubtle: statics.borderSubtle!,
-    textSecondary: statics.textSecondary!,
-    textSubtle: statics.textSubtle!,
+    // text primaries (standalone — OKLCH derivation deferred)
+    textSecondary: p.textSecondary,
+    textSubtle: p.textSubtle,
     neutralBg: hexToRgba(p.textNeutral, 0.10),
-    toggleOff: statics.toggleOff!,
+
+    // bg-derived UI tokens
+    bgOverlay: hexToRgba(shiftLightness(p.bg, -30), 0.4),
+    borderSubtle: relativeLuminance(p.bg) < 0.5
+      ? 'rgba(255, 255, 255, 0.06)'
+      : 'rgba(0, 0, 0, 0.06)',
+    toggleOff: (() => {
+      const [bgH, bgS] = hexToHsl(p.bg);
+      return hslToHex(bgH, Math.min(bgS * 0.2, 25), 73 + 10 * dir);
+    })(),
+
+    // scrollbar statics
     scrollbarThumb: statics.scrollbarThumb!,
     scrollbarThumbHover: statics.scrollbarThumbHover!,
   };
@@ -116,11 +134,7 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     logoColor: p.brand,
     heroLine1Color: p.brand,
     heroLine2Color: p.brandAccent,
-    glowColors: [
-      hexToRgba(p.brandAccent, 0.50),
-      hexToRgba(p.brandAccent, 0.32),
-      hexToRgba(p.brandAccent, 0.20),
-    ],
+    glowColor: hexToRgba(p.brandAccent, 0.50),
     blobColors: [
       hexToRgba(p.brandAccent, 0.10),
       hexToRgba(p.brandAccent, 0.05),

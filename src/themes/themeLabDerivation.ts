@@ -18,6 +18,10 @@ const PRIMARY_KEYS = new Set<keyof ThemeColors>([
   'opm',
   'textNeutral',
   'textPrimary',
+  'textSecondary',
+  'textSubtle',
+  'target',
+  'selfFunded',
 ]);
 
 const cloneTheme = (t: ThemeConfig): ThemeConfig => ({
@@ -30,7 +34,7 @@ const cloneTheme = (t: ThemeConfig): ThemeConfig => ({
   effects: {
     ...t.effects,
     blobs: t.effects.blobs.map((b) => ({ ...b })),
-    glowColors: [...t.effects.glowColors],
+    glowColor: t.effects.glowColor,
   },
 });
 
@@ -74,13 +78,10 @@ export const applyLockedDerivations = (
     }
   }
 
-  derived.glowColors.forEach((gc, i) => {
-    const path = `effects.glowColors.${i}`;
-    if (!shouldApplyPath(path, onlyPathSet)) return;
-    if (isTokenLocked(locks, path)) {
-      next.effects.glowColors[i] = gc;
-    }
-  });
+  const glowPath = 'effects.glowColor';
+  if (shouldApplyPath(glowPath, onlyPathSet) && isTokenLocked(locks, glowPath)) {
+    next.effects.glowColor = derived.glowColor;
+  }
 
   derived.blobColors.forEach((bc, i) => {
     const path = `effects.blobs.${i}.color`;
