@@ -21,7 +21,7 @@ const ChangelogSection = () => {
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[11px] font-black uppercase tracking-widest text-content-subtle">
+        <h3 className="text-[11px] font-black uppercase tracking-widest text-content-secondary">
           Changelog
         </h3>
         <span className="text-[11px] font-bold text-content-subtle">
@@ -59,7 +59,7 @@ const ChangelogEntryBlock = ({ entry }: { entry: { version: string; date: string
     <p className="text-xs font-semibold text-content-secondary mb-1">{entry.title}</p>
     <ul className="space-y-0.5">
       {entry.items.map((item, i) => (
-        <li key={i} className="text-[11px] text-content-subtle pl-3 relative before:content-['·'] before:absolute before:left-0 before:text-content-subtle">
+        <li key={i} className="text-[11px] text-content-secondary pl-3 relative before:content-['·'] before:absolute before:left-0 before:text-content-secondary">
           {item}
         </li>
       ))}
@@ -169,7 +169,7 @@ export const SettingsModal = ({
           {/* Theme Lab Section */}
           <section>
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-[11px] font-black uppercase tracking-widest text-content-subtle">
+              <h3 className="text-[11px] font-black uppercase tracking-widest text-content-secondary">
                 Theme Lab
               </h3>
               <span
