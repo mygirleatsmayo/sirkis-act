@@ -3,7 +3,17 @@
 
 ## [Unreleased]
 
-- **Theme Design Compatibility (Wave 1 + Wave 2)**: Added robust per-theme capability handling, locked/studio editor behavior, and safe defaults/fallback resolution for compatibility across preinstalled and future themes.
+- **Theme Design Compatibility (Waves 1-3)**: Added robust per-theme capability handling, locked/studio/studioNoDerivation editor behavior, and safe defaults/fallback resolution for compatibility across preinstalled and future themes.
+- **Projection Token Independence**: target and selfFunded colors decoupled from brand, enabling per-theme projection palettes.
+- **Text Token Policy**: textSecondary and textSubtle promoted to standalone primaries (no auto-derivation); OKLCH-based derivation deferred.
+- **Glow Consolidation**: Three glow color tokens consolidated to a single `glowColor` token; CSS uses `color-mix()` for layered box-shadow effects.
+- **bg-Derived UI Tokens**: bgOverlay, borderSubtle, and toggleOff now derive dynamically from the bg primary instead of being hardcoded per mode.
+- **Numeric Typography Contract**: `tabular-nums` restricted to table body; stat footer and withdrawal cards use proportional figures.
+- **Theme Lab Palette Restructuring**: Primaries section renamed to Palette with Source (auto-derives linked tokens) and Standalone (no derivation) subsections.
+- **Theme Lab Label Renames**: returns→Growth, opm→Employer Funded, textNeutral→Real Value for clearer semantic meaning.
+- **Derivation Toggle**: Auto/Manual toggle in Theme Lab controls whether primary edits auto-derive linked tokens. When off, lock buttons and derived count badges are hidden.
+- **Theme Lab Tooltips**: Replaced all native `title` attributes with touch-aware tooltips (instant hover on desktop, tap-to-toggle on mobile with outside-click dismiss).
+- **Playground Persistence Fix**: `playground` theme ID is no longer persisted to localStorage, preventing stale working-copy themes from loading on refresh.
 - **Graceful Branding Degradation**: App now handles missing/empty logo/tagline/hero/subhead/sirkisms content without layout artifacts, with clearer hero visibility rules.
 - **Subhead Authoring Controls**: Added subhead wrap and widow controls, upgraded subhead emphasis modes (`plain`, `bold`, `italic`, `boldItalic`), and improved spacing logic so Theme Lab users do not need manual boundary spaces between subhead parts.
 - **Disclosure UX Finalization**: Disclosure trigger behavior stabilized across desktop/mobile; desktop disclosure moved to sidebar footer adjacent to reset action to avoid top-content overlap/shift issues.

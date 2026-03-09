@@ -1,5 +1,5 @@
 import type { ThemeConfig } from './types';
-import { CrownLogo } from '../components/CrownLogo';
+import { ElephantLogo } from '../components/ElephantLogo';
 
 export const cyprusTheme: ThemeConfig = {
   id: 'cyprus',
@@ -45,7 +45,7 @@ export const cyprusTheme: ThemeConfig = {
     scrollbarThumbHover: 'rgba(148, 163, 184, 0.5)',
   },
   branding: {
-    logo: CrownLogo,
+    logo: ElephantLogo,
     logoColor: '#00A499',
     appName: 'Sirkis Act',
     tagline: 'Old-Fashioned Financial Planning',

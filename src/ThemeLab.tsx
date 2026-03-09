@@ -430,11 +430,11 @@ const generateThemeSource = (theme: ThemeConfig, name: string): string => {
     (key, val) => (key === 'logo' ? '__LOGO__' : val),
     2,
   );
-  json = json.replace('"__LOGO__"', 'CrownLogo');
+  json = json.replace('"__LOGO__"', 'ElephantLogo');
 
   return [
     `import type { ThemeConfig } from './types';`,
-    `import { CrownLogo } from '../components/CrownLogo';`,
+    `import { ElephantLogo } from '../components/ElephantLogo';`,
     ``,
     `// TODO: Register in src/themes/index.ts`,
     `export const ${varName}Theme: ThemeConfig = ${json};`,

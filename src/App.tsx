@@ -345,14 +345,14 @@ const SettingsPanel = ({
         {!isMobile && (
           <div className="mb-8 pt-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
+              <div className={`flex gap-2.5 ${showSidebarTagline ? 'items-start' : 'items-center'}`}>
                 {showSidebarLogo && (
                   <div style={capabilities.logoColorMode === 'themed' ? { color: theme.branding.logoColor } : undefined}>
-                    <Logo className="h-9 w-9" />
+                    <Logo className="h-11 w-11" />
                   </div>
                 )}
                 <div>
-                  <div className="font-display font-black text-xl tracking-tight leading-tight" style={{ color: theme.colors.brand }}>{theme.branding.appName}</div>
+                  <div className="font-display font-black text-[1.6rem] tracking-tight leading-tight" style={{ color: theme.colors.brand }}>{theme.branding.appName}</div>
                   {showSidebarTagline && (
                     <div className="text-[10px] font-medium text-content-subtle leading-tight">{theme.branding.tagline}</div>
                   )}
@@ -863,19 +863,19 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
       <div role="main" id="main-content" className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
         {/* MOBILE HEADER */}
         <div role="banner" className={`lg:hidden flex justify-between items-center px-4 bg-surface border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
-          <div className="flex items-center gap-2">
+          <div className={`flex gap-2 ${isScrolled ? 'items-center' : 'items-start'}`}>
             {heroVisibility.showLogo && (
               <div style={capabilities.logoColorMode === 'themed' ? { color: theme.branding.logoColor } : undefined}>
                 <div
                   className="transition-transform duration-300 ease-in-out"
-                  style={{ transform: isScrolled ? 'scale(0.67)' : 'scale(1)', transformOrigin: 'left center' }}
+                  style={{ transform: isScrolled ? 'scale(0.67)' : 'scale(1)', transformOrigin: 'center' }}
                 >
-                  <Logo className="h-9 w-9" />
+                  <Logo className="h-11 w-11" />
                 </div>
               </div>
             )}
             <div className="flex flex-col">
-              <div className="font-display font-black tracking-tight leading-tight text-2xl" style={{ color: theme.colors.brand }}>{theme.branding.appName}</div>
+              <div className="font-display font-black tracking-tight leading-tight text-[1.6rem]" style={{ color: theme.colors.brand }}>{theme.branding.appName}</div>
               {heroVisibility.showTagline && (
                 <div className={`font-medium text-content-subtle leading-tight text-[11px] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-6 opacity-100'}`}>{theme.branding.tagline}</div>
               )}
