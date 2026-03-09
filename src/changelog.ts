@@ -11,7 +11,7 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
     date: '2026-03-09',
     title: 'New Logo, Theme Lab Overhaul & Branding Flexibility',
     items: [
-      "Dropping your savings into a piggy bank? Think bigger! Meet Babar, Sirkis Act's new mascot and logo. He's here to help you save a trunk-load of cash with good old-fashioned financial planning (for capitalists who love money).",
+      "Dropping your savings into a tiny piggy bank? Time to think bigger! Meet Babar, Sirkis Act's new mascot and logo. He's here to help you save a trunk-load of cash with good old-fashioned financial planning (for capitalists who love money).",
       'Theme Lab colors now split into Source (auto-syncs linked tones) and Standalone (fully manual) groups.',
       'New Auto/Manual derivation toggle: flip to Manual for full control over every color without auto-updates.',
       'Theme Lab tooltips now work on mobile: tap an info icon to read the hint, tap anywhere else to dismiss.',
