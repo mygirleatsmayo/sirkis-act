@@ -3,6 +3,11 @@
 
 ## [Unreleased]
 
+---
+
+## [1.4.0] - 2026-03-09 — New Logo, Theme Lab Overhaul & Branding Flexibility
+
+- **New Elephant Logo**: Cyprus theme now features an elephant mascot logo in the header, replacing the abstract crown. Logo is proportionally sized and bottom-aligned with the app name on desktop; collapses gracefully in the mobile header.
 - **Theme Design Compatibility (Waves 1-3)**: Added robust per-theme capability handling, locked/studio/studioNoDerivation editor behavior, and safe defaults/fallback resolution for compatibility across preinstalled and future themes.
 - **Projection Token Independence**: target and selfFunded colors decoupled from brand, enabling per-theme projection palettes.
 - **Text Token Policy**: textSecondary and textSubtle promoted to standalone primaries (no auto-derivation); OKLCH-based derivation deferred.

@@ -7,6 +7,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    version: '1.4.0',
+    date: '2026-03-09',
+    title: 'New Logo, Theme Lab Overhaul & Branding Flexibility',
+    items: [
+      "Dropping your savings into a piggy bank? Think bigger! Meet the Babar, Sirkis Act's new mascot logo. He's here to help you save a trunk-load of cash with good old-fashioned financial planning.",
+      'Theme Lab colors now split into Source (auto-syncs linked tones) and Standalone (fully manual) groups.',
+      'New Auto/Manual derivation toggle: flip to Manual for full control over every color without auto-updates.',
+      'Theme Lab tooltips now work on mobile: tap an info icon to read the hint, tap anywhere else to dismiss.',
+      'Missing logo, tagline, or hero content no longer causes layout shifts or empty space.',
+      'Theme Lab no longer restores in-progress edits on page refresh — you always start fresh from the saved theme.',
+      '...And many more Theme Lab improvements!',
+    ],
+  },
+  {
     version: '1.3.1',
     date: '2026-03-04',
     title: 'Tooltip Hover Scope Fix',
