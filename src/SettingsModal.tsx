@@ -131,11 +131,11 @@ const ThemeSwitcherSection = ({
                     <Logo className="h-6 w-6" />
                   </div>
 
-                  {/* Theme name: first word hero1 color, second word hero2 color */}
+                  {/* Theme name: first word in brand, second word in heroLine2Color */}
                   <div className="font-display leading-tight">
                     <div
-                      className="text-sm font-light truncate"
-                      style={{ color: t.branding.heroLine1Color }}
+                      className="text-sm font-bold truncate"
+                      style={{ color: t.colors.brand }}
                     >
                       {nameLine1}
                     </div>
@@ -155,14 +155,6 @@ const ThemeSwitcherSection = ({
                     style={{ color: t.colors.textPrimary }}
                   >
                     $1,618,033
-                  </div>
-
-                  {/* Flavor text in sans */}
-                  <div
-                    className="text-[9px] font-sans truncate"
-                    style={{ color: t.colors.textSubtle }}
-                  >
-                    {t.branding.tagline}
                   </div>
                 </div>
 
