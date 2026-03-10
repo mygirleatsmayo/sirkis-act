@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Palette, ChevronDown } from 'lucide-react';
 import { useTheme } from './themes/useTheme';
 import { CHANGELOG_ENTRIES } from './changelog';
-
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenThemeLab: () => void;
+  onCloseThemeLab: () => void;
   showFab: boolean;
   onToggleFab: (value: boolean) => void;
 }
@@ -71,6 +71,7 @@ export const SettingsModal = ({
   isOpen,
   onClose,
   onOpenThemeLab,
+  onCloseThemeLab: _onCloseThemeLab,
   showFab,
   onToggleFab,
 }: SettingsModalProps) => {

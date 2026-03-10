@@ -33,6 +33,7 @@ const RootContent = () => {
         isOpen={settingsOpen}
         onClose={closeSettings}
         onOpenThemeLab={openLab}
+        onCloseThemeLab={closeLab}
         showFab={showFab}
         onToggleFab={setShowFab}
       />
