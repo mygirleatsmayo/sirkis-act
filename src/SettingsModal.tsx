@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Palette, ChevronDown } from 'lucide-react';
 import { useTheme } from './themes/useTheme';
 import { CHANGELOG_ENTRIES } from './changelog';
+import { getSelectableThemes } from './themes/index';
+
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -67,11 +69,78 @@ const ChangelogEntryBlock = ({ entry }: { entry: { version: string; date: string
   </div>
 );
 
+const SWATCH_KEYS = ['brand', 'returns', 'loss', 'opm'] as const;
+
+const ThemeSwitcherSection = ({
+  onCloseThemeLab,
+}: {
+  onCloseThemeLab: () => void;
+}) => {
+  const { theme: activeTheme, themeId, setThemeId } = useTheme();
+  const selectableThemes = getSelectableThemes();
+
+  const handleSelect = (id: string) => {
+    if (id === themeId) return;
+    onCloseThemeLab();
+    setThemeId(id);
+  };
+
+  return (
+    <section>
+      <h3 className="text-[11px] font-black uppercase tracking-widest text-content-secondary mb-3">
+        Theme
+      </h3>
+      <div className="flex flex-wrap gap-3">
+        {selectableThemes.map((t) => {
+          const isActive = t.id === themeId;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => handleSelect(t.id)}
+              className={`relative w-[120px] h-[70px] rounded-xl border-2 transition-all overflow-hidden flex flex-col items-start justify-between p-2.5 ${
+                isActive
+                  ? ''
+                  : 'border-white/10 hover:border-white/25'
+              }`}
+              style={{
+                backgroundColor: t.colors.bg,
+                borderColor: isActive ? activeTheme.colors.brand : undefined,
+                boxShadow: isActive
+                  ? `0 0 0 2px ${activeTheme.colors.brand}`
+                  : undefined,
+              }}
+              aria-label={`Switch to ${t.name} theme`}
+              aria-pressed={isActive}
+            >
+              <span
+                className="text-xs font-bold truncate max-w-full"
+                style={{ color: t.colors.textPrimary }}
+              >
+                {t.name}
+              </span>
+              <div className="flex gap-1.5">
+                {SWATCH_KEYS.map((key) => (
+                  <div
+                    key={key}
+                    className="w-3 h-3 rounded-full border border-white/20"
+                    style={{ backgroundColor: t.colors[key] }}
+                  />
+                ))}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
+
 export const SettingsModal = ({
   isOpen,
   onClose,
   onOpenThemeLab,
-  onCloseThemeLab: _onCloseThemeLab,
+  onCloseThemeLab,
   showFab,
   onToggleFab,
 }: SettingsModalProps) => {
@@ -167,6 +236,9 @@ export const SettingsModal = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-8">
+          {/* Theme Switcher Section */}
+          <ThemeSwitcherSection onCloseThemeLab={onCloseThemeLab} />
+
           {/* Theme Lab Section */}
           <section>
             <div className="flex items-center gap-2 mb-2">
