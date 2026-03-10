@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Palette, ChevronDown } from 'lucide-react';
 import { useTheme } from './themes/useTheme';
 import { CHANGELOG_ENTRIES } from './changelog';
-import { getSelectableThemes } from './themes/index';
+import { getSelectableThemes, resolveTheme } from './themes/index';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -69,7 +69,7 @@ const ChangelogEntryBlock = ({ entry }: { entry: { version: string; date: string
   </div>
 );
 
-const SWATCH_KEYS = ['brand', 'returns', 'loss', 'opm'] as const;
+const CIRCLE_KEYS = ['returns', 'loss', 'opm', 'textNeutral'] as const;
 
 const ThemeSwitcherSection = ({
   onCloseThemeLab,
@@ -93,12 +93,22 @@ const ThemeSwitcherSection = ({
       <div className="flex flex-wrap gap-3">
         {selectableThemes.map((t) => {
           const isActive = t.id === themeId;
+          const resolved = resolveTheme(t);
+          const Logo = t.branding.logo;
+          const logoColor = resolved.capabilities.logoColorMode === 'intrinsic'
+            ? undefined
+            : t.branding.logoColor;
+          // Split theme name: first word line 1 (hero1 color), rest line 2 (hero2 color)
+          const spaceIdx = t.name.indexOf(' ');
+          const nameLine1 = spaceIdx > 0 ? t.name.slice(0, spaceIdx) : t.name;
+          const nameLine2 = spaceIdx > 0 ? t.name.slice(spaceIdx + 1) : '';
+
           return (
             <button
               key={t.id}
               type="button"
               onClick={() => handleSelect(t.id)}
-              className={`relative w-[120px] h-[70px] rounded-xl border-2 transition-all overflow-hidden flex flex-col items-start justify-between p-2.5 ${
+              className={`relative w-[140px] h-[140px] rounded-xl border-2 transition-all overflow-hidden p-3 ${
                 isActive
                   ? ''
                   : 'border-white/10 hover:border-white/25'
@@ -113,20 +123,59 @@ const ThemeSwitcherSection = ({
               aria-label={`Switch to ${t.name} theme`}
               aria-pressed={isActive}
             >
-              <span
-                className="text-xs font-bold truncate max-w-full"
-                style={{ color: t.colors.textPrimary }}
-              >
-                {t.name}
-              </span>
-              <div className="flex gap-1.5">
-                {SWATCH_KEYS.map((key) => (
+              <div className="flex h-full">
+                {/* Left column */}
+                <div className="flex flex-col justify-between flex-1 min-w-0">
+                  {/* Logo */}
+                  <div className="h-6 w-6" style={{ color: logoColor }}>
+                    <Logo className="h-6 w-6" />
+                  </div>
+
+                  {/* Theme name: first word hero1 color, second word hero2 color */}
+                  <div className="font-display leading-tight">
+                    <div
+                      className="text-sm font-light truncate"
+                      style={{ color: t.branding.heroLine1Color }}
+                    >
+                      {nameLine1}
+                    </div>
+                    {nameLine2 && (
+                      <div
+                        className="text-sm font-bold truncate"
+                        style={{ color: t.branding.heroLine2Color }}
+                      >
+                        {nameLine2}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Dollar amount in mono */}
                   <div
-                    key={key}
-                    className="w-3 h-3 rounded-full border border-white/20"
-                    style={{ backgroundColor: t.colors[key] }}
-                  />
-                ))}
+                    className="text-[10px] font-mono font-semibold"
+                    style={{ color: t.colors.textPrimary }}
+                  >
+                    $1,618,033
+                  </div>
+
+                  {/* Flavor text in sans */}
+                  <div
+                    className="text-[9px] font-sans truncate"
+                    style={{ color: t.colors.textSubtle }}
+                  >
+                    {t.branding.tagline}
+                  </div>
+                </div>
+
+                {/* Right column: 4 color circles */}
+                <div className="flex flex-col justify-center gap-2 ml-2">
+                  {CIRCLE_KEYS.map((key) => (
+                    <div
+                      key={key}
+                      className="w-4 h-4 rounded-full ring-1 ring-white/10"
+                      style={{ backgroundColor: t.colors[key] }}
+                    />
+                  ))}
+                </div>
               </div>
             </button>
           );
