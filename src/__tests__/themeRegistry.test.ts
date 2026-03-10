@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { themes } from '../themes';
+import { themes, getSelectableThemes } from '../themes';
 import { resolveTheme } from '../themes/resolveTheme';
 
 describe('theme registry compatibility', () => {
@@ -19,5 +19,25 @@ describe('theme registry compatibility', () => {
     expect(themes['cyprusLocked']).toBeDefined();
     const resolved = resolveTheme(themes['cyprusLocked']);
     expect(resolved.editor.kind).toBe('locked');
+  });
+});
+
+describe('getSelectableThemes', () => {
+  it('returns themes excluding playground and locked fixtures', () => {
+    const selectable = getSelectableThemes();
+    const ids = selectable.map(t => t.id);
+    expect(ids).not.toContain('playground');
+    expect(ids).not.toContain('cyprusLocked');
+    expect(ids).toContain('cyprus');
+  });
+
+  it('returns array of ThemeConfig objects', () => {
+    const selectable = getSelectableThemes();
+    expect(selectable.length).toBeGreaterThan(0);
+    for (const t of selectable) {
+      expect(t).toHaveProperty('id');
+      expect(t).toHaveProperty('name');
+      expect(t).toHaveProperty('colors');
+    }
   });
 });

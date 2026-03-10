@@ -14,6 +14,12 @@ export const defaultThemeId = 'cyprus';
 export const getTheme = (id: string): ThemeConfig =>
   themes[id] ?? themes[defaultThemeId];
 
+/** Themes available in the user-facing theme switcher (hides playground + QA fixtures). */
+export const getSelectableThemes = (): ThemeConfig[] =>
+  Object.values(themes).filter(
+    (t) => t.id !== 'playground' && !t.id.toLowerCase().includes('locked')
+  );
+
 export { useTheme } from './useTheme';
 export { DEFAULT_THEME_CAPABILITIES, DEFAULT_THEME_EDITOR, resolveTheme } from './resolveTheme';
 export type {
