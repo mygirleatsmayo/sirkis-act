@@ -27,7 +27,6 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
-  Landmark,
   Settings as SettingsIcon
 } from 'lucide-react';
 import { Drawer } from 'vaul';
@@ -556,10 +555,10 @@ const SettingsPanel = ({
             <div className={`mt-2 text-[11px] ${hsaOverCap ? 'text-accent-loss' : 'text-content-subtle'}`}>Common caps: {formatCurrency(LIMITS.hsaIndividual)} individual, {formatCurrency(LIMITS.hsaFamily)} family.</div>
           </ToggleSection>
           <ToggleSection label="Starting Balances" enabled={inputs.enableStartingBalances} onToggle={(v) => handleInputChange('enableStartingBalances', v)}>
-            <div className="text-[11px] text-content-subtle mb-4">Existing account balances compound from year one, even if you are not currently contributing to that account type.</div>
-            <InputField label="401(k) Balance" value={inputs.starting401k} onChange={v => handleInputChange('starting401k', v)} min={0} max={10_000_000} step={1000} unit="$" icon={Landmark} tooltip="Current balance in your 401(k) or 403(b), including rollovers from previous employers." />
-            <InputField label="Roth IRA Balance" value={inputs.startingRoth} onChange={v => handleInputChange('startingRoth', v)} min={0} max={10_000_000} step={1000} unit="$" icon={Landmark} tooltip="Current balance in your Roth IRA." />
-            <InputField label="HSA Balance" value={inputs.startingHSA} onChange={v => handleInputChange('startingHSA', v)} min={0} max={10_000_000} step={1000} unit="$" icon={Landmark} tooltip="Current balance in your Health Savings Account." />
+            <InputField label="401(k) Balance" value={inputs.starting401k} onChange={v => handleInputChange('starting401k', v)} min={0} max={10_000_000} step={1000} unit="$" tooltip="Current balance in your 401(k) or 403(b), including rollovers from previous employers." />
+            <InputField label="Roth IRA Balance" value={inputs.startingRoth} onChange={v => handleInputChange('startingRoth', v)} min={0} max={10_000_000} step={1000} unit="$" tooltip="Current balance in your Roth IRA." />
+            <InputField label="HSA Balance" value={inputs.startingHSA} onChange={v => handleInputChange('startingHSA', v)} min={0} max={10_000_000} step={1000} unit="$" tooltip="Current balance in your Health Savings Account." />
+            <div className="text-[11px] text-content-subtle -mt-4">Existing account balances compound from year one.</div>
           </ToggleSection>
         </section>
         <div className="pt-8">
@@ -1108,6 +1107,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                         tick={{ fill: theme.colors.textSubtle, fontSize: isNarrowScreen ? 10 : 12, fontWeight: 600 }}
                         tickFormatter={(val) => {
                           const numericVal = typeof val === 'number' ? val : Number(val);
+                          if (Math.abs(numericVal) >= 1_000_000) return `$${(numericVal / 1_000_000).toFixed(numericVal % 1_000_000 === 0 ? 0 : 1)}M`;
                           return `$${(numericVal / 1000).toFixed(0)}k`;
                         }}
                       />
