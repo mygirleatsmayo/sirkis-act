@@ -19,6 +19,10 @@ export interface Inputs {
   rothContribution: number;
   hsaContribution: number;
   contributionTiming: string;
+  enableStartingBalances: boolean;
+  starting401k: number;
+  startingRoth: number;
+  startingHSA: number;
 }
 
 export interface ProjectionRow {
@@ -93,8 +97,11 @@ export type NumericInputKey =
   | 'matchPercent'
   | 'matchLimit'
   | 'rothContribution'
-  | 'hsaContribution';
-export type BooleanInputKey = 'enable401k' | 'enableRoth' | 'enableHSA' | 'rothMatch401k';
+  | 'hsaContribution'
+  | 'starting401k'
+  | 'startingRoth'
+  | 'startingHSA';
+export type BooleanInputKey = 'enable401k' | 'enableRoth' | 'enableHSA' | 'rothMatch401k' | 'enableStartingBalances';
 export type SalaryPreset = { label: string; salary: number };
 export type InputBounds = Record<NumericInputKey, { min: number; max: number }>;
 export type InputValue = Inputs[InputKey] | number | string | boolean;

@@ -3,10 +3,13 @@ import type { Inputs, ProjectionRow } from '../types';
 
 export const runProjection = (inputs: Inputs, startAgeOverride: number): ProjectionRow[] => {
 const data: ProjectionRow[] = [];
-let balance401k = 0;
-let balanceRoth = 0;
-let balanceHSA = 0;
-let cumUserCont = 0;
+const init401k = inputs.enableStartingBalances ? inputs.starting401k : 0;
+const initRoth = inputs.enableStartingBalances ? inputs.startingRoth : 0;
+const initHSA = inputs.enableStartingBalances ? inputs.startingHSA : 0;
+let balance401k = init401k;
+let balanceRoth = initRoth;
+let balanceHSA = initHSA;
+let cumUserCont = init401k + initRoth + initHSA;
 let cumEmployerCont = 0;
 let cumReturns = 0;
 let currentSalary = inputs.currentSalary;

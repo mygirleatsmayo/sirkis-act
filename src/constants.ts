@@ -19,6 +19,10 @@ export const DEFAULT_INPUTS: Inputs = {
   rothContribution: 7000,
   hsaContribution: 4150,
   contributionTiming: 'start',
+  enableStartingBalances: false,
+  starting401k: 0,
+  startingRoth: 0,
+  startingHSA: 0,
 };
 export const LIMITS = {
   max401kEmployee: 23000,
@@ -73,4 +77,7 @@ export const INPUT_BOUNDS: InputBounds = {
   matchLimit: { min: 0, max: 100 },
   rothContribution: { min: 0, max: LIMITS.rothAnnual },
   hsaContribution: { min: 0, max: LIMITS.hsaFamily },
+  starting401k: { min: 0, max: 10_000_000 },
+  startingRoth: { min: 0, max: 10_000_000 },
+  startingHSA: { min: 0, max: 10_000_000 },
 };
