@@ -133,3 +133,80 @@ describe('projection behaviour', () => {
     expect(nomDelayed).toBeLessThan(nomImmediate);
   });
 });
+
+describe('starting balances', () => {
+  it('starting balance compounds even without new contributions', () => {
+    const inputs = makeInputs({
+      enableStartingBalances: true,
+      starting401k: 50_000,
+      enable401k: false,
+      enableRoth: false,
+      enableHSA: false,
+      expectedReturn: 7,
+    });
+    const data = runProjection(inputs, inputs.startAge);
+    const last = data[data.length - 1];
+    expect(last['Total Nominal']).toBeGreaterThan(50_000);
+  });
+
+  it('starting balance increases final balance over baseline', () => {
+    const base = makeInputs({
+      enable401k: true,
+      contribution401k: 10,
+      enableRoth: false,
+      enableHSA: false,
+    });
+    const withStarting = makeInputs({
+      ...base,
+      enableStartingBalances: true,
+      starting401k: 10_000,
+    });
+    const baseData = runProjection(base, base.startAge);
+    const startData = runProjection(withStarting, withStarting.startAge);
+    expect(startData[startData.length - 1]['Total Nominal'])
+      .toBeGreaterThan(baseData[baseData.length - 1]['Total Nominal']);
+  });
+
+  it('disabled toggle ignores starting balance values', () => {
+    const withToggleOff = makeInputs({
+      enableStartingBalances: false,
+      starting401k: 100_000,
+      startingRoth: 50_000,
+      startingHSA: 25_000,
+      enable401k: true,
+      contribution401k: 10,
+      enableRoth: false,
+      enableHSA: false,
+    });
+    const baseline = makeInputs({
+      enable401k: true,
+      contribution401k: 10,
+      enableRoth: false,
+      enableHSA: false,
+    });
+    const offData = runProjection(withToggleOff, withToggleOff.startAge);
+    const baseData = runProjection(baseline, baseline.startAge);
+    expect(offData[offData.length - 1]['Total Nominal'])
+      .toBe(baseData[baseData.length - 1]['Total Nominal']);
+  });
+
+  it('chart stacking identity holds: contributions + match + returns = total', () => {
+    const inputs = makeInputs({
+      enableStartingBalances: true,
+      starting401k: 30_000,
+      startingRoth: 10_000,
+      enable401k: true,
+      contribution401k: 10,
+      matchPercent: 50,
+      matchLimit: 6,
+      enableRoth: true,
+      rothMatch401k: false,
+      rothContribution: 5_000,
+      enableHSA: false,
+    });
+    const data = runProjection(inputs, inputs.startAge);
+    const last = data[data.length - 1];
+    const stackSum = last['Your Contributions'] + last['Employer Match'] + last['Investment Returns'];
+    expect(stackSum).toBe(last['Total Nominal']);
+  });
+});

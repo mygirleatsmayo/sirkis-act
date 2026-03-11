@@ -30,6 +30,10 @@ describe('DEFAULT_INPUTS', () => {
     'rothContribution',
     'hsaContribution',
     'contributionTiming',
+    'enableStartingBalances',
+    'starting401k',
+    'startingRoth',
+    'startingHSA',
   ];
 
   it('contains all expected keys', () => {

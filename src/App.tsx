@@ -27,6 +27,7 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  Landmark,
   Settings as SettingsIcon
 } from 'lucide-react';
 import { Drawer } from 'vaul';
@@ -553,6 +554,12 @@ const SettingsPanel = ({
           <ToggleSection label="HSA / Other" enabled={inputs.enableHSA} onToggle={(v) => handleInputChange('enableHSA', v)}>
             <InputField label="Annual Amount" value={inputs.hsaContribution} onChange={v => handleInputChange('hsaContribution', v)} min={0} max={LIMITS.hsaFamily} step={100} unit="$" error={hsaOverCap ? 'Exceeds family cap. Projections use cap.' : null} tooltip="Triple-tax-advantaged: contributions, growth, and qualified medical withdrawals are all tax-free." />
             <div className={`mt-2 text-[11px] ${hsaOverCap ? 'text-accent-loss' : 'text-content-subtle'}`}>Common caps: {formatCurrency(LIMITS.hsaIndividual)} individual, {formatCurrency(LIMITS.hsaFamily)} family.</div>
+          </ToggleSection>
+          <ToggleSection label="Starting Balances" enabled={inputs.enableStartingBalances} onToggle={(v) => handleInputChange('enableStartingBalances', v)}>
+            <div className="text-[11px] text-content-subtle mb-4">Existing account balances compound from year one, even if you are not currently contributing to that account type.</div>
+            <InputField label="401(k) Balance" value={inputs.starting401k} onChange={v => handleInputChange('starting401k', v)} min={0} max={10_000_000} step={1000} unit="$" icon={Landmark} tooltip="Current balance in your 401(k) or 403(b), including rollovers from previous employers." />
+            <InputField label="Roth IRA Balance" value={inputs.startingRoth} onChange={v => handleInputChange('startingRoth', v)} min={0} max={10_000_000} step={1000} unit="$" icon={Landmark} tooltip="Current balance in your Roth IRA." />
+            <InputField label="HSA Balance" value={inputs.startingHSA} onChange={v => handleInputChange('startingHSA', v)} min={0} max={10_000_000} step={1000} unit="$" icon={Landmark} tooltip="Current balance in your Health Savings Account." />
           </ToggleSection>
         </section>
         <div className="pt-8">
