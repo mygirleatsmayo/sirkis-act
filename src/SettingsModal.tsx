@@ -71,6 +71,16 @@ const ChangelogEntryBlock = ({ entry }: { entry: { version: string; date: string
 
 const CIRCLE_KEYS = ['returns', 'loss', 'opm', 'textNeutral'] as const;
 
+/** Mini chart: three projection curves fanning from a shared bottom-left origin */
+const ThemeCardChart = ({ colors }: { colors: { returns: string; brand: string; opm: string } }) => (
+  <svg viewBox="0 0 100 56" className="w-full h-auto" aria-hidden="true">
+    <path d="M2 54 C28 48 58 28 98 6 L98 54 Z" fill={colors.returns} fillOpacity={0.07} />
+    <path d="M2 54 C28 48 58 28 98 6"  stroke={colors.returns} fill="none" strokeWidth="2" strokeLinecap="round" />
+    <path d="M2 54 C28 50 58 38 98 22" stroke={colors.brand}   fill="none" strokeWidth="2" strokeLinecap="round" />
+    <path d="M2 54 C28 52 58 46 98 36" stroke={colors.opm}     fill="none" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
 const ThemeSwitcherSection = ({
   onCloseThemeLab,
 }: {
@@ -95,10 +105,10 @@ const ThemeSwitcherSection = ({
           const isActive = t.id === themeId;
           const resolved = resolveTheme(t);
           const Logo = t.branding.logo;
-          const logoColor = resolved.capabilities.logoColorMode === 'intrinsic'
-            ? undefined
-            : t.branding.logoColor;
-          // Split theme name: first word line 1 (hero1 color), rest line 2 (hero2 color)
+          const logoColor =
+            resolved.capabilities.logoColorMode === 'intrinsic'
+              ? undefined
+              : t.branding.logoColor;
           const spaceIdx = t.name.indexOf(' ');
           const nameLine1 = spaceIdx > 0 ? t.name.slice(0, spaceIdx) : t.name;
           const nameLine2 = spaceIdx > 0 ? t.name.slice(spaceIdx + 1) : '';
@@ -108,40 +118,57 @@ const ThemeSwitcherSection = ({
               key={t.id}
               type="button"
               onClick={() => handleSelect(t.id)}
-              className={`relative w-[140px] h-[140px] rounded-xl border-2 transition-all overflow-hidden p-3 ${
-                isActive
-                  ? ''
-                  : 'border-white/10 hover:border-white/25'
+              className={`relative w-[200px] h-[180px] rounded-xl border-2 transition-all overflow-hidden text-left ${
+                isActive ? '' : 'border-white/10 hover:border-white/25'
               }`}
               style={{
                 backgroundColor: t.colors.bg,
                 borderColor: isActive ? activeTheme.colors.brand : undefined,
-                boxShadow: isActive
-                  ? `0 0 0 2px ${activeTheme.colors.brand}`
-                  : undefined,
+                boxShadow: isActive ? `0 0 0 2px ${activeTheme.colors.brand}` : undefined,
               }}
               aria-label={`Switch to ${t.name} theme`}
               aria-pressed={isActive}
             >
               <div className="flex h-full">
-                {/* Left column */}
-                <div className="flex flex-col justify-between flex-1 min-w-0">
-                  {/* Logo */}
-                  <div className="h-6 w-6" style={{ color: logoColor }}>
-                    <Logo className="h-6 w-6" />
+                {/* Glass side panel ~33% */}
+                <div
+                  className="flex flex-col items-center pt-2.5 pb-2.5 shrink-0"
+                  style={{ width: '33%', backgroundColor: t.colors.bgGlass }}
+                >
+                  {/* Logo — h-[36px] w-auto: correct aspect ratio, height matches two-line name block */}
+                  <div style={{ color: logoColor }}>
+                    <Logo className="h-[36px] w-auto" />
                   </div>
+                  {/* Circles — centered in space between logo bottom and card bottom */}
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="flex flex-col gap-[7px]">
+                      {CIRCLE_KEYS.map((key) => (
+                        <div
+                          key={key}
+                          className="w-[16px] h-[16px] rounded-full"
+                          style={{
+                            backgroundColor: t.colors[key],
+                            boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Theme name: first word in brand, second word in heroLine2Color */}
-                  <div className="font-display leading-tight">
+                {/* Main content ~67% */}
+                <div className="flex-1 flex flex-col p-2.5 min-w-0">
+                  {/* Theme name — two lines, display font, left justified */}
+                  <div>
                     <div
-                      className="text-sm font-bold truncate"
-                      style={{ color: t.colors.brand }}
+                      className="font-display font-bold text-[16px] leading-none"
+                      style={{ color: t.branding.heroLine1Color }}
                     >
                       {nameLine1}
                     </div>
                     {nameLine2 && (
                       <div
-                        className="text-sm font-bold truncate"
+                        className="font-display font-bold text-[16px] leading-none mt-[4px]"
                         style={{ color: t.branding.heroLine2Color }}
                       >
                         {nameLine2}
@@ -149,24 +176,35 @@ const ThemeSwitcherSection = ({
                     )}
                   </div>
 
-                  {/* Dollar amount in mono */}
+                  {/* Flavor text */}
+                  {t.branding.cardFlavor && (
+                    <div
+                      className="text-[10px] font-sans leading-none mt-[10px]"
+                      style={{ color: t.colors.textSecondary }}
+                    >
+                      {t.branding.cardFlavor}
+                    </div>
+                  )}
+
+                  {/* Chart — on bgGlass surface, fills remaining vertical space */}
                   <div
-                    className="text-[10px] font-mono font-semibold"
-                    style={{ color: t.colors.textPrimary }}
+                    className="flex-1 flex items-center px-2 mt-2 rounded-lg min-h-[40px]"
+                    style={{ backgroundColor: t.colors.bgGlass }}
+                  >
+                    <ThemeCardChart colors={t.colors} />
+                  </div>
+
+                  {/* Dollar amount */}
+                  <div
+                    className="text-[12px] font-bold text-center mt-1.5"
+                    style={{
+                      color: t.colors.textPrimary,
+                      fontFamily: t.fonts.mono,
+                      fontFeatureSettings: '"tnum"',
+                    }}
                   >
                     $1,618,033
                   </div>
-                </div>
-
-                {/* Right column: 4 color circles */}
-                <div className="flex flex-col justify-center gap-2 ml-2">
-                  {CIRCLE_KEYS.map((key) => (
-                    <div
-                      key={key}
-                      className="w-4 h-4 rounded-full ring-1 ring-white/10"
-                      style={{ backgroundColor: t.colors[key] }}
-                    />
-                  ))}
                 </div>
               </div>
             </button>

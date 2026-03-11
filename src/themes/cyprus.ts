@@ -59,6 +59,7 @@ export const cyprusTheme: ThemeConfig = {
     },
     heroLine1Color: '#00A499',
     heroLine2Color: '#E6C300',
+    cardFlavor: 'Old-Fashioned',
   },
   fonts: {
     display: 'Fraunces, Georgia, serif',

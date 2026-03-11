@@ -66,6 +66,7 @@ export interface ThemeBranding {
   };
   heroLine1Color: string;       // color for hero line 1
   heroLine2Color: string;       // color for hero line 2
+  cardFlavor?: string;          // short per-theme flavor text for switcher card (e.g. 'Old-Fashioned')
 }
 
 export interface ThemeFonts {
