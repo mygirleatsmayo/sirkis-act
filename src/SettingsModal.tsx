@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
-import { X, Palette, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { X, Palette, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from './themes/useTheme';
 import { CHANGELOG_ENTRIES } from './changelog';
-import { getSelectableThemes, resolveTheme } from './themes/index';
+import { getSelectableThemes } from './themes/index';
+import type { LogoComponent, ThemeConfig, ThemeFonts } from './themes/types';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -14,6 +16,516 @@ interface SettingsModalProps {
 }
 
 const APP_VERSION = CHANGELOG_ENTRIES[0]?.version ?? '0.0.0';
+
+/** Normalized shape for carousel cards — real themes and mock placeholders */
+interface CarouselTheme {
+  id: string;
+  name: string;
+  isMock: boolean;
+  colors: {
+    bg: string;
+    bgGlass: string;
+    brand: string;
+    returns: string;
+    loss: string;
+    opm: string;
+    textNeutral: string;
+    textPrimary: string;
+    textSecondary: string;
+  };
+  branding: {
+    logo: LogoComponent;
+    logoColor: string;
+    heroLine1Color: string;
+    heroLine2Color: string;
+    cardFlavor?: string;
+  };
+  fonts: ThemeFonts;
+}
+
+const toCarouselTheme = (t: ThemeConfig): CarouselTheme => ({
+  id: t.id,
+  name: t.name,
+  isMock: false,
+  colors: {
+    bg: t.colors.bg,
+    bgGlass: t.colors.bgGlass,
+    brand: t.colors.brand,
+    returns: t.colors.returns,
+    loss: t.colors.loss,
+    opm: t.colors.opm,
+    textNeutral: t.colors.textNeutral,
+    textPrimary: t.colors.textPrimary,
+    textSecondary: t.colors.textSecondary,
+  },
+  branding: {
+    logo: t.branding.logo,
+    logoColor: t.branding.logoColor,
+    heroLine1Color: t.branding.heroLine1Color,
+    heroLine2Color: t.branding.heroLine2Color,
+    cardFlavor: t.branding.cardFlavor,
+  },
+  fonts: t.fonts,
+});
+
+/** Placeholder SVG logos for mock themes */
+const PlaceholderCatLogo = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 40 40" fill="none" className={className} aria-hidden="true">
+    <circle cx="20" cy="22" r="14" stroke="currentColor" strokeWidth="2" />
+    <polygon points="10,12 14,4 18,12" fill="currentColor" />
+    <polygon points="22,12 26,4 30,12" fill="currentColor" />
+    <circle cx="15" cy="20" r="1.5" fill="currentColor" />
+    <circle cx="25" cy="20" r="1.5" fill="currentColor" />
+    <path d="M16 26 Q20 30 24 26" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+  </svg>
+);
+
+const PlaceholderRootLogo = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 40 40" fill="none" className={className} aria-hidden="true">
+    <circle cx="20" cy="20" r="14" stroke="currentColor" strokeWidth="2" />
+    <path d="M20 10 C20 10 16 18 16 24 C16 28 20 30 20 30 C20 30 24 28 24 24 C24 18 20 10 20 10Z" fill="currentColor" fillOpacity="0.6" />
+    <path d="M16 24 C14 26 12 28 10 28" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M24 24 C26 26 28 28 30 28" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const PlaceholderEinsteinLogo = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 40 40" fill="none" className={className} aria-hidden="true">
+    <circle cx="20" cy="20" r="14" stroke="currentColor" strokeWidth="2" />
+    <text x="20" y="24" textAnchor="middle" fill="currentColor" fontSize="11" fontWeight="bold" fontFamily="serif">E=mc</text>
+  </svg>
+);
+
+const MOCK_THEMES: CarouselTheme[] = [
+  {
+    id: 'mock-feral-filly',
+    name: 'Feral Filly',
+    isMock: true,
+    colors: {
+      bg: '#1E1E2E',
+      bgGlass: '#2A2A3E',
+      brand: '#CBA6F7',
+      returns: '#F5C2E7',
+      loss: '#F38BA8',
+      opm: '#94E2D5',
+      textNeutral: '#BAC2DE',
+      textPrimary: '#CDD6F4',
+      textSecondary: '#A6ADC8',
+    },
+    branding: {
+      logo: PlaceholderCatLogo,
+      logoColor: '#CBA6F7',
+      heroLine1Color: '#CBA6F7',
+      heroLine2Color: '#F5C2E7',
+      cardFlavor: 'Pheline Financial',
+    },
+    fonts: { display: 'Fraunces, Georgia, serif', sans: 'Recursive, system-ui, sans-serif', mono: 'ui-monospace, monospace' },
+  },
+  {
+    id: 'mock-overheated-rhizome',
+    name: 'Overheated Rhizome',
+    isMock: true,
+    colors: {
+      bg: '#1A1008',
+      bgGlass: '#2C1E10',
+      brand: '#D4840A',
+      returns: '#E6A830',
+      loss: '#C04040',
+      opm: '#8B6914',
+      textNeutral: '#C8A878',
+      textPrimary: '#E8D4B0',
+      textSecondary: '#A89070',
+    },
+    branding: {
+      logo: PlaceholderRootLogo,
+      logoColor: '#D4840A',
+      heroLine1Color: '#E6A830',
+      heroLine2Color: '#D4840A',
+      cardFlavor: 'Financial Diss...ertation',
+    },
+    fonts: { display: 'Fraunces, Georgia, serif', sans: 'Recursive, system-ui, sans-serif', mono: 'ui-monospace, monospace' },
+  },
+  {
+    id: 'mock-eighth-wonder',
+    name: 'Eighth Wonder',
+    isMock: true,
+    colors: {
+      bg: '#0A1628',
+      bgGlass: '#142240',
+      brand: '#3B82F6',
+      returns: '#D4AF37',
+      loss: '#DC2626',
+      opm: '#60A5FA',
+      textNeutral: '#94A3B8',
+      textPrimary: '#E2E8F0',
+      textSecondary: '#94A3B8',
+    },
+    branding: {
+      logo: PlaceholderEinsteinLogo,
+      logoColor: '#D4AF37',
+      heroLine1Color: '#3B82F6',
+      heroLine2Color: '#D4AF37',
+      cardFlavor: 'Relativity Easy',
+    },
+    fonts: { display: 'Fraunces, Georgia, serif', sans: 'Recursive, system-ui, sans-serif', mono: 'ui-monospace, monospace' },
+  },
+];
+
+const CIRCLE_KEYS = ['returns', 'loss', 'opm', 'textNeutral'] as const;
+
+/** Mini chart: three projection curves fanning from a shared bottom-left origin */
+const ThemeCardChart = ({ colors }: { colors: { returns: string; brand: string; opm: string } }) => (
+  <svg viewBox="0 0 100 56" className="w-full h-auto" aria-hidden="true">
+    <path d="M2 54 C28 48 58 28 98 6 L98 54 Z" fill={colors.returns} fillOpacity={0.07} />
+    <path d="M2 54 C28 48 58 28 98 6"  stroke={colors.returns} fill="none" strokeWidth="2" strokeLinecap="round" />
+    <path d="M2 54 C28 50 58 38 98 22" stroke={colors.brand}   fill="none" strokeWidth="2" strokeLinecap="round" />
+    <path d="M2 54 C28 52 58 46 98 36" stroke={colors.opm}     fill="none" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const SIDE_PANEL_WIDTH = 52;
+const CARD_HEIGHT = 180;
+
+const FoldedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
+  const Logo = t.branding.logo;
+  const spaceIdx = t.name.indexOf(' ');
+  const initial1 = t.name[0] ?? '';
+  const initial2 = spaceIdx > 0 ? t.name[spaceIdx + 1] ?? '' : '';
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Logo zone — bgGlass */}
+      <div
+        className="flex items-center justify-center py-2 shrink-0"
+        style={{ backgroundColor: t.colors.bgGlass }}
+      >
+        <div style={{ color: t.branding.logoColor }}>
+          <Logo className="h-[24px] w-auto" />
+        </div>
+      </div>
+      {/* Initials + swatches — bg */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-1.5">
+        <div
+          className="font-display font-bold text-[18px] leading-none"
+          style={{ color: t.branding.heroLine1Color }}
+        >
+          {initial1}
+        </div>
+        {initial2 && (
+          <div
+            className="font-display font-bold text-[18px] leading-none"
+            style={{ color: t.branding.heroLine2Color }}
+          >
+            {initial2}
+          </div>
+        )}
+        <div className="flex flex-col gap-[5px] mt-1">
+          {CIRCLE_KEYS.map((key) => (
+            <div
+              key={key}
+              className="w-[12px] h-[12px] rounded-full mx-auto"
+              style={{
+                backgroundColor: t.colors[key],
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ExpandedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
+  const Logo = t.branding.logo;
+  const spaceIdx = t.name.indexOf(' ');
+  const nameLine1 = spaceIdx > 0 ? t.name.slice(0, spaceIdx) : t.name;
+  const nameLine2 = spaceIdx > 0 ? t.name.slice(spaceIdx + 1) : '';
+
+  return (
+    <div className="flex h-full">
+      {/* Glass side panel — fixed width */}
+      <div
+        className="flex flex-col items-center pt-2.5 pb-2.5 shrink-0"
+        style={{ width: SIDE_PANEL_WIDTH, backgroundColor: t.colors.bgGlass }}
+      >
+        <div style={{ color: t.branding.logoColor }}>
+          <Logo className="h-[36px] w-auto" />
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col gap-[7px]">
+            {CIRCLE_KEYS.map((key) => (
+              <div
+                key={key}
+                className="w-[16px] h-[16px] rounded-full"
+                style={{
+                  backgroundColor: t.colors[key],
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Content area */}
+      <div className="flex-1 flex flex-col p-2.5 min-w-0">
+        <div>
+          <div
+            className="font-display font-bold text-[16px] leading-none"
+            style={{ color: t.branding.heroLine1Color }}
+          >
+            {nameLine1}
+          </div>
+          {nameLine2 && (
+            <div
+              className="font-display font-bold text-[16px] leading-none mt-[4px]"
+              style={{ color: t.branding.heroLine2Color }}
+            >
+              {nameLine2}
+            </div>
+          )}
+        </div>
+
+        {t.branding.cardFlavor && (
+          <div
+            className="text-[10px] font-sans leading-none mt-[10px]"
+            style={{ color: t.colors.textSecondary }}
+          >
+            {t.branding.cardFlavor}
+          </div>
+        )}
+
+        <div
+          className="flex-1 flex items-center px-2 mt-2 rounded-lg min-h-[40px]"
+          style={{ backgroundColor: t.colors.bgGlass }}
+        >
+          <ThemeCardChart colors={t.colors} />
+        </div>
+
+        <div
+          className="text-[12px] font-bold text-center mt-1.5"
+          style={{
+            color: t.colors.textPrimary,
+            fontFamily: t.fonts.mono,
+            fontFeatureSettings: '"tnum"',
+          }}
+        >
+          $1,618,033
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ArrowButton = ({
+  direction,
+  onClick,
+}: {
+  direction: 'left' | 'right';
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-label={direction === 'left' ? 'Previous theme' : 'Next theme'}
+    className="shrink-0 flex items-center justify-center rounded-lg border border-white/10 hover:border-white/25 hover:bg-white/5 transition-colors"
+    style={{ width: 28, height: CARD_HEIGHT }}
+  >
+    {direction === 'left' ? (
+      <ChevronLeft size={14} className="text-content-subtle" />
+    ) : (
+      <ChevronRight size={14} className="text-content-subtle" />
+    )}
+  </button>
+);
+
+const EXPANDED_WIDTH = 175;
+const FOLDED_COUNT_MOBILE = 2;
+const FOLDED_COUNT_DESKTOP = 3;
+
+const ThemeSwitcherSection = ({
+  onCloseThemeLab,
+}: {
+  onCloseThemeLab: () => void;
+}) => {
+  const { theme: activeTheme, themeId, setThemeId } = useTheme();
+  const selectableThemes = getSelectableThemes();
+
+  // Build carousel items: real themes first, then mocks
+  // selectableThemes is a stable registry snapshot (constant across renders)
+  const carouselThemes = useMemo<CarouselTheme[]>(
+    () => [...selectableThemes.map(toCarouselTheme), ...MOCK_THEMES],
+    // selectableThemes is a module-level constant — length guards against future dynamic themes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectableThemes.length],
+  );
+
+  const [expandedId, setExpandedId] = useState(themeId);
+
+  // Responsive: 2 folded on mobile, 3 on desktop
+  const [foldedCount, setFoldedCount] = useState(FOLDED_COUNT_MOBILE);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 640px)');
+    const update = () => setFoldedCount(mq.matches ? FOLDED_COUNT_DESKTOP : FOLDED_COUNT_MOBILE);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  const windowSize = 1 + foldedCount;
+  const maxStart = Math.max(0, carouselThemes.length - windowSize);
+  const [startIndex, setStartIndex] = useState(() => {
+    // Start with the active theme visible
+    const activeIdx = carouselThemes.findIndex((t) => t.id === themeId);
+    return Math.min(Math.max(0, activeIdx), maxStart);
+  });
+
+  const advance = (delta: number) => {
+    setStartIndex((prev) => {
+      const next = prev + delta;
+      if (next < 0) return maxStart;
+      if (next > maxStart) return 0;
+      return next;
+    });
+  };
+
+  // Memoize visible themes to avoid re-creating array on every render
+  const visibleThemes = useMemo(
+    () => carouselThemes.slice(startIndex, startIndex + windowSize),
+    [carouselThemes, startIndex, windowSize],
+  );
+
+  const handleCardClick = (id: string) => {
+    if (id === expandedId) return;
+    setExpandedId(id);
+
+    // Activate real themes on click
+    const theme = carouselThemes.find((t) => t.id === id);
+    if (theme && !theme.isMock && id !== themeId) {
+      onCloseThemeLab();
+      setThemeId(id);
+    }
+  };
+
+  // If expanded card scrolls out of view, auto-expand first visible
+  useEffect(() => {
+    const isVisible = visibleThemes.some((t) => t.id === expandedId);
+    if (!isVisible && visibleThemes.length > 0) {
+      setExpandedId(visibleThemes[0].id);
+    }
+  }, [startIndex, expandedId, visibleThemes]);
+
+  const springTransition = { type: 'spring' as const, stiffness: 400, damping: 40 };
+
+  return (
+    <section>
+      <h3 className="text-[11px] font-black uppercase tracking-widest text-content-secondary mb-3">
+        Theme
+      </h3>
+      <div
+        className="flex items-stretch gap-1.5"
+        role="group"
+        aria-label="Theme switcher"
+      >
+        <ArrowButton direction="left" onClick={() => advance(-1)} />
+
+        <div className="flex gap-1.5 min-w-0">
+          {visibleThemes.map((t) => {
+            const isExpanded = t.id === expandedId;
+            const isActive = t.id === themeId;
+
+            return (
+              <motion.div
+                key={t.id}
+                layout
+                transition={springTransition}
+                onClick={() => handleCardClick(t.id)}
+                className={`relative rounded-xl border-2 cursor-pointer shrink-0 ${
+                  isActive ? '' : 'border-white/10 hover:border-white/25'
+                }`}
+                style={{
+                  width: isExpanded ? EXPANDED_WIDTH : SIDE_PANEL_WIDTH,
+                  height: CARD_HEIGHT,
+                  backgroundColor: t.colors.bg,
+                  borderColor: isActive ? activeTheme.colors.brand : undefined,
+                  boxShadow: isActive ? `0 0 0 2px ${activeTheme.colors.brand}` : undefined,
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={
+                  t.isMock
+                    ? `${t.name} theme (coming soon)`
+                    : `Switch to ${t.name} theme`
+                }
+                aria-pressed={isActive}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleCardClick(t.id);
+                  }
+                  // Arrow key navigation between visible cards
+                  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const idx = visibleThemes.findIndex((vt) => vt.id === t.id);
+                    const nextIdx = e.key === 'ArrowRight' ? idx + 1 : idx - 1;
+                    if (nextIdx >= 0 && nextIdx < visibleThemes.length) {
+                      const container = e.currentTarget.parentElement;
+                      const cards = container?.querySelectorAll<HTMLElement>('[role="button"]');
+                      cards?.[nextIdx]?.focus();
+                    }
+                  }
+                }}
+              >
+                {/* Inner wrapper — overflow-hidden here, not on outer motion.div, to preserve border/shadow */}
+                <div className="rounded-xl overflow-hidden h-full">
+                  <AnimatePresence mode="wait">
+                    {isExpanded ? (
+                      <motion.div
+                        key={`expanded-${t.id}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="h-full"
+                      >
+                        <ExpandedCardContent theme={t} />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key={`folded-${t.id}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.1 }}
+                        className="h-full"
+                      >
+                        <FoldedCardContent theme={t} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Mock badge */}
+                {t.isMock && (
+                  <div className="absolute inset-0 flex items-end justify-center pb-1.5 rounded-xl pointer-events-none">
+                    <span
+                      className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-black/60 text-white/60"
+                    >
+                      Soon
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+
+        <ArrowButton direction="right" onClick={() => advance(1)} />
+      </div>
+    </section>
+  );
+};
 
 const ChangelogSection = () => {
   const [expanded, setExpanded] = useState(false);
@@ -68,152 +580,6 @@ const ChangelogEntryBlock = ({ entry }: { entry: { version: string; date: string
     </ul>
   </div>
 );
-
-const CIRCLE_KEYS = ['returns', 'loss', 'opm', 'textNeutral'] as const;
-
-/** Mini chart: three projection curves fanning from a shared bottom-left origin */
-const ThemeCardChart = ({ colors }: { colors: { returns: string; brand: string; opm: string } }) => (
-  <svg viewBox="0 0 100 56" className="w-full h-auto" aria-hidden="true">
-    <path d="M2 54 C28 48 58 28 98 6 L98 54 Z" fill={colors.returns} fillOpacity={0.07} />
-    <path d="M2 54 C28 48 58 28 98 6"  stroke={colors.returns} fill="none" strokeWidth="2" strokeLinecap="round" />
-    <path d="M2 54 C28 50 58 38 98 22" stroke={colors.brand}   fill="none" strokeWidth="2" strokeLinecap="round" />
-    <path d="M2 54 C28 52 58 46 98 36" stroke={colors.opm}     fill="none" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-
-const ThemeSwitcherSection = ({
-  onCloseThemeLab,
-}: {
-  onCloseThemeLab: () => void;
-}) => {
-  const { theme: activeTheme, themeId, setThemeId } = useTheme();
-  const selectableThemes = getSelectableThemes();
-
-  const handleSelect = (id: string) => {
-    if (id === themeId) return;
-    onCloseThemeLab();
-    setThemeId(id);
-  };
-
-  return (
-    <section>
-      <h3 className="text-[11px] font-black uppercase tracking-widest text-content-secondary mb-3">
-        Theme
-      </h3>
-      <div className="flex flex-wrap gap-3">
-        {selectableThemes.map((t) => {
-          const isActive = t.id === themeId;
-          const resolved = resolveTheme(t);
-          const Logo = t.branding.logo;
-          const logoColor =
-            resolved.capabilities.logoColorMode === 'intrinsic'
-              ? undefined
-              : t.branding.logoColor;
-          const spaceIdx = t.name.indexOf(' ');
-          const nameLine1 = spaceIdx > 0 ? t.name.slice(0, spaceIdx) : t.name;
-          const nameLine2 = spaceIdx > 0 ? t.name.slice(spaceIdx + 1) : '';
-
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => handleSelect(t.id)}
-              className={`relative w-[200px] h-[180px] rounded-xl border-2 transition-all overflow-hidden text-left ${
-                isActive ? '' : 'border-white/10 hover:border-white/25'
-              }`}
-              style={{
-                backgroundColor: t.colors.bg,
-                borderColor: isActive ? activeTheme.colors.brand : undefined,
-                boxShadow: isActive ? `0 0 0 2px ${activeTheme.colors.brand}` : undefined,
-              }}
-              aria-label={`Switch to ${t.name} theme`}
-              aria-pressed={isActive}
-            >
-              <div className="flex h-full">
-                {/* Glass side panel ~33% */}
-                <div
-                  className="flex flex-col items-center pt-2.5 pb-2.5 shrink-0"
-                  style={{ width: '33%', backgroundColor: t.colors.bgGlass }}
-                >
-                  {/* Logo — h-[36px] w-auto: correct aspect ratio, height matches two-line name block */}
-                  <div style={{ color: logoColor }}>
-                    <Logo className="h-[36px] w-auto" />
-                  </div>
-                  {/* Circles — centered in space between logo bottom and card bottom */}
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="flex flex-col gap-[7px]">
-                      {CIRCLE_KEYS.map((key) => (
-                        <div
-                          key={key}
-                          className="w-[16px] h-[16px] rounded-full"
-                          style={{
-                            backgroundColor: t.colors[key],
-                            boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Main content ~67% */}
-                <div className="flex-1 flex flex-col p-2.5 min-w-0">
-                  {/* Theme name — two lines, display font, left justified */}
-                  <div>
-                    <div
-                      className="font-display font-bold text-[16px] leading-none"
-                      style={{ color: t.branding.heroLine1Color }}
-                    >
-                      {nameLine1}
-                    </div>
-                    {nameLine2 && (
-                      <div
-                        className="font-display font-bold text-[16px] leading-none mt-[4px]"
-                        style={{ color: t.branding.heroLine2Color }}
-                      >
-                        {nameLine2}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Flavor text */}
-                  {t.branding.cardFlavor && (
-                    <div
-                      className="text-[10px] font-sans leading-none mt-[10px]"
-                      style={{ color: t.colors.textSecondary }}
-                    >
-                      {t.branding.cardFlavor}
-                    </div>
-                  )}
-
-                  {/* Chart — on bgGlass surface, fills remaining vertical space */}
-                  <div
-                    className="flex-1 flex items-center px-2 mt-2 rounded-lg min-h-[40px]"
-                    style={{ backgroundColor: t.colors.bgGlass }}
-                  >
-                    <ThemeCardChart colors={t.colors} />
-                  </div>
-
-                  {/* Dollar amount */}
-                  <div
-                    className="text-[12px] font-bold text-center mt-1.5"
-                    style={{
-                      color: t.colors.textPrimary,
-                      fontFamily: t.fonts.mono,
-                      fontFeatureSettings: '"tnum"',
-                    }}
-                  >
-                    $1,618,033
-                  </div>
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
-};
 
 export const SettingsModal = ({
   isOpen,
