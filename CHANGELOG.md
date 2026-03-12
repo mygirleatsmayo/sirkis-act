@@ -3,6 +3,9 @@
 
 ## [Unreleased]
 
+- **Starting Balances**: Added inputs to seamlessly seed existing account balances for 401(k), Roth IRA, and HSA projections compounding from year one.
+- **Dynamic Y-Axis Scaling**: Enhanced chart scale logic to calculate perfect visual intervals (supporting decimals like $3.375M) and removed premature curve compression on hidden start-now overlays.
+
 ---
 
 ## [1.4.0] - 2026-03-09 — New Logo, Theme Lab Overhaul & Branding Flexibility
