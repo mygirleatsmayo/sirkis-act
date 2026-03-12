@@ -1,22 +1,84 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Palette, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+# Theme Switcher Carousel Implementation Plan
+
+> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Build an accordion-style theme switcher carousel in the Settings Modal with one expanded card, 2-3 folded cards, and arrow navigation.
+
+**Architecture:** Rewrite `ThemeSwitcherSection` in SettingsModal.tsx to use `motion` (formerly framer-motion) layout animations. Each theme card renders as a `motion.div` that transitions between expanded (175px) and folded (52px) widths. A `CarouselTheme` interface normalizes real themes and mock placeholders into a common shape.
+
+**Tech Stack:** React 19, TypeScript, motion (v12.x), Tailwind CSS, Lucide icons
+
+---
+
+## File Structure
+
+| File | Role |
+| --- | --- |
+| `src/SettingsModal.tsx` | Rewrite ThemeSwitcherSection; add CarouselTheme type, mock themes, FoldedCardContent, ArrowButton, toCarouselTheme helper |
+| `package.json` | Add `motion` dependency |
+
+No new files. All carousel code lives in SettingsModal.tsx alongside the existing ThemeCardChart and ChangelogSection.
+
+---
+
+## Chunk 1: Foundation
+
+### Task 1: Install motion dependency
+
+**Files:**
+
+- Modify: `package.json`
+
+- [ ] **Step 1: Install motion**
+
+```bash
+npm install motion
+```
+
+- [ ] **Step 2: Verify install**
+
+```bash
+npm ls motion
+```
+
+Expected: `motion@12.x.x` listed
+
+- [ ] **Step 3: Verify build still works**
+
+```bash
+npm run build
+```
+
+Expected: Clean build, no errors
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add package.json package-lock.json
+git commit -m "chore: add motion dependency for theme switcher carousel"
+```
+
+---
+
+### Task 2: Add CarouselTheme type and toCarouselTheme helper
+
+**Files:**
+
+- Modify: `src/SettingsModal.tsx:1-16`
+
+- [ ] **Step 1: Add the CarouselTheme interface and helpers**
+
+At the top of SettingsModal.tsx, after the existing imports, add:
+
+```typescript
 import { motion, AnimatePresence } from 'motion/react';
-import { useTheme } from './themes/useTheme';
-import { CHANGELOG_ENTRIES } from './changelog';
-import { getSelectableThemes } from './themes/index';
-import type { LogoComponent, ThemeConfig, ThemeFonts } from './themes/types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+// (ChevronDown already imported)
+```
 
-interface SettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onOpenThemeLab: () => void;
-  onCloseThemeLab: () => void;
-  showFab: boolean;
-  onToggleFab: (value: boolean) => void;
-}
+Then below `APP_VERSION` (line 16), add:
 
-const APP_VERSION = CHANGELOG_ENTRIES[0]?.version ?? '0.0.0';
-
+```typescript
 /** Normalized shape for carousel cards — real themes and mock placeholders */
 interface CarouselTheme {
   id: string;
@@ -67,7 +129,42 @@ const toCarouselTheme = (t: ThemeConfig): CarouselTheme => ({
   },
   fonts: t.fonts,
 });
+```
 
+Also add the necessary type imports at the top:
+
+```typescript
+import type { LogoComponent, ThemeConfig, ThemeFonts } from './themes/types';
+```
+
+- [ ] **Step 2: Verify build**
+
+```bash
+npm run build
+```
+
+Expected: Clean build. The new types/helpers are defined but not yet consumed.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/SettingsModal.tsx
+git commit -m "feat: add CarouselTheme type and toCarouselTheme helper"
+```
+
+---
+
+### Task 3: Add mock placeholder themes
+
+**Files:**
+
+- Modify: `src/SettingsModal.tsx` (below the `toCarouselTheme` helper)
+
+- [ ] **Step 1: Create placeholder logo components and mock themes**
+
+Add below `toCarouselTheme`:
+
+```typescript
 /** Placeholder SVG logos for mock themes */
 const PlaceholderCatLogo = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 40 40" fill="none" className={className} aria-hidden="true">
@@ -170,19 +267,38 @@ const MOCK_THEMES: CarouselTheme[] = [
     fonts: { display: 'Fraunces, Georgia, serif', sans: 'Recursive, system-ui, sans-serif', mono: 'ui-monospace, monospace' },
   },
 ];
+```
 
-const CIRCLE_KEYS = ['returns', 'loss', 'opm', 'textNeutral'] as const;
+- [ ] **Step 2: Verify build**
 
-/** Mini chart: three projection curves fanning from a shared bottom-left origin */
-const ThemeCardChart = ({ colors }: { colors: { returns: string; brand: string; opm: string } }) => (
-  <svg viewBox="0 0 100 56" className="w-full h-auto" aria-hidden="true">
-    <path d="M2 54 C28 48 58 28 98 6 L98 54 Z" fill={colors.returns} fillOpacity={0.07} />
-    <path d="M2 54 C28 48 58 28 98 6"  stroke={colors.returns} fill="none" strokeWidth="2" strokeLinecap="round" />
-    <path d="M2 54 C28 50 58 38 98 22" stroke={colors.brand}   fill="none" strokeWidth="2" strokeLinecap="round" />
-    <path d="M2 54 C28 52 58 46 98 36" stroke={colors.opm}     fill="none" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
+```bash
+npm run build
+```
 
+Expected: Clean build. Mocks defined but not yet consumed.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/SettingsModal.tsx
+git commit -m "feat: add mock placeholder themes for carousel prototyping"
+```
+
+---
+
+## Chunk 2: Carousel Components
+
+### Task 4: Build FoldedCardContent component
+
+**Files:**
+
+- Modify: `src/SettingsModal.tsx` (add component above ThemeSwitcherSection)
+
+- [ ] **Step 1: Add FoldedCardContent**
+
+Place above the existing `ThemeSwitcherSection`:
+
+```typescript
 const SIDE_PANEL_WIDTH = 52;
 const CARD_HEIGHT = 180;
 
@@ -235,7 +351,36 @@ const FoldedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
     </div>
   );
 };
+```
 
+- [ ] **Step 2: Verify build**
+
+```bash
+npm run build
+```
+
+Expected: Clean build. Component defined but not yet rendered.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/SettingsModal.tsx
+git commit -m "feat: add FoldedCardContent component for collapsed theme cards"
+```
+
+---
+
+### Task 5: Build ExpandedCardContent component
+
+**Files:**
+
+- Modify: `src/SettingsModal.tsx` (add component below FoldedCardContent)
+
+- [ ] **Step 1: Extract ExpandedCardContent from existing ThemeSwitcherSection card**
+
+This extracts the existing card internals into a standalone component. Place below FoldedCardContent:
+
+```typescript
 const ExpandedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
   const Logo = t.branding.logo;
   const spaceIdx = t.name.indexOf(' ');
@@ -317,7 +462,34 @@ const ExpandedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
     </div>
   );
 };
+```
 
+- [ ] **Step 2: Verify build**
+
+```bash
+npm run build
+```
+
+Expected: Clean build.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/SettingsModal.tsx
+git commit -m "feat: add ExpandedCardContent component for theme carousel"
+```
+
+---
+
+### Task 6: Build ArrowButton component
+
+**Files:**
+
+- Modify: `src/SettingsModal.tsx` (add component below ExpandedCardContent)
+
+- [ ] **Step 1: Add ArrowButton**
+
+```typescript
 const ArrowButton = ({
   direction,
   onClick,
@@ -339,9 +511,51 @@ const ArrowButton = ({
     )}
   </button>
 );
+```
 
+- [ ] **Step 2: Verify build**
+
+```bash
+npm run build
+```
+
+Expected: Clean build.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/SettingsModal.tsx
+git commit -m "feat: add ArrowButton component for carousel navigation"
+```
+
+---
+
+## Chunk 3: Carousel Assembly
+
+### Task 7: Rewrite ThemeSwitcherSection with carousel logic
+
+**Files:**
+
+- Modify: `src/SettingsModal.tsx:84-216` (replace entire ThemeSwitcherSection)
+
+This is the core task. Replace the existing `ThemeSwitcherSection` with the carousel version.
+
+- [ ] **Step 0: Update React import**
+
+The existing import (line 1) needs `useMemo` added:
+
+```typescript
+import { useState, useEffect, useRef, useMemo } from 'react';
+```
+
+- [ ] **Step 1: Replace ThemeSwitcherSection**
+
+Delete lines 84-216 (the existing `ThemeSwitcherSection`) and replace with:
+
+```typescript
 const EXPANDED_WIDTH = 175;
-const CAROUSEL_GAP = 4; // gap-1
+const FOLDED_COUNT_MOBILE = 2;
+const FOLDED_COUNT_DESKTOP = 3;
 
 const ThemeSwitcherSection = ({
   onCloseThemeLab,
@@ -352,45 +566,24 @@ const ThemeSwitcherSection = ({
   const selectableThemes = getSelectableThemes();
 
   // Build carousel items: real themes first, then mocks
-  // selectableThemes is a stable registry snapshot (constant across renders)
-  const carouselThemes = useMemo<CarouselTheme[]>(
-    () => [...selectableThemes.map(toCarouselTheme), ...MOCK_THEMES],
-    // selectableThemes is a module-level constant — length guards against future dynamic themes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectableThemes.length],
-  );
+  const carouselThemes: CarouselTheme[] = [
+    ...selectableThemes.map(toCarouselTheme),
+    ...MOCK_THEMES,
+  ];
 
   const [expandedId, setExpandedId] = useState(themeId);
 
-  // Measure cards container and compute optimal layout
-  const cardsRef = useRef<HTMLDivElement>(null);
-  const [cardsWidth, setCardsWidth] = useState(0);
+  // Responsive: 2 folded on mobile, 3 on desktop
+  const [foldedCount, setFoldedCount] = useState(FOLDED_COUNT_MOBILE);
   useEffect(() => {
-    const el = cardsRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      setCardsWidth(Math.floor(entry.contentBoxSize[0].inlineSize));
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
+    const mq = window.matchMedia('(min-width: 640px)');
+    const update = () => setFoldedCount(mq.matches ? FOLDED_COUNT_DESKTOP : FOLDED_COUNT_MOBILE);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
   }, []);
 
-  // Layout: maximize expanded cards, but always keep at least 1 folded visible.
-  // Try N expanded + 1 folded (descending N), fill leftover with extra folded.
-  const { windowSize, expandedCount } = useMemo(() => {
-    if (cardsWidth === 0) return { windowSize: 3, expandedCount: 1 };
-
-    const E = EXPANDED_WIDTH, F = SIDE_PANEL_WIDTH, G = CAROUSEL_GAP;
-    for (let exp = carouselThemes.length - 1; exp >= 1; exp--) {
-      const needed = exp * E + F + exp * G; // N expanded + 1 folded + N gaps
-      if (needed > cardsWidth) continue;
-      const extra = Math.floor((cardsWidth - needed) / (F + G));
-      const total = Math.min(exp + 1 + extra, carouselThemes.length);
-      return { windowSize: total, expandedCount: Math.min(exp, total - 1) };
-    }
-    return { windowSize: 2, expandedCount: 1 };
-  }, [cardsWidth, carouselThemes.length]);
-
+  const windowSize = 1 + foldedCount;
   const maxStart = Math.max(0, carouselThemes.length - windowSize);
   const [startIndex, setStartIndex] = useState(() => {
     // Start with the active theme visible
@@ -408,9 +601,9 @@ const ThemeSwitcherSection = ({
   };
 
   // Memoize visible themes to avoid re-creating array on every render
-  const visibleThemes = useMemo(
-    () => carouselThemes.slice(startIndex, startIndex + windowSize),
-    [carouselThemes, startIndex, windowSize],
+  const visibleThemes = useMemo(() =>
+    carouselThemes.slice(startIndex, startIndex + windowSize),
+    [startIndex, windowSize, carouselThemes.length]
   );
 
   const handleCardClick = (id: string) => {
@@ -441,18 +634,15 @@ const ThemeSwitcherSection = ({
         Theme
       </h3>
       <div
-        className="flex items-stretch gap-1"
+        className="flex items-stretch gap-1.5"
         role="group"
         aria-label="Theme switcher"
       >
         <ArrowButton direction="left" onClick={() => advance(-1)} />
 
-        <div ref={cardsRef} className="flex-1 flex gap-1 min-w-0 overflow-hidden">
-          {visibleThemes.map((t, idx) => {
-            // Selected card always expanded; fill remaining expanded slots from the left
-            const selectedIdx = visibleThemes.findIndex((vt) => vt.id === expandedId);
-            const expandStart = Math.max(0, Math.min(selectedIdx, visibleThemes.length - expandedCount));
-            const isExpanded = idx >= expandStart && idx < expandStart + expandedCount;
+        <div className="flex gap-1.5 min-w-0">
+          {visibleThemes.map((t) => {
+            const isExpanded = t.id === expandedId;
             const isActive = t.id === themeId;
 
             return (
@@ -461,7 +651,7 @@ const ThemeSwitcherSection = ({
                 layout
                 transition={springTransition}
                 onClick={() => handleCardClick(t.id)}
-                className={`relative rounded-xl border-2 cursor-pointer ${
+                className={`relative rounded-xl border-2 cursor-pointer shrink-0 ${
                   isActive ? '' : 'border-white/10 hover:border-white/25'
                 }`}
                 style={{
@@ -546,238 +736,143 @@ const ThemeSwitcherSection = ({
     </section>
   );
 };
+```
 
-const ChangelogSection = () => {
-  const [expanded, setExpanded] = useState(false);
-  const recent = CHANGELOG_ENTRIES.slice(0, 3);
-  const [latest, ...older] = recent;
+- [ ] **Step 2: Remove unused imports if any**
 
-  return (
-    <section>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[11px] font-black uppercase tracking-widest text-content-secondary">
-          Changelog
-        </h3>
-        <span className="text-[11px] font-bold text-content-subtle">
-          v{APP_VERSION}
-        </span>
-      </div>
-      <div className="space-y-4">
-        {latest && <ChangelogEntryBlock entry={latest} />}
-        {older.length > 0 && (
-          <>
-            {expanded && older.map((entry) => (
-              <ChangelogEntryBlock key={entry.version} entry={entry} />
-            ))}
-            <button
-              type="button"
-              onClick={() => setExpanded(!expanded)}
-              className="flex items-center gap-1 text-[11px] font-semibold text-content-subtle hover:text-content-secondary transition-colors"
-            >
-              <ChevronDown size={12} className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
-              {expanded ? 'Show less' : `${older.length} older release${older.length > 1 ? 's' : ''}`}
-            </button>
-          </>
-        )}
-      </div>
-    </section>
-  );
-};
+Check that `resolveTheme` import is still needed (used by the removed old ThemeSwitcherSection). If only used there, remove it from the import line:
 
-const ChangelogEntryBlock = ({ entry }: { entry: { version: string; date: string; title: string; items: string[] } }) => (
-  <div>
-    <div className="flex items-baseline gap-2 mb-1">
-      <span className="text-xs font-bold text-content-secondary">v{entry.version}</span>
-      <span className="text-[10px] text-content-subtle">{entry.date}</span>
-    </div>
-    <p className="text-xs font-semibold text-content-secondary mb-1">{entry.title}</p>
-    <ul className="space-y-0.5">
-      {entry.items.map((item, i) => (
-        <li key={i} className="text-[11px] text-content-secondary pl-3 relative before:content-['·'] before:absolute before:left-0 before:text-content-secondary">
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>
-);
+```typescript
+// Before:
+import { getSelectableThemes, resolveTheme } from './themes/index';
+// After (if resolveTheme is no longer used):
+import { getSelectableThemes } from './themes/index';
+```
 
-export const SettingsModal = ({
-  isOpen,
-  onClose,
-  onOpenThemeLab,
-  onCloseThemeLab,
-  showFab,
-  onToggleFab,
-}: SettingsModalProps) => {
-  const { theme } = useTheme();
-  const isThemeLabLocked = theme.editor.kind === 'locked';
-  const modalRef = useRef<HTMLDivElement>(null);
+- [ ] **Step 3: Verify build**
 
-  // Focus trap, Escape key, and body scroll lock
-  useEffect(() => {
-    if (!isOpen) return;
+```bash
+npm run build
+```
 
-    document.body.style.overflow = 'hidden';
+Expected: Clean build.
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-      if (e.key === 'Tab' && modalRef.current) {
-        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
+- [ ] **Step 4: Verify lint**
 
-    window.addEventListener('keydown', handleKeyDown);
-    modalRef.current?.focus();
+```bash
+npm run lint
+```
 
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+Expected: Zero warnings.
 
-  useEffect(() => {
-    if (isThemeLabLocked && showFab) {
-      onToggleFab(false);
-    }
-  }, [isThemeLabLocked, onToggleFab, showFab]);
+- [ ] **Step 5: Visual check**
 
-  if (!isOpen) return null;
+Open the dev server (`npm run dev`), open Settings modal, verify:
+- Cyprus card is expanded by default
+- 3 mock cards appear folded
+- Clicking a folded card expands it with animation
+- Arrow buttons cycle through themes
+- Active theme has brand border/glow
 
-  // Close modal first, then open Theme Lab on the next frame so it
-  // doesn't render behind the still-mounted modal backdrop.
-  const handleOpenThemeLab = () => {
-    if (isThemeLabLocked) return;
-    onClose();
-    requestAnimationFrame(() => onOpenThemeLab());
-  };
+- [ ] **Step 6: Commit**
 
-  return (
-    <div
-      className="fixed inset-0 z-[9990] flex items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Settings"
-    >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-surface-overlay backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      {/* Modal */}
-      <div
-        ref={modalRef}
-        tabIndex={-1}
-        className="relative z-10 w-full max-w-lg mx-4 max-h-[85vh] flex flex-col bg-surface-glass border border-white/10 rounded-2xl shadow-2xl outline-none
-          max-sm:fixed max-sm:inset-0 max-sm:max-w-none max-sm:mx-0 max-sm:max-h-none max-sm:rounded-none"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 flex-shrink-0">
-          <h2 className="text-lg font-display font-bold text-content-primary">Settings</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close settings"
-            className="p-1.5 rounded-lg text-content-subtle hover:text-content-primary hover:bg-white/10 transition-colors"
-          >
-            <X size={18} />
-          </button>
-        </div>
+```bash
+git add src/SettingsModal.tsx
+git commit -m "feat: implement theme switcher carousel with accordion animation"
+```
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-8">
-          {/* Theme Switcher Section */}
-          <ThemeSwitcherSection onCloseThemeLab={onCloseThemeLab} />
+---
 
-          {/* Theme Lab Section */}
-          <section>
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-[11px] font-black uppercase tracking-widest text-content-secondary">
-                Theme Lab
-              </h3>
-              <span
-                className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                // Intentional: Theme Lab is fully user-driven; no hardcoded contrast guardrails for brand surfaces.
-                style={{ backgroundColor: theme.colors.brand, color: theme.colors.textPrimary }}
-              >
-                Beta
-              </span>
-            </div>
-            <p className="text-sm text-content-secondary mb-4">
-              Customize colors, fonts, and branding with{' '}
-              <span className="whitespace-nowrap">a live preview.</span>
-            </p>
-            <button
-              type="button"
-              onClick={handleOpenThemeLab}
-              disabled={isThemeLabLocked}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
-              // Intentional: contrast is controlled by theme token choices (brand/textPrimary), not forced logic.
-              style={{ backgroundColor: theme.colors.brand, color: theme.colors.textPrimary, opacity: isThemeLabLocked ? 0.45 : 1 }}
-            >
-              <Palette size={16} />
-              Open Theme Lab
-            </button>
-            {isThemeLabLocked && (
-              <p className="mt-2 text-[11px] text-amber-300/90">This theme is brand locked and cannot be edited in Theme Lab.</p>
-            )}
-            <label className={`flex items-center gap-3 mt-3 select-none ${isThemeLabLocked ? 'cursor-not-allowed opacity-65' : 'cursor-pointer'}`}>
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={showFab}
-                  onChange={(e) => onToggleFab(e.target.checked)}
-                  disabled={isThemeLabLocked}
-                  className="sr-only peer"
-                />
-                <div className={`w-9 h-5 rounded-full transition-colors ${isThemeLabLocked ? 'bg-white/10' : 'bg-white/15 peer-checked:bg-accent-brand'}`} />
-                <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform peer-checked:translate-x-4 ${isThemeLabLocked ? 'bg-white/70' : 'bg-white'}`} />
-              </div>
-              <div>
-                <span className="text-sm font-semibold text-content-secondary">
-                  Show floating button
-                </span>
-                <span className="block text-[11px] text-content-subtle">
-                  {isThemeLabLocked ? 'Unavailable for locked themes' : 'Quick access while editing'}
-                </span>
-              </div>
-            </label>
-          </section>
+### Task 8: Run existing tests
 
-          {/* Changelog Section */}
-          <ChangelogSection />
+**Files:**
 
-          {/* Welcome Tour Section (stub) */}
-          <section className="flex flex-col items-center">
-            <h3 className="text-[11px] font-black uppercase tracking-widest text-content-subtle mb-2 self-start">
-              Welcome Tour
-            </h3>
-            <button
-              type="button"
-              disabled
-              className="px-4 py-2 rounded-xl text-sm font-bold text-content-subtle/50 bg-white/5 border border-white/5 cursor-not-allowed"
-            >
-              Replay Tour
-            </button>
-            <span className="text-[11px] text-content-subtle/50 mt-1">Coming soon</span>
-          </section>
-        </div>
-      </div>
-    </div>
-  );
-};
+- None modified; verification only
+
+- [ ] **Step 1: Run full test suite**
+
+```bash
+npm run test
+```
+
+Expected: All 131 tests pass. The carousel is a UI component with no business logic tests to break, but verify nothing regressed.
+
+- [ ] **Step 2: Run full build pipeline**
+
+```bash
+npm run build && npm run lint
+```
+
+Expected: Clean build, zero lint warnings.
+
+---
+
+## Chunk 4: Polish and Responsive Tuning
+
+### Task 9: Test responsive behavior
+
+**Files:**
+
+- Modify: `src/SettingsModal.tsx` (if adjustments needed)
+
+- [ ] **Step 1: Test mobile viewport (< 640px)**
+
+Open dev tools, resize to 375px width. Verify:
+- 1 expanded + 2 folded cards visible
+- Arrow buttons visible and functional
+- Carousel fits within modal without horizontal overflow
+- Cards don't overlap or clip
+
+- [ ] **Step 2: Test desktop viewport (>= 640px)**
+
+Resize to 768px+ width. Verify:
+- 1 expanded + 3 folded cards visible
+- Arrow buttons visible and functional
+
+- [ ] **Step 3: Test narrow viewport (320px)**
+
+Resize to 320px (iPhone SE). Verify:
+- Carousel scales down or remains usable
+- No horizontal overflow or broken layout
+
+- [ ] **Step 4: Adjust sizes if needed**
+
+If cards overflow on narrow viewports, adjust `EXPANDED_WIDTH`, `SIDE_PANEL_WIDTH`, or gap values. These are constants at the top of the component, easy to tune.
+
+- [ ] **Step 5: Commit any adjustments**
+
+```bash
+git add src/SettingsModal.tsx
+git commit -m "fix: tune carousel sizing for narrow viewports"
+```
+
+(Skip this step if no adjustments were needed.)
+
+---
+
+### Task 10: Final verification and cleanup
+
+- [ ] **Step 1: Full build pipeline**
+
+```bash
+npm run build && npm run lint && npm run test
+```
+
+Expected: All clean.
+
+- [ ] **Step 2: Visual smoke test**
+
+- Open Settings modal on desktop
+- Click through all theme cards (expand/fold transitions)
+- Click arrows to cycle past visible window
+- Verify wrap-around works (right arrow at end goes to start)
+- Verify active theme indicator (brand border) stays on Cyprus regardless of which card is expanded
+- Verify mock cards show "Soon" badge
+- Close and reopen Settings — expanded card should default to active theme
+
+- [ ] **Step 3: Commit if any final cleanup**
+
+```bash
+git add -A
+git commit -m "chore: theme switcher carousel polish and cleanup"
+```
