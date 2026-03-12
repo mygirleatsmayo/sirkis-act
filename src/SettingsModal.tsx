@@ -183,7 +183,7 @@ const ThemeCardChart = ({ colors }: { colors: { returns: string; brand: string; 
   </svg>
 );
 
-const SIDE_PANEL_WIDTH = 52;
+const SIDE_PANEL_WIDTH = 48;
 const CARD_HEIGHT = 180;
 
 const FoldedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
@@ -321,15 +321,22 @@ const ExpandedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
 const ArrowButton = ({
   direction,
   onClick,
+  disabled,
 }: {
   direction: 'left' | 'right';
   onClick: () => void;
+  disabled?: boolean;
 }) => (
   <button
     type="button"
     onClick={onClick}
+    disabled={disabled}
     aria-label={direction === 'left' ? 'Previous theme' : 'Next theme'}
-    className="shrink-0 flex items-center justify-center rounded-lg border border-white/10 hover:border-white/25 hover:bg-white/5 transition-colors"
+    className={`shrink-0 flex items-center justify-center rounded-lg border transition-colors ${
+      disabled
+        ? 'border-white/5 opacity-30 cursor-default'
+        : 'border-white/10 hover:border-white/25 hover:bg-white/5'
+    }`}
     style={{ width: 28, height: CARD_HEIGHT }}
   >
     {direction === 'left' ? (
@@ -375,18 +382,26 @@ const ThemeSwitcherSection = ({
     return () => ro.disconnect();
   }, []);
 
-  // Layout: maximize expanded cards, but always keep at least 1 folded visible.
-  // Try N expanded + 1 folded (descending N), fill leftover with extra folded.
+  // Layout: expanded cards flex-grow to fill remaining space (capped at EXPANDED_WIDTH).
+  // Start with max folded cards that fit, then shed folded until expanded cards get MIN_EXPANDED.
   const { windowSize, expandedCount } = useMemo(() => {
     if (cardsWidth === 0) return { windowSize: 3, expandedCount: 1 };
 
-    const E = EXPANDED_WIDTH, F = SIDE_PANEL_WIDTH, G = CAROUSEL_GAP;
-    for (let exp = carouselThemes.length - 1; exp >= 1; exp--) {
-      const needed = exp * E + F + exp * G; // N expanded + 1 folded + N gaps
-      if (needed > cardsWidth) continue;
-      const extra = Math.floor((cardsWidth - needed) / (F + G));
-      const total = Math.min(exp + 1 + extra, carouselThemes.length);
-      return { windowSize: total, expandedCount: Math.min(exp, total - 1) };
+    const F = SIDE_PANEL_WIDTH, G = CAROUSEL_GAP;
+    const MIN_EXP = 160; // side panel (48) + usable content area
+
+    // How many folded cards fit if all were folded?
+    const maxSlots = Math.min(
+      Math.max(2, Math.floor((cardsWidth + G) / (F + G))),
+      carouselThemes.length,
+    );
+
+    // Try total = maxSlots down to 2: always 1 expanded, rest folded.
+    // Accept the first total where expanded card gets at least MIN_EXP.
+    for (let total = maxSlots; total >= 2; total--) {
+      const folded = total - 1;
+      const expandedWidth = cardsWidth - folded * F - (total - 1) * G;
+      if (expandedWidth >= MIN_EXP) return { windowSize: total, expandedCount: 1 };
     }
     return { windowSize: 2, expandedCount: 1 };
   }, [cardsWidth, carouselThemes.length]);
@@ -399,13 +414,11 @@ const ThemeSwitcherSection = ({
   });
 
   const advance = (delta: number) => {
-    setStartIndex((prev) => {
-      const next = prev + delta;
-      if (next < 0) return maxStart;
-      if (next > maxStart) return 0;
-      return next;
-    });
+    setStartIndex((prev) => Math.max(0, Math.min(prev + delta, maxStart)));
   };
+
+  const atStart = startIndex === 0;
+  const atEnd = startIndex >= maxStart;
 
   // Memoize visible themes to avoid re-creating array on every render
   const visibleThemes = useMemo(
@@ -445,7 +458,7 @@ const ThemeSwitcherSection = ({
         role="group"
         aria-label="Theme switcher"
       >
-        <ArrowButton direction="left" onClick={() => advance(-1)} />
+        <ArrowButton direction="left" onClick={() => advance(-1)} disabled={atStart} />
 
         <div ref={cardsRef} className="flex-1 flex gap-1 min-w-0 overflow-hidden">
           {visibleThemes.map((t, idx) => {
@@ -461,15 +474,13 @@ const ThemeSwitcherSection = ({
                 layout
                 transition={springTransition}
                 onClick={() => handleCardClick(t.id)}
-                className={`relative rounded-xl border-2 cursor-pointer ${
-                  isActive ? '' : 'border-white/10 hover:border-white/25'
-                }`}
+                className="relative rounded-xl cursor-pointer"
                 style={{
-                  width: isExpanded ? EXPANDED_WIDTH : SIDE_PANEL_WIDTH,
+                  ...(isExpanded
+                    ? { flex: '1 1 0%', maxWidth: EXPANDED_WIDTH, minWidth: SIDE_PANEL_WIDTH }
+                    : { width: SIDE_PANEL_WIDTH, flexShrink: 0 }),
                   height: CARD_HEIGHT,
                   backgroundColor: t.colors.bg,
-                  borderColor: isActive ? activeTheme.colors.brand : undefined,
-                  boxShadow: isActive ? `0 0 0 2px ${activeTheme.colors.brand}` : undefined,
                 }}
                 role="button"
                 tabIndex={0}
@@ -497,7 +508,7 @@ const ThemeSwitcherSection = ({
                   }
                 }}
               >
-                {/* Inner wrapper — overflow-hidden here, not on outer motion.div, to preserve border/shadow */}
+                {/* Inner wrapper — overflow-hidden here, not on outer motion.div, to preserve boxShadow */}
                 <div className="rounded-xl overflow-hidden h-full">
                   <AnimatePresence mode="wait">
                     {isExpanded ? (
@@ -536,12 +547,22 @@ const ThemeSwitcherSection = ({
                     </span>
                   </div>
                 )}
+
+                {/* Selection ring — overlay so child backgrounds can't cover it */}
+                <div
+                  className="absolute inset-0 rounded-xl pointer-events-none"
+                  style={{
+                    boxShadow: isActive
+                      ? `inset 0 0 0 2px ${activeTheme.colors.brand}`
+                      : 'inset 0 0 0 1px rgba(255,255,255,0.1)',
+                  }}
+                />
               </motion.div>
             );
           })}
         </div>
 
-        <ArrowButton direction="right" onClick={() => advance(1)} />
+        <ArrowButton direction="right" onClick={() => advance(1)} disabled={atEnd} />
       </div>
     </section>
   );
