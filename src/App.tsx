@@ -612,6 +612,40 @@ const BLOB_POSITIONS: Record<string, string> = {
 };
 const DISCLOSURE_COPY = 'The information provided on this website is for educational purposes only and should not be construed as investment or financial advice.';
 
+/** Compute evenly-spaced y-axis tick values based on magnitude. */
+const getNiceTicks = (maxVal: number, targetIntervals = 4): number[] => {
+  if (maxVal <= 0) return Array.from({ length: targetIntervals + 1 }, (_, i) => i);
+  let topTick: number;
+
+  if (maxVal >= 1_000_000 && maxVal <= 20_000_000) {
+    if (maxVal < 5_000_000) {
+      // Top ticks < 5M can use up to one decimal place ending in 5
+      topTick = Math.ceil((maxVal * 2) / 1_000_000) / 2 * 1_000_000;
+    } else {
+      // Top tick is the next integer million
+      topTick = Math.ceil(maxVal / 1_000_000) * 1_000_000;
+    }
+  } else {
+    // For values > 20M or < 1M, intervals are strictly powers of 10 * (1, 2, 5)
+    const rawStep = maxVal / targetIntervals;
+    const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+    const norm = rawStep / mag;
+    let niceNorm: number;
+    if (norm <= 1) niceNorm = 1;
+    else if (norm <= 2) niceNorm = 2;
+    else if (norm <= 5) niceNorm = 5;
+    else niceNorm = 10;
+    topTick = niceNorm * mag * targetIntervals;
+  }
+
+  const step = topTick / targetIntervals;
+  const ticks: number[] = [];
+  for (let i = 0; i <= targetIntervals; i++) {
+    ticks.push(i * step); // Keep decimals if any
+  }
+  return ticks;
+};
+
 const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
   const { theme } = useTheme();
   const capabilities = theme.capabilities;
@@ -744,6 +778,15 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
     };
   }, [inputs]);
   const isDelayed = inputs.startAge > inputs.currentAge;
+  const yTicks = useMemo(() => {
+    const yMax = Math.max(...chartData.map(d => {
+      const stacked = d['Total Nominal'];
+      if (!showImmediateLine || !isDelayed) return stacked;
+      const imm = (d as Record<string, unknown>)['Immediate Total Nominal'];
+      return Math.max(stacked, typeof imm === 'number' ? imm : 0);
+    }));
+    return getNiceTicks(yMax);
+  }, [chartData, showImmediateLine, isDelayed]);
   const nominalAtRetirement = finalData ? finalData['Total Nominal'] : 0;
   const startWithdrawAge = inputs.retirementAge + 1;
   const withdrawalYears = Math.max(1, inputs.lifeExpectancy - startWithdrawAge + 1);
@@ -1105,10 +1148,17 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: theme.colors.textSubtle, fontSize: isNarrowScreen ? 10 : 12, fontWeight: 600 }}
+                        domain={[0, yTicks[yTicks.length - 1]]}
+                        ticks={yTicks}
                         tickFormatter={(val) => {
                           const numericVal = typeof val === 'number' ? val : Number(val);
-                          if (Math.abs(numericVal) >= 1_000_000) return `$${(numericVal / 1_000_000).toFixed(numericVal % 1_000_000 === 0 ? 0 : 1)}M`;
-                          return `$${(numericVal / 1000).toFixed(0)}k`;
+                          if (numericVal === 0) return '$0';
+                          if (Math.abs(numericVal) >= 1_000_000) {
+                            const inM = numericVal / 1_000_000;
+                            return `$${Number.parseFloat(inM.toFixed(3))}M`;
+                          }
+                          if (Math.abs(numericVal) < 1000) return `$${numericVal}`;
+                          return `$${Number.parseFloat((numericVal / 1000).toFixed(1))}k`;
                         }}
                       />
                       <Tooltip
