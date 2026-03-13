@@ -5,6 +5,7 @@
 
 - **Starting Balances**: Added inputs to seamlessly seed existing account balances for 401(k), Roth IRA, and HSA projections compounding from year one.
 - **Dynamic Y-Axis Scaling**: Enhanced chart scale logic to calculate perfect visual intervals (supporting decimals like $3.375M) and removed premature curve compression on hidden start-now overlays.
+- **Theme Switcher Carousel**: Accordion-style theme preview carousel in Settings with expanded/folded cards, arrow navigation, responsive layout, and motion animations.
 
 ---
 
