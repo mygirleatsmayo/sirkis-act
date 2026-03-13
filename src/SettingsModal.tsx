@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { X, Palette, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useTheme } from './themes/useTheme';
 import { CHANGELOG_ENTRIES } from './changelog';
 import { getSelectableThemes } from './themes/index';
-import type { LogoComponent, ThemeConfig, ThemeFonts } from './themes/types';
+import type { LogoComponent, ThemeColors, ThemeConfig, ThemeFonts } from './themes/types';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -21,18 +21,10 @@ const APP_VERSION = CHANGELOG_ENTRIES[0]?.version ?? '0.0.0';
 interface CarouselTheme {
   id: string;
   name: string;
+  nameLine1: string;
+  nameLine2: string;
   isMock: boolean;
-  colors: {
-    bg: string;
-    bgGlass: string;
-    brand: string;
-    returns: string;
-    loss: string;
-    opm: string;
-    textNeutral: string;
-    textPrimary: string;
-    textSecondary: string;
-  };
+  colors: Pick<ThemeColors, 'bg' | 'bgGlass' | 'brand' | 'returns' | 'loss' | 'opm' | 'textNeutral' | 'textPrimary' | 'textSecondary'>;
   branding: {
     logo: LogoComponent;
     logoColor: string;
@@ -43,9 +35,15 @@ interface CarouselTheme {
   fonts: ThemeFonts;
 }
 
+const splitName = (name: string) => {
+  const i = name.indexOf(' ');
+  return { nameLine1: i > 0 ? name.slice(0, i) : name, nameLine2: i > 0 ? name.slice(i + 1) : '' };
+};
+
 const toCarouselTheme = (t: ThemeConfig): CarouselTheme => ({
   id: t.id,
   name: t.name,
+  ...splitName(t.name),
   isMock: false,
   colors: {
     bg: t.colors.bg,
@@ -100,6 +98,7 @@ const MOCK_THEMES: CarouselTheme[] = [
   {
     id: 'mock-feral-filly',
     name: 'Feral Filly',
+    ...splitName('Feral Filly'),
     isMock: true,
     colors: {
       bg: '#1E1E2E',
@@ -124,6 +123,7 @@ const MOCK_THEMES: CarouselTheme[] = [
   {
     id: 'mock-overheated-rhizome',
     name: 'Overheated Rhizome',
+    ...splitName('Overheated Rhizome'),
     isMock: true,
     colors: {
       bg: '#1A1008',
@@ -148,6 +148,7 @@ const MOCK_THEMES: CarouselTheme[] = [
   {
     id: 'mock-eighth-wonder',
     name: 'Eighth Wonder',
+    ...splitName('Eighth Wonder'),
     isMock: true,
     colors: {
       bg: '#0A1628',
@@ -188,38 +189,40 @@ const CARD_HEIGHT = 180;
 
 const FoldedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
   const Logo = t.branding.logo;
-  const spaceIdx = t.name.indexOf(' ');
-  const initial1 = t.name[0] ?? '';
-  const initial2 = spaceIdx > 0 ? t.name[spaceIdx + 1] ?? '' : '';
+  const initial1 = t.nameLine1[0] ?? '';
+  const initial2 = t.nameLine2[0] ?? '';
 
   return (
-    <div className="flex flex-col h-full">
+    <motion.div layout="position" className="flex flex-col h-full">
       {/* Logo zone — bgGlass */}
-      <div
+      <motion.div
+        layout="position"
         className="flex items-center justify-center py-2 shrink-0"
         style={{ backgroundColor: t.colors.bgGlass }}
       >
-        <div style={{ color: t.branding.logoColor }}>
+        <motion.div layout="position" style={{ color: t.branding.logoColor }}>
           <Logo className="h-[24px] w-auto" />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
       {/* Initials + swatches — bg */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-1.5">
-        <div
+      <motion.div layout="position" className="flex-1 flex flex-col items-center justify-center gap-1.5">
+        <motion.div
+          layout="position"
           className="font-display font-bold text-[18px] leading-none"
           style={{ color: t.branding.heroLine1Color }}
         >
           {initial1}
-        </div>
+        </motion.div>
         {initial2 && (
-          <div
+          <motion.div
+            layout="position"
             className="font-display font-bold text-[18px] leading-none"
             style={{ color: t.branding.heroLine2Color }}
           >
             {initial2}
-          </div>
+          </motion.div>
         )}
-        <div className="flex flex-col gap-[5px] mt-1">
+        <motion.div layout="position" className="flex flex-col gap-[5px] mt-1">
           {CIRCLE_KEYS.map((key) => (
             <div
               key={key}
@@ -230,30 +233,28 @@ const FoldedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
               }}
             />
           ))}
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
 const ExpandedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
   const Logo = t.branding.logo;
-  const spaceIdx = t.name.indexOf(' ');
-  const nameLine1 = spaceIdx > 0 ? t.name.slice(0, spaceIdx) : t.name;
-  const nameLine2 = spaceIdx > 0 ? t.name.slice(spaceIdx + 1) : '';
 
   return (
-    <div className="flex h-full">
+    <motion.div layout="position" className="flex h-full">
       {/* Glass side panel — fixed width */}
-      <div
+      <motion.div
+        layout="position"
         className="flex flex-col items-center pt-2.5 pb-2.5 shrink-0"
         style={{ width: SIDE_PANEL_WIDTH, backgroundColor: t.colors.bgGlass }}
       >
-        <div style={{ color: t.branding.logoColor }}>
+        <motion.div layout="position" style={{ color: t.branding.logoColor }}>
           <Logo className="h-[36px] w-auto" />
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col gap-[7px]">
+        </motion.div>
+        <motion.div layout="position" className="flex-1 flex items-center justify-center">
+          <motion.div layout="position" className="flex flex-col gap-[7px]">
             {CIRCLE_KEYS.map((key) => (
               <div
                 key={key}
@@ -264,46 +265,51 @@ const ExpandedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
                 }}
               />
             ))}
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
 
       {/* Content area */}
-      <div className="flex-1 flex flex-col p-2.5 min-w-0">
-        <div>
-          <div
+      <motion.div layout="position" className="flex-1 flex flex-col p-2.5 min-w-0">
+        <motion.div layout="position">
+          <motion.div
+            layout="position"
             className="font-display font-bold text-[16px] leading-none"
             style={{ color: t.branding.heroLine1Color }}
           >
-            {nameLine1}
-          </div>
-          {nameLine2 && (
-            <div
+            {t.nameLine1}
+          </motion.div>
+          {t.nameLine2 && (
+            <motion.div
+              layout="position"
               className="font-display font-bold text-[16px] leading-none mt-[4px]"
               style={{ color: t.branding.heroLine2Color }}
             >
-              {nameLine2}
-            </div>
+              {t.nameLine2}
+            </motion.div>
           )}
-        </div>
+        </motion.div>
 
         {t.branding.cardFlavor && (
-          <div
+          <motion.div
+            layout="position"
             className="text-[10px] font-sans leading-none mt-[10px]"
             style={{ color: t.colors.textSecondary }}
           >
             {t.branding.cardFlavor}
-          </div>
+          </motion.div>
         )}
 
-        <div
+        <motion.div
+          layout="position"
           className="flex-1 flex items-center px-2 mt-2 rounded-lg min-h-[40px]"
           style={{ backgroundColor: t.colors.bgGlass }}
         >
           <ThemeCardChart colors={t.colors} />
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
+          layout="position"
           className="text-[12px] font-bold text-center mt-1.5"
           style={{
             color: t.colors.textPrimary,
@@ -312,9 +318,9 @@ const ExpandedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
           }}
         >
           $1,618,033
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -349,6 +355,7 @@ const ArrowButton = ({
 
 const EXPANDED_WIDTH = 175;
 const CAROUSEL_GAP = 4; // gap-1
+const SPRING_TRANSITION = { type: 'spring' as const, stiffness: 400, damping: 40 };
 
 const ThemeSwitcherSection = ({
   onCloseThemeLab,
@@ -359,10 +366,9 @@ const ThemeSwitcherSection = ({
   const selectableThemes = getSelectableThemes();
 
   // Build carousel items: real themes first, then mocks
-  // selectableThemes is a stable registry snapshot (constant across renders)
+  // getSelectableThemes() allocates a new array each call; memoize by length
   const carouselThemes = useMemo<CarouselTheme[]>(
     () => [...selectableThemes.map(toCarouselTheme), ...MOCK_THEMES],
-    // selectableThemes is a module-level constant — length guards against future dynamic themes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectableThemes.length],
   );
@@ -438,6 +444,11 @@ const ThemeSwitcherSection = ({
     }
   };
 
+  // Clamp startIndex when maxStart shrinks (e.g., after resize)
+  useEffect(() => {
+    setStartIndex((prev) => Math.min(prev, maxStart));
+  }, [maxStart]);
+
   // If expanded card scrolls out of view, auto-expand first visible
   useEffect(() => {
     const isVisible = visibleThemes.some((t) => t.id === expandedId);
@@ -446,7 +457,9 @@ const ThemeSwitcherSection = ({
     }
   }, [startIndex, expandedId, visibleThemes]);
 
-  const springTransition = { type: 'spring' as const, stiffness: 400, damping: 40 };
+  // Which slots are expanded — computed once, not per card
+  const selectedIdx = visibleThemes.findIndex((vt) => vt.id === expandedId);
+  const expandStart = Math.max(0, Math.min(selectedIdx, visibleThemes.length - expandedCount));
 
   return (
     <section>
@@ -462,9 +475,6 @@ const ThemeSwitcherSection = ({
 
         <div ref={cardsRef} className="flex-1 flex gap-1 min-w-0 overflow-hidden">
           {visibleThemes.map((t, idx) => {
-            // Selected card always expanded; fill remaining expanded slots from the left
-            const selectedIdx = visibleThemes.findIndex((vt) => vt.id === expandedId);
-            const expandStart = Math.max(0, Math.min(selectedIdx, visibleThemes.length - expandedCount));
             const isExpanded = idx >= expandStart && idx < expandStart + expandedCount;
             const isActive = t.id === themeId;
 
@@ -472,7 +482,7 @@ const ThemeSwitcherSection = ({
               <motion.div
                 key={t.id}
                 layout
-                transition={springTransition}
+                transition={SPRING_TRANSITION}
                 onClick={() => handleCardClick(t.id)}
                 className="relative rounded-xl cursor-pointer"
                 style={{
@@ -508,34 +518,26 @@ const ThemeSwitcherSection = ({
                   }
                 }}
               >
-                {/* Inner wrapper — overflow-hidden here, not on outer motion.div, to preserve boxShadow */}
-                <div className="rounded-xl overflow-hidden h-full">
-                  <AnimatePresence mode="wait">
-                    {isExpanded ? (
-                      <motion.div
-                        key={`expanded-${t.id}`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className="h-full"
-                      >
-                        <ExpandedCardContent theme={t} />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key={`folded-${t.id}`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.1 }}
-                        className="h-full"
-                      >
-                        <FoldedCardContent theme={t} />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                {/* Inner wrapper — always-mounted layers with opacity crossfade.
+                    Avoids mount/unmount during parent layout scale (which distorts children). */}
+                <motion.div layout className="relative rounded-xl overflow-hidden h-full">
+                  <motion.div
+                    className="absolute inset-0"
+                    animate={{ opacity: isExpanded ? 1 : 0 }}
+                    transition={{ duration: 0.15 }}
+                    style={{ pointerEvents: isExpanded ? 'auto' : 'none' }}
+                  >
+                    <ExpandedCardContent theme={t} />
+                  </motion.div>
+                  <motion.div
+                    className="absolute inset-0"
+                    animate={{ opacity: isExpanded ? 0 : 1 }}
+                    transition={{ duration: 0.1 }}
+                    style={{ pointerEvents: isExpanded ? 'none' : 'auto' }}
+                  >
+                    <FoldedCardContent theme={t} />
+                  </motion.div>
+                </motion.div>
 
                 {/* Mock badge */}
                 {t.isMock && (
