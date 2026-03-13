@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overheated Rhizome — Design Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Work+Sans:wght@300;400;500&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --page-bg:     #A8A8A8;
+      --page-text:   #1A1A1A;
+      --page-subtle: #555555;
+      --page-border: #888888;
+      --page-display: 'Spectral', Georgia, serif;
+      --page-sans:    'Space Grotesk', system-ui, sans-serif;
+      --page-mono:    'Space Mono', ui-monospace, monospace;
+    }
+
+    body {
+      background: var(--page-bg);
+      color: var(--page-text);
+      font-family: var(--page-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 56px 40px 80px;
+    }
+
+    .wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ─── PAGE HEADER ─── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 72px;
+    }
+
+    .page-header h1 {
+      font-family: var(--page-display);
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 400;
+      font-style: italic;
+      color: #1A1A1A;
+      letter-spacing: -0.015em;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .page-header p {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--page-subtle);
+    }
+
+    .page-header .tagline {
+      font-family: var(--page-display);
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--page-subtle);
+      margin-top: 6px;
+      letter-spacing: 0;
+    }
+
+    /* ─── SECTION ─── */
+    section {
+      margin-bottom: 80px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--page-subtle);
+      white-space: nowrap;
+    }
+
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--page-border);
+    }
+
+    /* ─── PALETTE GRID ─── */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .palette-card {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .palette-header {
+      padding: 22px 22px 20px;
+      flex: 1;
+    }
+
+    .palette-badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-bottom: 10px;
+      opacity: 0.7;
+    }
+
+    .palette-name {
+      font-family: var(--page-display);
+      font-size: 1.3rem;
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 3px;
+    }
+
+    .palette-tagline {
+      font-size: 0.72rem;
+      opacity: 0.45;
+      margin-bottom: 18px;
+    }
+
+    /* Mini mock-up */
+    .mock-app {
+      border-radius: 8px;
+      padding: 14px 16px 16px;
+      margin-bottom: 4px;
+    }
+
+    .mock-appname {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Two-line hero inside mock */
+    .mock-hero {
+      margin-bottom: 12px;
+      line-height: 1.0;
+    }
+
+    .mock-hero-line1 {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .mock-hero-line2 {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: -0.01em;
+    }
+
+    .mock-tagline {
+      font-size: 0.6rem;
+      margin-top: 5px;
+      font-style: italic;
+      opacity: 0.9;
+      line-height: 1.3;
+    }
+
+    /* Subcard inside mock */
+    .mock-subcard {
+      border-radius: 5px;
+      padding: 9px 11px 10px;
+      margin-top: 10px;
+    }
+
+    .mock-subcard-name {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .mock-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .mock-stat-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .mock-stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+    }
+
+    .mock-stat-value2 {
+      font-size: 0.78rem;
+      font-weight: 500;
+      margin-top: 2px;
+      letter-spacing: -0.01em;
+    }
+
+    /* Swatch strip */
+    .swatch-strip {
+      display: flex;
+      height: 6px;
+    }
+
+    .swatch {
+      flex: 1;
+    }
+
+    /* Color list */
+    .palette-colors {
+      padding: 12px 16px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px 12px;
+      background: rgba(0,0,0,0.25);
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .color-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .color-label-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+      min-width: 0;
+    }
+
+    .color-role {
+      font-size: 0.62rem;
+      line-height: 1.2;
+    }
+
+    .color-hex {
+      font-family: var(--page-mono);
+      font-size: 0.58rem;
+      opacity: 0.5;
+      letter-spacing: 0.03em;
+    }
+
+    /* ─── FONT GRID ─── */
+    .font-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .font-card {
+      background: #1A1208;
+      border-radius: 14px;
+      padding: 26px;
+      border: 1px solid var(--page-border);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .font-card-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .font-num {
+      font-family: var(--page-mono);
+      font-size: 0.65rem;
+      color: var(--page-subtle);
+    }
+
+    .font-pairing-name {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--page-subtle);
+    }
+
+    .pick-badge {
+      margin-left: auto;
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(216, 130, 30, 0.15);
+      color: #D8821E;
+      padding: 2px 7px;
+      border-radius: 99px;
+    }
+
+    .font-block {
+      padding: 16px 0;
+      border-top: 1px solid #231D12;
+    }
+
+    .font-block:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .font-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .font-role-tag {
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--page-subtle);
+    }
+
+    .font-name-tag {
+      font-family: var(--page-mono);
+      font-size: 0.62rem;
+      color: #6A5C40;
+    }
+
+    .sample-display {
+      font-size: 1.75rem;
+      line-height: 1.1;
+      color: #E8D8B0;
+      letter-spacing: -0.01em;
+    }
+
+    .sample-sans {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #A89878;
+    }
+
+    .sample-mono {
+      font-size: 1.2rem;
+      letter-spacing: 0.02em;
+      color: #E8821A;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding-top: 40px;
+      border-top: 1px solid var(--page-border);
+      color: var(--page-subtle);
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+    }
+
+    footer em {
+      font-family: var(--page-display);
+      font-style: italic;
+      color: #444444;
+    }
+
+    .mode-divider {
+      text-align: center;
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #555;
+      margin: -10px 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .mode-divider span { white-space: nowrap; }
+    .mode-divider::before, .mode-divider::after { content: ''; flex: 1; height: 1px; background: #888; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ─── HEADER ─── -->
+  <header class="page-header">
+    <h1>Overheated Rhizome</h1>
+    <p>Palette &amp; Typography Explorer</p>
+    <p class="tagline">"Academic snark mashed with totally tuber-lar style."</p>
+  </header>
+
+  <!-- ─── PALETTES ─── -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Palette Options — Dark</span>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="palette-grid">
+
+      <!-- 1: SCORCHED EARTH · Pairing 01: Spectral + Space Grotesk + Space Mono -->
+      <div class="palette-card" style="background:#1C1008;">
+        <div class="palette-header" style="background:#1C1008; color:#F5E6C8;">
+          <div class="palette-badge" style="background:rgba(232,130,26,0.15); color:#E8821A;">Amber — Baked Flesh</div>
+          <div class="mock-app" style="background:#281A0C; border:1px solid #3D2A14; font-family:'Space Grotesk',sans-serif;">
+            <div class="mock-appname" style="color:#8A7054; font-family:'Space Grotesk',sans-serif;">Overheated Rhizome</div>
+            <div class="mock-hero" style="font-family:'Spectral',serif;">
+              <span class="mock-hero-line1" style="color:#E8821A;">Overheated</span>
+              <span class="mock-hero-line2" style="color:#D4A843;">Rhizome</span>
+              <div class="mock-tagline" style="color:#8A7054;">the potato at peak internal temperature</div>
+            </div>
+            <div class="mock-subcard" style="background:#1C1008; border:1px solid #3D2A14;">
+              <div class="mock-subcard-name" style="color:#A8906A; font-family:'Space Grotesk',sans-serif;">Scorched Earth</div>
+              <div class="mock-stat">
+                <div class="mock-stat-label" style="color:#8A7054;">Target by Retirement</div>
+                <div class="mock-stat-value" style="color:#F5E6C8; font-family:'Space Mono',monospace;">$1,247,892</div>
+                <div class="mock-stat-value2" style="color:#C8B090; font-family:'Space Mono',monospace;">$418,204 <span style="font-size:0.6rem; color:#8A7054;">without plan</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#E8821A;" title="Brand"></div>
+          <div class="swatch" style="background:#D4A843;" title="Brand Accent / Returns"></div>
+          <div class="swatch" style="background:#C84848;" title="Loss"></div>
+          <div class="swatch" style="background:#7AB84A;" title="OPM"></div>
+          <div class="swatch" style="background:#E8C882;" title="Start Now"></div>
+          <div class="swatch" style="background:#78A8C8;" title="Target"></div>
+          <div class="swatch" style="background:#90B870;" title="Self Funded"></div>
+          <div class="swatch" style="background:#F5E6C8;" title="Text Primary"></div>
+          <div class="swatch" style="background:#D4C0A0;" title="Text Secondary"></div>
+          <div class="swatch" style="background:#C8B090;" title="Text Neutral"></div>
+          <div class="swatch" style="background:#8A7054;" title="Text Subtle"></div>
+          <div class="swatch" style="background:#281A0C;" title="Glass"></div>
+          <div class="swatch" style="background:#1C1008; border-right:1px solid #3D2A14;" title="Background"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.3);">
+          <div class="color-row"><div class="color-dot" style="background:#1C1008;border:1px solid #3D2A14;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Background</span><span class="color-hex">#1C1008</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#281A0C;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Glass</span><span class="color-hex">#281A0C</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#E8821A;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Brand</span><span class="color-hex">#E8821A</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#D4A843;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Brand Accent</span><span class="color-hex">#D4A843</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C84848;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Loss</span><span class="color-hex">#C84848</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#7AB84A;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">OPM</span><span class="color-hex">#7AB84A</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#D4A843;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Returns</span><span class="color-hex">#D4A843</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#E8C882;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Start Now</span><span class="color-hex">#E8C882</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#78A8C8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Target</span><span class="color-hex">#78A8C8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#90B870;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Self Funded</span><span class="color-hex">#90B870</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#F5E6C8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Text Primary</span><span class="color-hex">#F5E6C8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#D4C0A0;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Text Secondary</span><span class="color-hex">#D4C0A0</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C8B090;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Text Neutral</span><span class="color-hex">#C8B090</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#8A7054;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7054;">Text Subtle</span><span class="color-hex">#8A7054</span></div></div>
+        </div>
+      </div>
+
+      <!-- 2: ROOT CELLAR · Pairing 02: Playfair Display + IBM Plex Sans + IBM Plex Mono -->
+      <div class="palette-card" style="background:#12100A;">
+        <div class="palette-header" style="background:#12100A; color:#EDE0C4;">
+          <div class="palette-badge" style="background:rgba(143,191,26,0.12); color:#8FBF1A;">Sprout — Rhizome Grows</div>
+          <div class="mock-app" style="background:#1C180E; border:1px solid #2E2814; font-family:'IBM Plex Sans',sans-serif;">
+            <div class="mock-appname" style="color:#786850; font-family:'IBM Plex Sans',sans-serif;">Overheated Rhizome</div>
+            <div class="mock-hero" style="font-family:'Playfair Display',serif;">
+              <span class="mock-hero-line1" style="color:#8FBF1A;">Overheated</span>
+              <span class="mock-hero-line2" style="color:#C8A050;">Rhizome</span>
+              <div class="mock-tagline" style="color:#786850;">the tuber that started growing something</div>
+            </div>
+            <div class="mock-subcard" style="background:#12100A; border:1px solid #2E2814;">
+              <div class="mock-subcard-name" style="color:#A89070; font-family:'IBM Plex Sans',sans-serif;">Root Cellar</div>
+              <div class="mock-stat">
+                <div class="mock-stat-label" style="color:#786850;">Target by Retirement</div>
+                <div class="mock-stat-value" style="color:#EDE0C4; font-family:'IBM Plex Mono',monospace;">$1,247,892</div>
+                <div class="mock-stat-value2" style="color:#C0B088; font-family:'IBM Plex Mono',monospace;">$418,204 <span style="font-size:0.6rem; color:#786850;">without plan</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#8FBF1A;" title="Brand"></div>
+          <div class="swatch" style="background:#C8A050;" title="Brand Accent / Returns"></div>
+          <div class="swatch" style="background:#D44040;" title="Loss"></div>
+          <div class="swatch" style="background:#6AB088;" title="OPM"></div>
+          <div class="swatch" style="background:#C8E080;" title="Start Now"></div>
+          <div class="swatch" style="background:#70A8C0;" title="Target"></div>
+          <div class="swatch" style="background:#88B878;" title="Self Funded"></div>
+          <div class="swatch" style="background:#EDE0C4;" title="Text Primary"></div>
+          <div class="swatch" style="background:#C8BC98;" title="Text Secondary"></div>
+          <div class="swatch" style="background:#C0B088;" title="Text Neutral"></div>
+          <div class="swatch" style="background:#786850;" title="Text Subtle"></div>
+          <div class="swatch" style="background:#1C180E;" title="Glass"></div>
+          <div class="swatch" style="background:#12100A; border-right:1px solid #2E2814;" title="Background"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.3);">
+          <div class="color-row"><div class="color-dot" style="background:#12100A;border:1px solid #2E2814;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Background</span><span class="color-hex">#12100A</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#1C180E;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Glass</span><span class="color-hex">#1C180E</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#8FBF1A;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Brand</span><span class="color-hex">#8FBF1A</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C8A050;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Brand Accent</span><span class="color-hex">#C8A050</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#D44040;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Loss</span><span class="color-hex">#D44040</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#6AB088;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">OPM</span><span class="color-hex">#6AB088</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C8A050;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Returns</span><span class="color-hex">#C8A050</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C8E080;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Start Now</span><span class="color-hex">#C8E080</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#70A8C0;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Target</span><span class="color-hex">#70A8C0</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#88B878;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Self Funded</span><span class="color-hex">#88B878</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#EDE0C4;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Text Primary</span><span class="color-hex">#EDE0C4</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C8BC98;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Text Secondary</span><span class="color-hex">#C8BC98</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C0B088;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Text Neutral</span><span class="color-hex">#C0B088</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#786850;"></div><div class="color-label-wrap"><span class="color-role" style="color:#786850;">Text Subtle</span><span class="color-hex">#786850</span></div></div>
+        </div>
+      </div>
+
+      <!-- 3: NIGHT SHADE · Pairing 03: DM Serif Display + DM Sans + IBM Plex Mono -->
+      <div class="palette-card" style="background:#180C08;">
+        <div class="palette-header" style="background:#180C08; color:#F0DFC0;">
+          <div class="palette-badge" style="background:rgba(192,56,120,0.15); color:#C03878;">Magenta — Dissertation Rage</div>
+          <div class="mock-app" style="background:#221008; border:1px solid #3A1A10; font-family:'DM Sans',sans-serif;">
+            <div class="mock-appname" style="color:#806858; font-family:'DM Sans',sans-serif;">Overheated Rhizome</div>
+            <div class="mock-hero" style="font-family:'DM Serif Display',serif;">
+              <span class="mock-hero-line1" style="color:#C03878;">Overheated</span>
+              <span class="mock-hero-line2" style="color:#E87820;">Rhizome</span>
+              <div class="mock-tagline" style="color:#806858;">those who put the diss in dissertation</div>
+            </div>
+            <div class="mock-subcard" style="background:#180C08; border:1px solid #3A1A10;">
+              <div class="mock-subcard-name" style="color:#B09078; font-family:'DM Sans',sans-serif;">Night Shade</div>
+              <div class="mock-stat">
+                <div class="mock-stat-label" style="color:#806858;">Target by Retirement</div>
+                <div class="mock-stat-value" style="color:#F0DFC0; font-family:'IBM Plex Mono',monospace;">$1,247,892</div>
+                <div class="mock-stat-value2" style="color:#C8B090; font-family:'IBM Plex Mono',monospace;">$418,204 <span style="font-size:0.6rem; color:#806858;">without plan</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#C03878;" title="Brand"></div>
+          <div class="swatch" style="background:#E87820;" title="Brand Accent / Returns"></div>
+          <div class="swatch" style="background:#D44040;" title="Loss"></div>
+          <div class="swatch" style="background:#70B868;" title="OPM"></div>
+          <div class="swatch" style="background:#E882BC;" title="Start Now"></div>
+          <div class="swatch" style="background:#70A0C8;" title="Target"></div>
+          <div class="swatch" style="background:#88B870;" title="Self Funded"></div>
+          <div class="swatch" style="background:#F0DFC0;" title="Text Primary"></div>
+          <div class="swatch" style="background:#D0BEA0;" title="Text Secondary"></div>
+          <div class="swatch" style="background:#C8B090;" title="Text Neutral"></div>
+          <div class="swatch" style="background:#806858;" title="Text Subtle"></div>
+          <div class="swatch" style="background:#221008;" title="Glass"></div>
+          <div class="swatch" style="background:#180C08; border-right:1px solid #3A1A10;" title="Background"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.3);">
+          <div class="color-row"><div class="color-dot" style="background:#180C08;border:1px solid #3A1A10;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Background</span><span class="color-hex">#180C08</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#221008;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Glass</span><span class="color-hex">#221008</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C03878;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Brand</span><span class="color-hex">#C03878</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#E87820;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Brand Accent</span><span class="color-hex">#E87820</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#D44040;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Loss</span><span class="color-hex">#D44040</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#70B868;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">OPM</span><span class="color-hex">#70B868</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#E87820;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Returns</span><span class="color-hex">#E87820</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#E882BC;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Start Now</span><span class="color-hex">#E882BC</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#70A0C8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Target</span><span class="color-hex">#70A0C8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#88B870;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Self Funded</span><span class="color-hex">#88B870</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#F0DFC0;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Text Primary</span><span class="color-hex">#F0DFC0</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#D0BEA0;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Text Secondary</span><span class="color-hex">#D0BEA0</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C8B090;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Text Neutral</span><span class="color-hex">#C8B090</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#806858;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806858;">Text Subtle</span><span class="color-hex">#806858</span></div></div>
+        </div>
+      </div>
+
+      <!-- 4: STARCHY INTERIOR · Pairing 04: Libre Baskerville + Work Sans + Space Mono -->
+      <div class="palette-card" style="background:#201408;">
+        <div class="palette-header" style="background:#201408; color:#F8EDD8;">
+          <div class="palette-badge" style="background:rgba(232,192,96,0.12); color:#E8C060;">Pale Gold — Inside Exposed</div>
+          <div class="mock-app" style="background:#2C1C0C; border:1px solid #3C2810; font-family:'Work Sans',sans-serif;">
+            <div class="mock-appname" style="color:#887060; font-family:'Work Sans',sans-serif;">Overheated Rhizome</div>
+            <div class="mock-hero" style="font-family:'Libre Baskerville',serif;">
+              <span class="mock-hero-line1" style="color:#E8C060;">Overheated</span>
+              <span class="mock-hero-line2" style="color:#A04828;">Rhizome</span>
+              <div class="mock-tagline" style="color:#887060;">overcooked, delicate, split open</div>
+            </div>
+            <div class="mock-subcard" style="background:#201408; border:1px solid #3C2810;">
+              <div class="mock-subcard-name" style="color:#B09878; font-family:'Work Sans',sans-serif;">Starchy Interior</div>
+              <div class="mock-stat">
+                <div class="mock-stat-label" style="color:#887060;">Target by Retirement</div>
+                <div class="mock-stat-value" style="color:#F8EDD8; font-family:'Space Mono',monospace;">$1,247,892</div>
+                <div class="mock-stat-value2" style="color:#C8B88A; font-family:'Space Mono',monospace;">$418,204 <span style="font-size:0.6rem; color:#887060;">without plan</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#E8C060;" title="Brand"></div>
+          <div class="swatch" style="background:#A04828;" title="Brand Accent / Returns"></div>
+          <div class="swatch" style="background:#C84838;" title="Loss"></div>
+          <div class="swatch" style="background:#80B860;" title="OPM"></div>
+          <div class="swatch" style="background:#F0E090;" title="Start Now"></div>
+          <div class="swatch" style="background:#78A0C0;" title="Target"></div>
+          <div class="swatch" style="background:#88B068;" title="Self Funded"></div>
+          <div class="swatch" style="background:#F8EDD8;" title="Text Primary"></div>
+          <div class="swatch" style="background:#D8C8A8;" title="Text Secondary"></div>
+          <div class="swatch" style="background:#C8B88A;" title="Text Neutral"></div>
+          <div class="swatch" style="background:#887060;" title="Text Subtle"></div>
+          <div class="swatch" style="background:#2C1C0C;" title="Glass"></div>
+          <div class="swatch" style="background:#201408; border-right:1px solid #3C2810;" title="Background"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.3);">
+          <div class="color-row"><div class="color-dot" style="background:#201408;border:1px solid #3C2810;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Background</span><span class="color-hex">#201408</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#2C1C0C;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Glass</span><span class="color-hex">#2C1C0C</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#E8C060;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Brand</span><span class="color-hex">#E8C060</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#A04828;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Brand Accent</span><span class="color-hex">#A04828</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C84838;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Loss</span><span class="color-hex">#C84838</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#80B860;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">OPM</span><span class="color-hex">#80B860</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#A04828;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Returns</span><span class="color-hex">#A04828</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#F0E090;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Start Now</span><span class="color-hex">#F0E090</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#78A0C0;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Target</span><span class="color-hex">#78A0C0</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#88B068;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Self Funded</span><span class="color-hex">#88B068</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#F8EDD8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Text Primary</span><span class="color-hex">#F8EDD8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#D8C8A8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Text Secondary</span><span class="color-hex">#D8C8A8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C8B88A;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Text Neutral</span><span class="color-hex">#C8B88A</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#887060;"></div><div class="color-label-wrap"><span class="color-role" style="color:#887060;">Text Subtle</span><span class="color-hex">#887060</span></div></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── LIGHT PALETTES R2 ─── -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Palette Options — Light · Round 2 (semantic pass)</span>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="palette-grid">
+
+      <!-- R2-L1: SCORCHED EARTH · Pairing 01: Spectral + Space Grotesk + Space Mono -->
+      <div class="palette-card" style="background:#FBF0DC; border:1px solid #E0CCA0;">
+        <div class="palette-header" style="background:#FBF0DC; color:#1C1008;">
+          <div class="palette-badge" style="background:rgba(175,85,8,0.12); color:#AF5508;">Amber Brand — Green Returns</div>
+          <div class="mock-app" style="background:#F2E4C4; border:1px solid #D4B880; font-family:'Space Grotesk',sans-serif;">
+            <div class="mock-appname" style="color:#6A5030; font-family:'Space Grotesk',sans-serif;">Overheated Rhizome</div>
+            <div class="mock-hero" style="font-family:'Spectral',serif;">
+              <span class="mock-hero-line1" style="color:#AF5508;">Overheated</span>
+              <span class="mock-hero-line2" style="color:#7A6020;">Rhizome</span>
+              <div class="mock-tagline" style="color:#6A5030;">the potato at peak internal temperature</div>
+            </div>
+            <div class="mock-subcard" style="background:#FBF0DC; border:1px solid #D4B880;">
+              <div class="mock-subcard-name" style="color:#4A3820; font-family:'Space Grotesk',sans-serif;">Scorched Earth</div>
+              <div class="mock-stat">
+                <div class="mock-stat-label" style="color:#6A5030;">Target by Retirement</div>
+                <div class="mock-stat-value" style="color:#1C1008; font-family:'Space Mono',monospace;">$1,247,892</div>
+                <div class="mock-stat-value2" style="color:#6A5030; font-family:'Space Mono',monospace;">$418,204 <span style="font-size:0.6rem; color:#8A7050;">without plan</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#AF5508;" title="Brand"></div>
+          <div class="swatch" style="background:#7A6020;" title="Brand Accent"></div>
+          <div class="swatch" style="background:#C22020;" title="Loss"></div>
+          <div class="swatch" style="background:#3A7028;" title="OPM"></div>
+          <div class="swatch" style="background:#1E7828;" title="Returns"></div>
+          <div class="swatch" style="background:#0E8080;" title="Start Now"></div>
+          <div class="swatch" style="background:#6E3EA8;" title="Target (placeholder)"></div>
+          <div class="swatch" style="background:#2E7038;" title="Self Funded"></div>
+          <div class="swatch" style="background:#1C1008;" title="Text Primary"></div>
+          <div class="swatch" style="background:#4A3820;" title="Text Secondary"></div>
+          <div class="swatch" style="background:#6A5030;" title="Text Neutral"></div>
+          <div class="swatch" style="background:#8A7050;" title="Text Subtle"></div>
+          <div class="swatch" style="background:#FBF0DC; border-right:1px solid #D4B880;" title="Background"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.05);">
+          <div class="color-row"><div class="color-dot" style="background:#FBF0DC;border:1px solid #D4B880;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Background</span><span class="color-hex">#FBF0DC</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#F2E4C4;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Glass</span><span class="color-hex">#F2E4C4</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#AF5508;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Brand</span><span class="color-hex">#AF5508</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#7A6020;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Brand Accent</span><span class="color-hex">#7A6020</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C22020;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Loss</span><span class="color-hex">#C22020</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#3A7028;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">OPM</span><span class="color-hex">#3A7028</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#1E7828;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Returns</span><span class="color-hex">#1E7828 ↑</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#0E8080;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Start Now</span><span class="color-hex">#0E8080</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#6E3EA8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Target</span><span class="color-hex">#6E3EA8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#2E7038;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Self Funded</span><span class="color-hex">#2E7038</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#1C1008;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Text Primary</span><span class="color-hex">#1C1008</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#4A3820;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Text Secondary</span><span class="color-hex">#4A3820</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#6A5030;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Text Neutral</span><span class="color-hex">#6A5030</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#8A7050;"></div><div class="color-label-wrap"><span class="color-role" style="color:#8A7050;">Text Subtle</span><span class="color-hex">#8A7050</span></div></div>
+        </div>
+      </div>
+
+      <!-- R2-L2: ROOT CELLAR · Pairing 02: Playfair Display + IBM Plex Sans + IBM Plex Mono -->
+      <div class="palette-card" style="background:#F4EED8; border:1px solid #D8C898;">
+        <div class="palette-header" style="background:#F4EED8; color:#12100A;">
+          <div class="palette-badge" style="background:rgba(56,112,16,0.12); color:#387010;">Green Brand — Gold Returns</div>
+          <div class="mock-app" style="background:#EAE0C0; border:1px solid #C8B478; font-family:'IBM Plex Sans',sans-serif;">
+            <div class="mock-appname" style="color:#5A4828; font-family:'IBM Plex Sans',sans-serif;">Overheated Rhizome</div>
+            <div class="mock-hero" style="font-family:'Playfair Display',serif;">
+              <span class="mock-hero-line1" style="color:#387010;">Overheated</span>
+              <span class="mock-hero-line2" style="color:#785010;">Rhizome</span>
+              <div class="mock-tagline" style="color:#5A4828;">the tuber that started growing something</div>
+            </div>
+            <div class="mock-subcard" style="background:#F4EED8; border:1px solid #C8B478;">
+              <div class="mock-subcard-name" style="color:#3A2A18; font-family:'IBM Plex Sans',sans-serif;">Root Cellar</div>
+              <div class="mock-stat">
+                <div class="mock-stat-label" style="color:#5A4828;">Target by Retirement</div>
+                <div class="mock-stat-value" style="color:#12100A; font-family:'IBM Plex Mono',monospace;">$1,247,892</div>
+                <div class="mock-stat-value2" style="color:#5A4828; font-family:'IBM Plex Mono',monospace;">$418,204 <span style="font-size:0.6rem; color:#7A6840;">without plan</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#387010;" title="Brand"></div>
+          <div class="swatch" style="background:#785010;" title="Brand Accent"></div>
+          <div class="swatch" style="background:#C02828;" title="Loss"></div>
+          <div class="swatch" style="background:#2A6858;" title="OPM"></div>
+          <div class="swatch" style="background:#B07800;" title="Returns"></div>
+          <div class="swatch" style="background:#1068A0;" title="Start Now"></div>
+          <div class="swatch" style="background:#A03878;" title="Target (placeholder)"></div>
+          <div class="swatch" style="background:#286830;" title="Self Funded"></div>
+          <div class="swatch" style="background:#12100A;" title="Text Primary"></div>
+          <div class="swatch" style="background:#3A2A18;" title="Text Secondary"></div>
+          <div class="swatch" style="background:#5A4828;" title="Text Neutral"></div>
+          <div class="swatch" style="background:#7A6840;" title="Text Subtle"></div>
+          <div class="swatch" style="background:#F4EED8; border-right:1px solid #C8B478;" title="Background"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.05);">
+          <div class="color-row"><div class="color-dot" style="background:#F4EED8;border:1px solid #C8B478;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Background</span><span class="color-hex">#F4EED8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#EAE0C0;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Glass</span><span class="color-hex">#EAE0C0</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#387010;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Brand</span><span class="color-hex">#387010</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#785010;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Brand Accent</span><span class="color-hex">#785010</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C02828;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Loss</span><span class="color-hex">#C02828</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#2A6858;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">OPM</span><span class="color-hex">#2A6858</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#B07800;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Returns</span><span class="color-hex">#B07800 ↑</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#1068A0;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Start Now</span><span class="color-hex">#1068A0</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#A03878;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Target</span><span class="color-hex">#A03878</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#286830;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Self Funded</span><span class="color-hex">#286830</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#12100A;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Text Primary</span><span class="color-hex">#12100A</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#3A2A18;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Text Secondary</span><span class="color-hex">#3A2A18</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#5A4828;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Text Neutral</span><span class="color-hex">#5A4828</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#7A6840;"></div><div class="color-label-wrap"><span class="color-role" style="color:#7A6840;">Text Subtle</span><span class="color-hex">#7A6840</span></div></div>
+        </div>
+      </div>
+
+      <!-- R2-L3: NIGHT SHADE · Pairing 03: DM Serif Display + DM Sans + IBM Plex Mono -->
+      <div class="palette-card" style="background:#FAF0E8; border:1px solid #E8CCA8;">
+        <div class="palette-header" style="background:#FAF0E8; color:#180C08;">
+          <div class="palette-badge" style="background:rgba(136,24,64,0.1); color:#881840;">Wine Brand — Green Returns</div>
+          <div class="mock-app" style="background:#F0E0CC; border:1px solid #D8B888; font-family:'DM Sans',sans-serif;">
+            <div class="mock-appname" style="color:#604838; font-family:'DM Sans',sans-serif;">Overheated Rhizome</div>
+            <div class="mock-hero" style="font-family:'DM Serif Display',serif;">
+              <span class="mock-hero-line1" style="color:#881840;">Overheated</span>
+              <span class="mock-hero-line2" style="color:#704028;">Rhizome</span>
+              <div class="mock-tagline" style="color:#604838;">those who put the diss in dissertation</div>
+            </div>
+            <div class="mock-subcard" style="background:#FAF0E8; border:1px solid #D8B888;">
+              <div class="mock-subcard-name" style="color:#3A2820; font-family:'DM Sans',sans-serif;">Night Shade</div>
+              <div class="mock-stat">
+                <div class="mock-stat-label" style="color:#604838;">Target by Retirement</div>
+                <div class="mock-stat-value" style="color:#180C08; font-family:'IBM Plex Mono',monospace;">$1,247,892</div>
+                <div class="mock-stat-value2" style="color:#604838; font-family:'IBM Plex Mono',monospace;">$418,204 <span style="font-size:0.6rem; color:#806050;">without plan</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#881840;" title="Brand"></div>
+          <div class="swatch" style="background:#704028;" title="Brand Accent"></div>
+          <div class="swatch" style="background:#C02020;" title="Loss"></div>
+          <div class="swatch" style="background:#206838;" title="OPM"></div>
+          <div class="swatch" style="background:#1A7828;" title="Returns"></div>
+          <div class="swatch" style="background:#7038A8;" title="Start Now"></div>
+          <div class="swatch" style="background:#1A70A0;" title="Target (placeholder)"></div>
+          <div class="swatch" style="background:#206830;" title="Self Funded"></div>
+          <div class="swatch" style="background:#180C08;" title="Text Primary"></div>
+          <div class="swatch" style="background:#3A2820;" title="Text Secondary"></div>
+          <div class="swatch" style="background:#604838;" title="Text Neutral"></div>
+          <div class="swatch" style="background:#806050;" title="Text Subtle"></div>
+          <div class="swatch" style="background:#FAF0E8; border-right:1px solid #D8B888;" title="Background"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.05);">
+          <div class="color-row"><div class="color-dot" style="background:#FAF0E8;border:1px solid #D8B888;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Background</span><span class="color-hex">#FAF0E8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#F0E0CC;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Glass</span><span class="color-hex">#F0E0CC</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#881840;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Brand</span><span class="color-hex">#881840</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#704028;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Brand Accent</span><span class="color-hex">#704028</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C02020;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Loss</span><span class="color-hex">#C02020</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#206838;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">OPM</span><span class="color-hex">#206838</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#1A7828;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Returns</span><span class="color-hex">#1A7828 ↑</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#7038A8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Start Now</span><span class="color-hex">#7038A8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#1A70A0;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Target</span><span class="color-hex">#1A70A0</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#206830;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Self Funded</span><span class="color-hex">#206830</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#180C08;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Text Primary</span><span class="color-hex">#180C08</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#3A2820;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Text Secondary</span><span class="color-hex">#3A2820</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#604838;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Text Neutral</span><span class="color-hex">#604838</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#806050;"></div><div class="color-label-wrap"><span class="color-role" style="color:#806050;">Text Subtle</span><span class="color-hex">#806050</span></div></div>
+        </div>
+      </div>
+
+      <!-- R2-L4: STARCHY INTERIOR · Pairing 04: Libre Baskerville + Work Sans + Space Mono -->
+      <div class="palette-card" style="background:#FDF5E4; border:1px solid #E8D4A0;">
+        <div class="palette-header" style="background:#FDF5E4; color:#201408;">
+          <div class="palette-badge" style="background:rgba(120,64,8,0.1); color:#784008;">Caramel Brand — Green Returns</div>
+          <div class="mock-app" style="background:#F5E8C8; border:1px solid #D8C080; font-family:'Work Sans',sans-serif;">
+            <div class="mock-appname" style="color:#624830; font-family:'Work Sans',sans-serif;">Overheated Rhizome</div>
+            <div class="mock-hero" style="font-family:'Libre Baskerville',serif;">
+              <span class="mock-hero-line1" style="color:#784008;">Overheated</span>
+              <span class="mock-hero-line2" style="color:#5A5010;">Rhizome</span>
+              <div class="mock-tagline" style="color:#624830;">overcooked, delicate, split open</div>
+            </div>
+            <div class="mock-subcard" style="background:#FDF5E4; border:1px solid #D8C080;">
+              <div class="mock-subcard-name" style="color:#3C2818; font-family:'Work Sans',sans-serif;">Starchy Interior</div>
+              <div class="mock-stat">
+                <div class="mock-stat-label" style="color:#624830;">Target by Retirement</div>
+                <div class="mock-stat-value" style="color:#201408; font-family:'Space Mono',monospace;">$1,247,892</div>
+                <div class="mock-stat-value2" style="color:#624830; font-family:'Space Mono',monospace;">$418,204 <span style="font-size:0.6rem; color:#826048;">without plan</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#784008;" title="Brand"></div>
+          <div class="swatch" style="background:#5A5010;" title="Brand Accent"></div>
+          <div class="swatch" style="background:#C02020;" title="Loss"></div>
+          <div class="swatch" style="background:#1E6830;" title="OPM"></div>
+          <div class="swatch" style="background:#207830;" title="Returns"></div>
+          <div class="swatch" style="background:#8038A8;" title="Start Now"></div>
+          <div class="swatch" style="background:#0E7878;" title="Target (placeholder)"></div>
+          <div class="swatch" style="background:#1E6838;" title="Self Funded"></div>
+          <div class="swatch" style="background:#201408;" title="Text Primary"></div>
+          <div class="swatch" style="background:#3C2818;" title="Text Secondary"></div>
+          <div class="swatch" style="background:#624830;" title="Text Neutral"></div>
+          <div class="swatch" style="background:#826048;" title="Text Subtle"></div>
+          <div class="swatch" style="background:#FDF5E4; border-right:1px solid #D8C080;" title="Background"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.05);">
+          <div class="color-row"><div class="color-dot" style="background:#FDF5E4;border:1px solid #D8C080;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Background</span><span class="color-hex">#FDF5E4</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#F5E8C8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Glass</span><span class="color-hex">#F5E8C8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#784008;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Brand</span><span class="color-hex">#784008</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#5A5010;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Brand Accent</span><span class="color-hex">#5A5010</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#C02020;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Loss</span><span class="color-hex">#C02020</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#1E6830;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">OPM</span><span class="color-hex">#1E6830</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#207830;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Returns</span><span class="color-hex">#207830 ↑</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#8038A8;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Start Now</span><span class="color-hex">#8038A8</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#0E7878;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Target</span><span class="color-hex">#0E7878</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#1E6838;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Self Funded</span><span class="color-hex">#1E6838</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#201408;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Text Primary</span><span class="color-hex">#201408</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#3C2818;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Text Secondary</span><span class="color-hex">#3C2818</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#624830;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Text Neutral</span><span class="color-hex">#624830</span></div></div>
+          <div class="color-row"><div class="color-dot" style="background:#826048;"></div><div class="color-label-wrap"><span class="color-role" style="color:#826048;">Text Subtle</span><span class="color-hex">#826048</span></div></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── LIGHT PALETTES R1 ─── -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Palette Options — Light · Round 1 (reference)</span>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="palette-grid">
+
+      <!-- L1: SCORCHED EARTH LIGHT -->
+      <div class="palette-card" style="background:#FBF0DC; border:1px solid #E0CCA0;">
+        <div class="palette-header" style="background:#FBF0DC; color:#1C1008;">
+          <div class="palette-badge" style="background:rgba(184,90,8,0.12); color:#B85A08;">Amber Light — Baked Pale</div>
+          <div class="palette-name" style="color:#1C1008;">Scorched Earth</div>
+          <div class="palette-tagline" style="color:#7A5830;">the potato at peak internal temperature</div>
+          <div class="mock-app" style="background:#F2E4C4; border:1px solid #D4B880;">
+            <div class="mock-appname" style="color:#7A5830;">Overheated Rhizome</div>
+            <div class="mock-stat">
+              <div class="mock-stat-label" style="color:#7A5830;">Target by Retirement</div>
+              <div class="mock-stat-value" style="color:#B85A08;">$1,247,892</div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#B85A08;"></div>
+          <div class="swatch" style="background:#9A6820;"></div>
+          <div class="swatch" style="background:#C03030;"></div>
+          <div class="swatch" style="background:#3A7820;"></div>
+          <div class="swatch" style="background:#806040;"></div>
+          <div class="swatch" style="background:#1C1008;"></div>
+          <div class="swatch" style="background:#7A5830;"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.04);">
+          <div class="color-row"><div class="color-dot" style="background:#FBF0DC;border:1px solid #D4B880;"></div><span class="color-role">bg</span><span class="color-hex">#FBF0DC</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#B85A08;"></div><span class="color-role">brand</span><span class="color-hex">#B85A08</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#9A6820;"></div><span class="color-role">accent / returns</span><span class="color-hex">#9A6820</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#C03030;"></div><span class="color-role">loss</span><span class="color-hex">#C03030</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#3A7820;"></div><span class="color-role">opm</span><span class="color-hex">#3A7820</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#806040;"></div><span class="color-role">startNow</span><span class="color-hex">#806040</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#1C1008;"></div><span class="color-role">text</span><span class="color-hex">#1C1008</span></div>
+        </div>
+      </div>
+
+      <!-- L2: ROOT CELLAR LIGHT -->
+      <div class="palette-card" style="background:#F4EED8; border:1px solid #D8C898;">
+        <div class="palette-header" style="background:#F4EED8; color:#12100A;">
+          <div class="palette-badge" style="background:rgba(70,120,8,0.12); color:#467808;">Sprout Light — Shoots Up</div>
+          <div class="palette-name" style="color:#12100A;">Root Cellar</div>
+          <div class="palette-tagline" style="color:#6A5830;">the tuber that started growing something</div>
+          <div class="mock-app" style="background:#EAE0C0; border:1px solid #C8B478;">
+            <div class="mock-appname" style="color:#6A5830;">Overheated Rhizome</div>
+            <div class="mock-stat">
+              <div class="mock-stat-label" style="color:#6A5830;">Target by Retirement</div>
+              <div class="mock-stat-value" style="color:#467808;">$1,247,892</div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#467808;"></div>
+          <div class="swatch" style="background:#906028;"></div>
+          <div class="swatch" style="background:#B83030;"></div>
+          <div class="swatch" style="background:#2A7858;"></div>
+          <div class="swatch" style="background:#607828;"></div>
+          <div class="swatch" style="background:#12100A;"></div>
+          <div class="swatch" style="background:#6A5830;"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.04);">
+          <div class="color-row"><div class="color-dot" style="background:#F4EED8;border:1px solid #C8B478;"></div><span class="color-role">bg</span><span class="color-hex">#F4EED8</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#467808;"></div><span class="color-role">brand</span><span class="color-hex">#467808</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#906028;"></div><span class="color-role">accent / returns</span><span class="color-hex">#906028</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#B83030;"></div><span class="color-role">loss</span><span class="color-hex">#B83030</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#2A7858;"></div><span class="color-role">opm</span><span class="color-hex">#2A7858</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#607828;"></div><span class="color-role">startNow</span><span class="color-hex">#607828</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#12100A;"></div><span class="color-role">text</span><span class="color-hex">#12100A</span></div>
+        </div>
+      </div>
+
+      <!-- L3: NIGHT SHADE LIGHT -->
+      <div class="palette-card" style="background:#FAF0E6; border:1px solid #E8CCA8;">
+        <div class="palette-header" style="background:#FAF0E6; color:#180C08;">
+          <div class="palette-badge" style="background:rgba(144,24,72,0.1); color:#901848;">Magenta Light — Dissertation Bruise</div>
+          <div class="palette-name" style="color:#180C08;">Night Shade</div>
+          <div class="palette-tagline" style="color:#785840;">those who put the diss in dissertation</div>
+          <div class="mock-app" style="background:#F0E0CC; border:1px solid #D8B888;">
+            <div class="mock-appname" style="color:#785840;">Overheated Rhizome</div>
+            <div class="mock-stat">
+              <div class="mock-stat-label" style="color:#785840;">Target by Retirement</div>
+              <div class="mock-stat-value" style="color:#901848;">$1,247,892</div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#901848;"></div>
+          <div class="swatch" style="background:#A84810;"></div>
+          <div class="swatch" style="background:#B82828;"></div>
+          <div class="swatch" style="background:#307838;"></div>
+          <div class="swatch" style="background:#B03870;"></div>
+          <div class="swatch" style="background:#180C08;"></div>
+          <div class="swatch" style="background:#785840;"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.04);">
+          <div class="color-row"><div class="color-dot" style="background:#FAF0E6;border:1px solid #D8B888;"></div><span class="color-role">bg</span><span class="color-hex">#FAF0E6</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#901848;"></div><span class="color-role">brand</span><span class="color-hex">#901848</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#A84810;"></div><span class="color-role">accent / returns</span><span class="color-hex">#A84810</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#B82828;"></div><span class="color-role">loss</span><span class="color-hex">#B82828</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#307838;"></div><span class="color-role">opm</span><span class="color-hex">#307838</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#B03870;"></div><span class="color-role">startNow</span><span class="color-hex">#B03870</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#180C08;"></div><span class="color-role">text</span><span class="color-hex">#180C08</span></div>
+        </div>
+      </div>
+
+      <!-- L4: STARCHY INTERIOR LIGHT -->
+      <div class="palette-card" style="background:#FDF5E4; border:1px solid #E8D4A0;">
+        <div class="palette-header" style="background:#FDF5E4; color:#201408;">
+          <div class="palette-badge" style="background:rgba(120,80,8,0.1); color:#785008;">Gold Light — Split Open</div>
+          <div class="palette-name" style="color:#201408;">Starchy Interior</div>
+          <div class="palette-tagline" style="color:#806040;">overcooked, delicate, split open</div>
+          <div class="mock-app" style="background:#F5E8C8; border:1px solid #D8C080;">
+            <div class="mock-appname" style="color:#806040;">Overheated Rhizome</div>
+            <div class="mock-stat">
+              <div class="mock-stat-label" style="color:#806040;">Target by Retirement</div>
+              <div class="mock-stat-value" style="color:#785008;">$1,247,892</div>
+            </div>
+          </div>
+        </div>
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#785008;"></div>
+          <div class="swatch" style="background:#803010;"></div>
+          <div class="swatch" style="background:#B82828;"></div>
+          <div class="swatch" style="background:#387028;"></div>
+          <div class="swatch" style="background:#907028;"></div>
+          <div class="swatch" style="background:#201408;"></div>
+          <div class="swatch" style="background:#806040;"></div>
+        </div>
+        <div class="palette-colors" style="background:rgba(0,0,0,0.04);">
+          <div class="color-row"><div class="color-dot" style="background:#FDF5E4;border:1px solid #D8C080;"></div><span class="color-role">bg</span><span class="color-hex">#FDF5E4</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#785008;"></div><span class="color-role">brand</span><span class="color-hex">#785008</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#803010;"></div><span class="color-role">accent / returns</span><span class="color-hex">#803010</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#B82828;"></div><span class="color-role">loss</span><span class="color-hex">#B82828</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#387028;"></div><span class="color-role">opm</span><span class="color-hex">#387028</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#907028;"></div><span class="color-role">startNow</span><span class="color-hex">#907028</span></div>
+          <div class="color-row"><div class="color-dot" style="background:#201408;"></div><span class="color-role">text</span><span class="color-hex">#201408</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── TYPOGRAPHY ─── -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Font Pairings — Display / Sans / Mono</span>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="font-grid">
+
+      <!-- Pairing 1: Spectral + Space Grotesk + Space Mono -->
+      <div class="font-card">
+        <div class="font-card-header">
+          <span class="font-num">01</span>
+          <span class="font-pairing-name">Literary Academic</span>
+          <span class="pick-badge">my pick</span>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Display</span>
+            <span class="font-name-tag">Spectral</span>
+          </div>
+          <div class="sample-display" style="font-family:'Spectral',serif; font-weight:400;">
+            Overheated<br><em style="color:#D4A843;">Rhizome</em>
+          </div>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Sans</span>
+            <span class="font-name-tag">Space Grotesk</span>
+          </div>
+          <div class="sample-sans" style="font-family:'Space Grotesk',sans-serif;">
+            Built by the plaintiff for those who put the <em>diss</em> in dissertation.
+          </div>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Mono</span>
+            <span class="font-name-tag">Space Mono</span>
+          </div>
+          <div class="sample-mono" style="font-family:'Space Mono',monospace;">$1,247,892</div>
+        </div>
+      </div>
+
+      <!-- Pairing 2: Playfair + IBM Plex Sans + IBM Plex Mono -->
+      <div class="font-card">
+        <div class="font-card-header">
+          <span class="font-num">02</span>
+          <span class="font-pairing-name">Classical / Institutional</span>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Display</span>
+            <span class="font-name-tag">Playfair Display</span>
+          </div>
+          <div class="sample-display" style="font-family:'Playfair Display',serif; font-weight:400;">
+            Overheated<br><em style="color:#D4A843;">Rhizome</em>
+          </div>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Sans</span>
+            <span class="font-name-tag">IBM Plex Sans</span>
+          </div>
+          <div class="sample-sans" style="font-family:'IBM Plex Sans',sans-serif;">
+            Built by the plaintiff for those who put the <em>diss</em> in dissertation.
+          </div>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Mono</span>
+            <span class="font-name-tag">IBM Plex Mono</span>
+          </div>
+          <div class="sample-mono" style="font-family:'IBM Plex Mono',monospace;">$1,247,892</div>
+        </div>
+      </div>
+
+      <!-- Pairing 3: DM Serif Display + DM Sans + IBM Plex Mono -->
+      <div class="font-card">
+        <div class="font-card-header">
+          <span class="font-num">03</span>
+          <span class="font-pairing-name">Editorial / Clean</span>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Display</span>
+            <span class="font-name-tag">DM Serif Display</span>
+          </div>
+          <div class="sample-display" style="font-family:'DM Serif Display',serif; font-weight:400;">
+            Overheated<br><em style="color:#D4A843;">Rhizome</em>
+          </div>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Sans</span>
+            <span class="font-name-tag">DM Sans</span>
+          </div>
+          <div class="sample-sans" style="font-family:'DM Sans',sans-serif;">
+            Built by the plaintiff for those who put the <em>diss</em> in dissertation.
+          </div>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Mono</span>
+            <span class="font-name-tag">IBM Plex Mono</span>
+          </div>
+          <div class="sample-mono" style="font-family:'IBM Plex Mono',monospace;">$1,247,892</div>
+        </div>
+      </div>
+
+      <!-- Pairing 4: Libre Baskerville + Work Sans + Space Mono -->
+      <div class="font-card">
+        <div class="font-card-header">
+          <span class="font-num">04</span>
+          <span class="font-pairing-name">Sturdy / Dissertation</span>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Display</span>
+            <span class="font-name-tag">Libre Baskerville</span>
+          </div>
+          <div class="sample-display" style="font-family:'Libre Baskerville',serif; font-weight:400; font-size:1.45rem;">
+            Overheated<br><em style="color:#D4A843;">Rhizome</em>
+          </div>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Sans</span>
+            <span class="font-name-tag">Work Sans</span>
+          </div>
+          <div class="sample-sans" style="font-family:'Work Sans',sans-serif;">
+            Built by the plaintiff for those who put the <em>diss</em> in dissertation.
+          </div>
+        </div>
+        <div class="font-block">
+          <div class="font-meta">
+            <span class="font-role-tag">Mono</span>
+            <span class="font-name-tag">Space Mono</span>
+          </div>
+          <div class="sample-mono" style="font-family:'Space Mono',monospace;">$1,247,892</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <em>lmandel1@plaintiffs.ccp.edu</em> &nbsp;·&nbsp; Overheated Rhizome Design Explorer &nbsp;·&nbsp; sirkis-act--themes
+  </footer>
+
+</div>
+</body>
+</html>
