@@ -1087,7 +1087,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       aria-selected={activeTab === 'chart'}
                       aria-controls="projection-tabpanel"
                       onClick={() => setActiveTab('chart')}
-                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { background: theme.colors.brand } : undefined}
+                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { background: theme.colors.brand, color: theme.colors.textPrimary } : undefined}
                     >
                       Chart
                     </button>
@@ -1096,7 +1096,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       aria-selected={activeTab === 'table'}
                       aria-controls="projection-tabpanel"
                       onClick={() => setActiveTab('table')}
-                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { background: theme.colors.brand } : undefined}
+                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { background: theme.colors.brand, color: theme.colors.textPrimary } : undefined}
                     >
                       Table
                     </button>

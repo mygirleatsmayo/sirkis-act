@@ -551,9 +551,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   // ── Re-derive locked tokens when mode changes ──
 
   useEffect(() => {
-    if (!derivationEnabled) return;
+    if (!isOpen || !derivationEnabled) return;
     setThemeLocal((prev) => applyLockedDerivations(prev, effectiveMode, tokenLocksRef.current));
-  }, [effectiveMode, derivationEnabled]);
+  }, [effectiveMode, derivationEnabled, isOpen]);
 
   // ── Sync to ThemeProvider ──
 

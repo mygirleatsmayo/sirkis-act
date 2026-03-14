@@ -28,6 +28,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const setThemeId = useCallback((id: string) => {
+    // Theme selection should always take precedence over any transient lab override.
+    setThemeOverride(null);
     setThemeIdState(id);
     // Don't persist transient working-copy themes (e.g. playground used by Theme Lab)
     if (id !== 'playground') {
