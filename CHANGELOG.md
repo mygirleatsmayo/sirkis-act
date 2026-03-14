@@ -3,6 +3,9 @@
 
 ## [Unreleased]
 
+- **New Theme Added (WIP):** Introduced `Overheated Rhizome` light theme to the runtime registry for iterative design and compatibility testing.
+- **Theme Switch Reliability:** Selecting a theme now clears transient Theme Lab override state, preventing stale lab previews from masking explicit theme changes.
+- **Theme Lab Stability:** Locked-token re-derivation now runs only while Theme Lab is open, reducing hidden background churn when users are not actively editing.
 - **Starting Balances**: Added inputs to seamlessly seed existing account balances for 401(k), Roth IRA, and HSA projections compounding from year one.
 - **Dynamic Y-Axis Scaling**: Enhanced chart scale logic to calculate perfect visual intervals (supporting decimals like $3.375M) and removed premature curve compression on hidden start-now overlays.
 - **Theme Switcher Carousel**: Accordion-style theme preview carousel in Settings with expanded/folded cards, arrow navigation, responsive layout, and motion animations.
