@@ -17,6 +17,7 @@ export const overheatedRhizomeLightTheme: ThemeConfig = {
     textSecondary: '#3A2820',
     textNeutral: '#604838',
     textSubtle: '#806050',
+    textOnBrand: '#FAF0E8',
 
     brand: '#881840',
     brandBg: 'rgba(136, 24, 64, 0.06)',

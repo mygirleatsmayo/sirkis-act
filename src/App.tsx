@@ -467,7 +467,7 @@ const SettingsPanel = ({
                   key={option}
                   onClick={() => handleInputChange('contributionTiming', option)}
                   aria-pressed={inputs.contributionTiming === option}
-                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'text-content-primary shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10'}`} style={inputs.contributionTiming === option ? { background: theme.colors.brand } : undefined}
+                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10'}`} style={inputs.contributionTiming === option ? { background: theme.colors.brand, color: theme.colors.textOnBrand } : undefined}
                 >
                   {option === 'start' ? 'Start of Year' : 'Mid Year'}
                 </button>
@@ -1087,7 +1087,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       aria-selected={activeTab === 'chart'}
                       aria-controls="projection-tabpanel"
                       onClick={() => setActiveTab('chart')}
-                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { background: theme.colors.brand, color: theme.colors.textPrimary } : undefined}
+                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { background: theme.colors.brand, color: theme.colors.textOnBrand } : undefined}
                     >
                       Chart
                     </button>
@@ -1096,7 +1096,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       aria-selected={activeTab === 'table'}
                       aria-controls="projection-tabpanel"
                       onClick={() => setActiveTab('table')}
-                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { background: theme.colors.brand, color: theme.colors.textPrimary } : undefined}
+                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { background: theme.colors.brand, color: theme.colors.textOnBrand } : undefined}
                     >
                       Table
                     </button>

@@ -19,6 +19,7 @@ export interface ThemeColors {
   textSecondary: string;      // secondary labels, values
   textNeutral: string;        // neutral/real-value text (neither growth nor loss)
   textSubtle: string;         // helper text, timestamps, faint labels
+  textOnBrand: string;        // text on brand-colored surfaces (buttons, segmented controls, badges)
 
   // Semantic accents
   brand: string;              // primary brand color (UI chrome, toggles, sliders)

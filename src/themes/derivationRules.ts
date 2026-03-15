@@ -18,6 +18,7 @@ export interface Primaries {
   textSecondary: string;
   textSubtle: string;
   textNeutral: string;
+  textOnBrand: string;
   target: string;
   selfFunded: string;
 }
@@ -44,6 +45,7 @@ export const extractPrimaries = (colors: ThemeColors): Primaries => ({
   textSecondary: colors.textSecondary,
   textSubtle: colors.textSubtle,
   textNeutral: colors.textNeutral,
+  textOnBrand: colors.textOnBrand,
   target: colors.target,
   selfFunded: colors.selfFunded,
 });
@@ -87,6 +89,9 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
 
     // muted surface (darker than parent glass cards)
     mutedBg: mode === 'dark' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+
+    // text on brand (standalone — OKLCH derivation deferred)
+    textOnBrand: p.textOnBrand,
 
     // brand derivations
     brandBg: hexToRgba(p.brand, 0.06),

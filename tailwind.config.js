@@ -25,6 +25,7 @@ export default {
           secondary: 'rgb(var(--color-text-secondary) / <alpha-value>)',
           neutral: 'rgb(var(--color-text-neutral) / <alpha-value>)',
           subtle: 'rgb(var(--color-text-subtle) / <alpha-value>)',
+          'on-brand': 'rgb(var(--color-text-on-brand) / <alpha-value>)',
         },
         accent: {
           brand: 'rgb(var(--color-brand) / <alpha-value>)',

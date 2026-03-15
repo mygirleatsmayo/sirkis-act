@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDown, Sun, Moon, Zap, Info } from 'lucide-react';
+import { Lock, Unlock, RotateCcw, X, Upload, Palette, Download, Copy, ChevronDown, Info } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import type { ThemeConfig, ThemeColors, LogoComponent } from './themes/types';
 import { useTheme } from './themes/useTheme';
@@ -14,6 +14,7 @@ const PRIMARY_LABEL_OVERRIDES: Record<string, string> = {
   returns: 'Growth',
   opm: 'Employer Funded',
   textNeutral: 'Real Value',
+  textOnBrand: 'Button & Toggle Text',
 };
 
 const camelToLabel = (s: string): string =>
@@ -131,7 +132,7 @@ const TOKEN_HINTS: Partial<Record<keyof ThemeColors, string>> = {
 };
 
 /** Keys that are primaries — shown in Primaries picker, skip lock/unlock UI in sections */
-const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral', 'textPrimary', 'textSecondary', 'textSubtle', 'target', 'selfFunded']);
+const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', 'returns', 'loss', 'startNow', 'opm', 'textNeutral', 'textOnBrand', 'textPrimary', 'textSecondary', 'textSubtle', 'target', 'selfFunded']);
 
 /** Derived token paths per primary — used for flash, sticky highlight, and tooltip content */
 const DERIVED_PATHS: Record<string, string[]> = {
@@ -406,7 +407,6 @@ const LabInstructions = ({
           <li><strong className="text-white/55">SWATCHES</strong> Click a swatch to change that color.</li>
           <li><strong className="text-white/55">PALETTE</strong> Source colors auto-derive linked tokens (when auto-derivation is on). Standalone colors have no linked tokens.</li>
           <li><strong className="text-white/55">AUTO / MANUAL</strong> Toggle auto-derivation on or off. When off, every color is independently editable.</li>
-          <li><strong className="text-white/55">MODE</strong> Toggle dark, light, or auto to preview how colors behave.</li>
           <li><strong className="text-white/55">SOURCE LABELS</strong> Click to flash that color in app and highlight linked rows. Click again to clear highlights.</li>
           <li><strong className="text-white/55">ROW LABELS</strong> Click to flash only that row in app.</li>
           <li><strong className="text-white/55">LOCKING</strong> Unlocked rows keep manual edits. Re-lock snaps back to the derived color. Hidden when auto-derivation is off.</li>
@@ -454,6 +454,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const isTouch = useIsTouch();
   const prevThemeId = useRef(themeId);
   const wasOpenRef = useRef(false);
+  const initThemeIdRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const baseThemeRef = useRef<ThemeConfig>(cloneTheme(activeTheme));
 
@@ -473,9 +474,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   const [copyFeedback, setCopyFeedback] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
-  // Dark/Light/Auto mode
-  const [themeMode, setThemeMode] = useState<'dark' | 'light' | 'auto'>('auto');
-
   // Derivation toggle: studio → on, studioNoDerivation → off, locked → N/A
   const editorKind = theme.editor?.kind ?? DEFAULT_THEME_EDITOR.kind;
   const [derivationEnabled, setDerivationEnabled] = useState(() =>
@@ -490,13 +488,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     tokenLocksRef.current = nextLocks;
     setTokenLocks(nextLocks);
   }, []);
-
-  const resolveModeForTheme = useCallback((candidateTheme: ThemeConfig): ThemeMode => {
-    if (themeMode === 'auto') {
-      return relativeLuminance(candidateTheme.colors.bg) >= 0.5 ? 'light' : 'dark';
-    }
-    return themeMode;
-  }, [themeMode]);
 
   useEffect(() => {
     tokenLocksRef.current = tokenLocks;
@@ -523,13 +514,9 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     setTokenLocksAndRef(nextLocks);
   }, [setTokenLocksAndRef]);
 
-  // Compute effective mode
   const effectiveMode: ThemeMode = useMemo(() => {
-    if (themeMode === 'auto') {
-      return relativeLuminance(theme.colors.bg) >= 0.5 ? 'light' : 'dark';
-    }
-    return themeMode;
-  }, [themeMode, theme.colors.bg]);
+    return relativeLuminance(theme.colors.bg) >= 0.5 ? 'light' : 'dark';
+  }, [theme.colors.bg]);
 
   const relockToken = useCallback((path: string) => {
     const nextLocks = { ...tokenLocksRef.current };
@@ -562,18 +549,16 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
   }, [theme, isOpen, setThemeOverride]);
 
   useEffect(() => {
-    if (isOpen && !wasOpenRef.current) {
+    const themeChanged = activeTheme.id !== initThemeIdRef.current && activeTheme.id !== 'playground';
+    const shouldInit = isOpen && (!wasOpenRef.current || themeChanged);
+    if (shouldInit) {
       const base = cloneTheme(activeTheme);
-      const openMode = resolveModeForTheme(base);
+      initThemeIdRef.current = activeTheme.id;
       const openEditorKind = base.editor?.kind ?? DEFAULT_THEME_EDITOR.kind;
-      const openDerivation = openEditorKind !== 'studioNoDerivation';
-      setDerivationEnabled(openDerivation);
-      const normalizedBase = openDerivation
-        ? applyLockedDerivations(base, openMode, {})
-        : base;
-      baseThemeRef.current = normalizedBase;
-      setResetBaseTheme(normalizedBase);
-      setThemeLocal(cloneTheme(normalizedBase));
+      setDerivationEnabled(openEditorKind !== 'studioNoDerivation');
+      baseThemeRef.current = base;
+      setResetBaseTheme(base);
+      setThemeLocal(cloneTheme(base));
       setTokenLocksAndRef({});
       if (themeId !== 'playground') {
         prevThemeId.current = themeId;
@@ -583,7 +568,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     wasOpenRef.current = isOpen;
     // Override persists when panel closes so changes remain visible
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, activeTheme, resolveModeForTheme, setTokenLocksAndRef]);
+  }, [isOpen, activeTheme, setTokenLocksAndRef]);
 
   // ── Value setters ──
 
@@ -652,9 +637,10 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
       const next = cloneTheme(prev);
       (next.colors as unknown as Record<string, string>)[primaryKey] = newHex;
       if (!derivationEnabled) return next;
-      return applyLockedDerivations(next, effectiveMode, tokenLocksRef.current);
+      const mode: ThemeMode = relativeLuminance(next.colors.bg) >= 0.5 ? 'light' : 'dark';
+      return applyLockedDerivations(next, mode, tokenLocksRef.current);
     });
-  }, [effectiveMode, derivationEnabled]);
+  }, [derivationEnabled]);
 
   /** Toggle derivation on/off. Turning on re-derives all locked tokens. */
   const toggleDerivation = useCallback((enabled: boolean) => {
@@ -725,7 +711,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
     });
     setCustomSvg(null);
     setTokenLocksAndRef({});
-    setThemeMode('auto');
     setHighlightedPrimary(null);
     if (flashTimerRef.current) {
       clearTimeout(flashTimerRef.current);
@@ -851,27 +836,6 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         <LabInstructions open={instructionsOpen} onToggle={() => setInstructionsOpen((prev) => !prev)} />
 
         {/* ── Mode ── */}
-        <SectionHeader label="Mode" showDivider={instructionsOpen} compactTop />
-        <div className="flex items-center gap-1 mb-3 p-1 rounded-lg bg-white/5 w-fit">
-          {([
-            { mode: 'dark' as const, icon: Moon, label: 'Dark' },
-            { mode: 'light' as const, icon: Sun, label: 'Light' },
-            { mode: 'auto' as const, icon: Zap, label: 'Auto' },
-          ]).map(({ mode, icon: Icon, label }) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => setThemeMode(mode)}
-              className={`flex items-center gap-1 px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded-md transition-colors ${themeMode === mode
-                ? 'bg-white/15 text-white'
-                : 'text-white/40 hover:text-white/60'
-                }`}
-            >
-              <Icon size={10} /> {label}
-            </button>
-          ))}
-        </div>
-
         {theme.colors.bg !== defaults.colors.bg && (
           <p className="hidden max-sm:block text-[9px] font-bold text-white bg-red-600 rounded px-2 py-1 -mt-1 mb-2">
             ⚠ Address bar color updates when panel closes
@@ -956,7 +920,7 @@ export const ThemeLab = ({ isOpen, onClose }: ThemeLabProps) => {
         })}
 
         <SubSectionHeader label="Standalone" />
-        {(['startNow', 'textPrimary', 'textSecondary', 'textSubtle'] as const).map(key => {
+        {(['startNow', 'textOnBrand', 'textPrimary', 'textSecondary', 'textSubtle'] as const).map(key => {
           const handleChange = (hex: string) => {
             setPrimaryColor(key as keyof Primaries, hex);
           };

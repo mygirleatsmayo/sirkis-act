@@ -17,6 +17,7 @@ export const cyprusTheme: ThemeConfig = {
     textSecondary: '#e2e8f0',
     textNeutral: '#e2e8f0',
     textSubtle: '#8ba3c3',
+    textOnBrand: '#ffffff',
 
     brand: '#00A499',
     brandBg: 'rgba(0, 164, 153, 0.06)',

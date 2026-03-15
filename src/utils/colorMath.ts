@@ -103,6 +103,19 @@ export const relativeLuminance = (hex: string): number => {
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 };
 
+/** WCAG 2.1 contrast ratio between two hex colors (range 1–21) */
+export const contrastRatio = (hex1: string, hex2: string): number => {
+  const l1 = relativeLuminance(hex1);
+  const l2 = relativeLuminance(hex2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+};
+
+/** Pick white or black for maximum contrast against a background hex color */
+export const getContrastText = (bgHex: string): string =>
+  relativeLuminance(bgHex) > 0.179 ? '#000000' : '#ffffff';
+
 // ─── Parsing utilities ──────────────────────────────────────────────────
 
 /** Parse an rgba/rgb() string into [r, g, b, a] or null if invalid */

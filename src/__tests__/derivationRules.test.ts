@@ -16,6 +16,7 @@ const cyprusPrimaries: Primaries = {
   textPrimary: '#ffffff',
   textSecondary: '#e2e8f0',
   textSubtle: '#8ba3c3',
+  textOnBrand: '#ffffff',
   textNeutral: '#e2e8f0',
   target: '#00A499',
   selfFunded: '#00A499',
@@ -80,6 +81,15 @@ describe('applyDerivations', () => {
   });
   it('derives logoColor as copy of brand', () => {
     expect(derived.logoColor).toBe(cyprusPrimaries.brand);
+  });
+
+  // ── textOnBrand (standalone primary) ──
+  it('textOnBrand passes through as primary', () => {
+    expect(derived.colors.textOnBrand).toBe(cyprusPrimaries.textOnBrand);
+  });
+  it('textOnBrand is customizable per theme', () => {
+    const custom = applyDerivations({ ...cyprusPrimaries, textOnBrand: '#112233' }, 'dark');
+    expect(custom.colors.textOnBrand).toBe('#112233');
   });
 
   // ── returns derivations ──
@@ -174,6 +184,7 @@ describe('applyDerivations', () => {
     expect(derived.colors.textPrimary).toBe(cyprusPrimaries.textPrimary);
     expect(derived.colors.textSecondary).toBe(cyprusPrimaries.textSecondary);
     expect(derived.colors.textSubtle).toBe(cyprusPrimaries.textSubtle);
+    expect(derived.colors.textOnBrand).toBe(cyprusPrimaries.textOnBrand);
     expect(derived.colors.textNeutral).toBe(cyprusPrimaries.textNeutral);
     expect(derived.colors.target).toBe(cyprusPrimaries.target);
     expect(derived.colors.selfFunded).toBe(cyprusPrimaries.selfFunded);

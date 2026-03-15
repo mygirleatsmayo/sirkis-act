@@ -3,7 +3,8 @@ import { describe, it, expect } from 'vitest';
 import {
   hexToRgb, rgbToHex, rgbToHsl, hslToRgb,
   hexToHsl, hslToHex, shiftLightness, hexToRgba,
-  relativeLuminance, analogous, triadic, tetradic, complementary,
+  relativeLuminance, contrastRatio, getContrastText,
+  analogous, triadic, tetradic, complementary,
 } from '../utils/colorMath';
 
 describe('hexToRgb', () => {
@@ -116,6 +117,42 @@ describe('relativeLuminance', () => {
   });
   it('Cyprus bg is dark (< 0.1)', () => {
     expect(relativeLuminance('#003D3A')).toBeLessThan(0.1);
+  });
+});
+
+describe('contrastRatio', () => {
+  it('black vs white is 21:1', () => {
+    expect(contrastRatio('#000000', '#ffffff')).toBeCloseTo(21, 0);
+  });
+  it('same color is 1:1', () => {
+    expect(contrastRatio('#00A499', '#00A499')).toBeCloseTo(1, 4);
+  });
+  it('is symmetric', () => {
+    expect(contrastRatio('#003D3A', '#ffffff')).toBeCloseTo(
+      contrastRatio('#ffffff', '#003D3A'), 4
+    );
+  });
+  it('Cyprus brand vs white exceeds WCAG AA (4.5)', () => {
+    expect(contrastRatio('#00A499', '#ffffff')).toBeGreaterThan(2);
+  });
+  it('Overheated brand vs cream has good contrast', () => {
+    expect(contrastRatio('#881840', '#FAF0E8')).toBeGreaterThan(4.5);
+  });
+});
+
+describe('getContrastText', () => {
+  it('returns white for dark backgrounds', () => {
+    expect(getContrastText('#000000')).toBe('#ffffff');
+    expect(getContrastText('#003D3A')).toBe('#ffffff');
+    expect(getContrastText('#881840')).toBe('#ffffff');
+  });
+  it('returns black for light backgrounds', () => {
+    expect(getContrastText('#ffffff')).toBe('#000000');
+    expect(getContrastText('#FAF0E8')).toBe('#000000');
+    expect(getContrastText('#E6C300')).toBe('#000000');
+  });
+  it('returns black for mid-brightness brand (Cyprus teal)', () => {
+    expect(getContrastText('#00A499')).toBe('#000000');
   });
 });
 
