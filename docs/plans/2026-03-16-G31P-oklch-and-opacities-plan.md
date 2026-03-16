@@ -1,4 +1,4 @@
-# OKLCH & Semantic Opacities Normalization Plan
+# OKLCH & Semantic Opacities Normalization Plan (Gemini 3.1 Pro High Reasoning via API in Roo Code VS Code Extension)
 
 **Goal**: Execute a complete UI normalization targeting hardcoded opacities and rigid color derivations, ensuring the app seamlessly adapts across highly varied visual themes while honoring our "No AI Slop" and "Varied but Consistent" design principles.
 

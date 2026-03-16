@@ -1,4 +1,4 @@
-# OKLCH + Opacity Normalization Plan (GPT-5.3 Codex)
+# OKLCH + Opacity Normalization Plan (GPT-5.3 Codex in Copilot VS Code Extension)
 
 **Date:** 2026-03-16  
 **Branch context:** colors (off new-themes)  
