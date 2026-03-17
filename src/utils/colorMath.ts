@@ -104,13 +104,9 @@ export const hexToOklch = (hex: string): Oklch => {
   const gLinear = srgbToLinear(g / 255);
   const bLinear = srgbToLinear(b / 255);
 
-  const x = 0.4122214708 * rLinear + 0.5363325363 * gLinear + 0.0514459929 * bLinear;
-  const y = 0.2119034982 * rLinear + 0.6806995451 * gLinear + 0.1073969566 * bLinear;
-  const z = 0.0883024619 * rLinear + 0.2024326343 * gLinear + 0.9505321522 * bLinear;
-
-  const l = Math.cbrt(0.8189330101 * x + 0.3618667424 * y - 0.1288597137 * z);
-  const m = Math.cbrt(0.0329845436 * x + 0.9293118715 * y + 0.0361456387 * z);
-  const s = Math.cbrt(0.0482003018 * x + 0.2643662691 * y + 0.6338517070 * z);
+  const l = Math.cbrt(0.4122214708 * rLinear + 0.5363325363 * gLinear + 0.0514459929 * bLinear);
+  const m = Math.cbrt(0.2119034982 * rLinear + 0.6806995451 * gLinear + 0.1073969566 * bLinear);
+  const s = Math.cbrt(0.0883024619 * rLinear + 0.2817188376 * gLinear + 0.6299787005 * bLinear);
 
   const L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s;
   const a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s;

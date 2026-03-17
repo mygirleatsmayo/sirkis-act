@@ -5,6 +5,7 @@ import {
   hexToHsl, hslToHex, shiftLightness, hexToRgba,
   relativeLuminance, contrastRatio, getContrastText,
   analogous, triadic, tetradic, complementary,
+  hexToOklch, oklchToHex, shiftOklchLightness, deriveTextFromBg,
 } from '../utils/colorMath';
 
 describe('hexToRgb', () => {
@@ -93,6 +94,107 @@ describe('shiftLightness', () => {
     const result = shiftLightness('#ffffff', 10);
     const [, , l] = hexToHsl(result);
     expect(l).toBe(100);
+  });
+});
+
+describe('hexToOklch / oklchToHex', () => {
+  const expectHexClose = (actual: string, expected: string, tolerance = 1) => {
+    const [r1, g1, b1] = hexToRgb(actual);
+    const [r2, g2, b2] = hexToRgb(expected);
+    expect(Math.abs(r1 - r2)).toBeLessThanOrEqual(tolerance);
+    expect(Math.abs(g1 - g2)).toBeLessThanOrEqual(tolerance);
+    expect(Math.abs(b1 - b2)).toBeLessThanOrEqual(tolerance);
+  };
+
+  it('roundtrips white', () => {
+    const [L, C, H] = hexToOklch('#ffffff');
+    expect(L).toBeCloseTo(1, 4);
+    expect(C).toBeCloseTo(0, 4);
+    expectHexClose(oklchToHex(L, C, H), '#ffffff');
+  });
+
+  it('roundtrips black', () => {
+    const [L, C, H] = hexToOklch('#000000');
+    expect(L).toBeCloseTo(0, 4);
+    expect(C).toBeCloseTo(0, 4);
+    expectHexClose(oklchToHex(L, C, H), '#000000');
+  });
+
+  it('roundtrips Cyprus teal', () => {
+    const [L, C, H] = hexToOklch('#00a499');
+    expectHexClose(oklchToHex(L, C, H), '#00a499');
+  });
+
+  it('roundtrips Rhizome brand', () => {
+    const [L, C, H] = hexToOklch('#881840');
+    expectHexClose(oklchToHex(L, C, H), '#881840');
+  });
+
+  it('matches known red reference values', () => {
+    const [L, C, H] = hexToOklch('#ff0000');
+    expect(L).toBeCloseTo(0.6279, 3);
+    expect(C).toBeCloseTo(0.2577, 3);
+    expect(H).toBeCloseTo(29.23, 2);
+  });
+});
+
+describe('shiftOklchLightness', () => {
+  it('shifts up', () => {
+    const result = shiftOklchLightness('#003d3a', 0.05);
+    const [baseL] = hexToOklch('#003d3a');
+    const [resultL] = hexToOklch(result);
+    expect(resultL).toBeGreaterThan(baseL);
+  });
+
+  it('shifts down', () => {
+    const result = shiftOklchLightness('#faf0e8', -0.05);
+    const [baseL] = hexToOklch('#faf0e8');
+    const [resultL] = hexToOklch(result);
+    expect(resultL).toBeLessThan(baseL);
+  });
+
+  it('clamps at 0', () => {
+    expect(shiftOklchLightness('#000000', -0.2)).toBe('#000000');
+  });
+
+  it('clamps at 1', () => {
+    expect(shiftOklchLightness('#ffffff', 0.2)).toBe('#ffffff');
+  });
+
+  it('same color with +/- deltas gives different results', () => {
+    const lighter = shiftOklchLightness('#00a499', 0.05);
+    const darker = shiftOklchLightness('#00a499', -0.05);
+    expect(lighter).not.toBe(darker);
+  });
+});
+
+describe('deriveTextFromBg', () => {
+  const hueDistance = (a: number, b: number) => {
+    const delta = Math.abs(a - b);
+    return Math.min(delta, 360 - delta);
+  };
+
+  it('derives readable secondary text from dark backgrounds', () => {
+    const text = deriveTextFromBg('#003d3a', 0.82);
+    expect(relativeLuminance(text)).toBeGreaterThan(0.4);
+  });
+
+  it('derives readable secondary text from light backgrounds', () => {
+    const text = deriveTextFromBg('#faf0e8', 0.30);
+    expect(relativeLuminance(text)).toBeLessThan(0.2);
+  });
+
+  it('respects chroma clamp', () => {
+    const derived = deriveTextFromBg('#ff0000', 0.6, 0.01);
+    const [, C] = hexToOklch(derived);
+    expect(C).toBeLessThanOrEqual(0.011);
+  });
+
+  it('preserves source hue', () => {
+    const [, , sourceHue] = hexToOklch('#00a499');
+    const derived = deriveTextFromBg('#00a499', 0.75, 0.03);
+    const [, , textHue] = hexToOklch(derived);
+    expect(hueDistance(sourceHue, textHue)).toBeLessThanOrEqual(5);
   });
 });
 
