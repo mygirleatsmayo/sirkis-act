@@ -87,6 +87,88 @@ export const shiftLightness = (hex: string, delta: number): string => {
   return hslToHex(h, s, newL);
 };
 
+export type Oklch = [number, number, number];
+
+const clamp01 = (value: number): number => Math.max(0, Math.min(1, value));
+
+const srgbToLinear = (value: number): number =>
+  value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+
+const linearToSrgb = (value: number): number =>
+  value <= 0.0031308 ? value * 12.92 : 1.055 * value ** (1 / 2.4) - 0.055;
+
+/** Convert hex (#RRGGBB) to OKLCH [L, C, H] */
+export const hexToOklch = (hex: string): Oklch => {
+  const [r, g, b] = hexToRgb(hex);
+  const rLinear = srgbToLinear(r / 255);
+  const gLinear = srgbToLinear(g / 255);
+  const bLinear = srgbToLinear(b / 255);
+
+  const x = 0.4122214708 * rLinear + 0.5363325363 * gLinear + 0.0514459929 * bLinear;
+  const y = 0.2119034982 * rLinear + 0.6806995451 * gLinear + 0.1073969566 * bLinear;
+  const z = 0.0883024619 * rLinear + 0.2024326343 * gLinear + 0.9505321522 * bLinear;
+
+  const l = Math.cbrt(0.8189330101 * x + 0.3618667424 * y - 0.1288597137 * z);
+  const m = Math.cbrt(0.0329845436 * x + 0.9293118715 * y + 0.0361456387 * z);
+  const s = Math.cbrt(0.0482003018 * x + 0.2643662691 * y + 0.6338517070 * z);
+
+  const L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s;
+  const a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s;
+  const bChannel = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+
+  const C = Math.sqrt(a ** 2 + bChannel ** 2);
+  const HRaw = (Math.atan2(bChannel, a) * 180) / Math.PI;
+  const H = HRaw < 0 ? HRaw + 360 : HRaw;
+
+  return [L, C, H];
+};
+
+/** Convert OKLCH [L, C, H] to hex (#rrggbb), clamping to sRGB gamut */
+export const oklchToHex = (L: number, C: number, H: number): string => {
+  const clampedL = clamp01(L);
+  const clampedC = Math.max(0, C);
+  const normalizedH = ((H % 360) + 360) % 360;
+  const hueRadians = (normalizedH * Math.PI) / 180;
+  const a = clampedC * Math.cos(hueRadians);
+  const bChannel = clampedC * Math.sin(hueRadians);
+
+  const lPrime = clampedL + 0.3963377774 * a + 0.2158037573 * bChannel;
+  const mPrime = clampedL - 0.1055613458 * a - 0.0638541728 * bChannel;
+  const sPrime = clampedL - 0.0894841775 * a - 1.2914855480 * bChannel;
+
+  const l = lPrime ** 3;
+  const m = mPrime ** 3;
+  const s = sPrime ** 3;
+
+  const rLinear = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+  const gLinear = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+  const bLinear = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+
+  const r = clamp01(linearToSrgb(rLinear));
+  const g = clamp01(linearToSrgb(gLinear));
+  const b = clamp01(linearToSrgb(bLinear));
+
+  return rgbToHex(r * 255, g * 255, b * 255);
+};
+
+/** Shift OKLCH lightness by deltaL (clamped 0-1). Preserves chroma and hue. */
+export const shiftOklchLightness = (hex: string, deltaL: number): string => {
+  const [L, C, H] = hexToOklch(hex);
+  return oklchToHex(clamp01(L + deltaL), C, H);
+};
+
+/** Derive text color from bg hex at a target OKLCH lightness. */
+export const deriveTextFromBg = (
+  bgHex: string,
+  targetL: number,
+  maxChroma = 0.035,
+): string => {
+  const [, C, H] = hexToOklch(bgHex);
+  const clampedL = clamp01(targetL);
+  const clampedMaxChroma = Math.max(0, maxChroma);
+  return oklchToHex(clampedL, Math.min(C, clampedMaxChroma), H);
+};
+
 /** Create rgba string from hex + alpha */
 export const hexToRgba = (hex: string, alpha: number): string => {
   const [r, g, b] = hexToRgb(hex);
