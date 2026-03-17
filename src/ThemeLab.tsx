@@ -94,6 +94,8 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
       { key: 'bgInput', label: 'Input' },
       { key: 'bgOverlay', label: 'Overlay' },
       { key: 'mutedBg', label: 'Muted' },
+      { key: 'surfaceHover', label: 'Hover Overlay' },
+      { key: 'surfaceSunken', label: 'Inset Surface' },
     ],
   },
   {
@@ -101,6 +103,7 @@ const TOKEN_SECTIONS: { section: string; tokens: { key: keyof ThemeColors; label
     tokens: [
       { key: 'borderDefault', label: 'Border Default' },
       { key: 'borderSubtle', label: 'Border Subtle' },
+      { key: 'borderMuted', label: 'Muted Border' },
     ],
   },
   {
@@ -136,7 +139,7 @@ const PRIMARY_KEYS = new Set<keyof ThemeColors>(['bg', 'brand', 'brandAccent', '
 
 /** Derived token paths per primary — used for flash, sticky highlight, and tooltip content */
 const DERIVED_PATHS: Record<string, string[]> = {
-  bg: ['colors.bgGlass', 'colors.bgInput', 'colors.borderDefault', 'colors.mutedBg', 'colors.bgOverlay', 'colors.borderSubtle', 'colors.toggleOff'],
+  bg: ['colors.bgGlass', 'colors.bgInput', 'colors.borderDefault', 'colors.mutedBg', 'colors.bgOverlay', 'colors.surfaceHover', 'colors.surfaceSunken', 'colors.borderSubtle', 'colors.borderMuted', 'colors.toggleOff'],
   brand: ['colors.brandBg', 'colors.focusRing', 'colors.sliderAccent', 'colors.sliderAccentHover', 'branding.heroLine1Color', 'branding.logoColor'],
   brandAccent: ['branding.heroLine2Color', 'effects.glowColor', 'effects.blobs.0.color', 'effects.blobs.1.color'],
   returns: ['colors.returnsBg'],

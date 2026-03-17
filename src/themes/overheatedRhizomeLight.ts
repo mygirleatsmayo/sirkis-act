@@ -12,6 +12,7 @@ export const overheatedRhizomeLightTheme: ThemeConfig = {
 
     borderDefault: '#D0B090',
     borderSubtle: 'rgba(24, 12, 8, 0.06)',
+    borderMuted: 'rgba(24, 12, 8, 0.10)',
 
     textPrimary: '#180C08',
     textSecondary: '#3A2820',
@@ -32,6 +33,8 @@ export const overheatedRhizomeLightTheme: ThemeConfig = {
     neutralBg: 'rgba(24, 12, 8, 0.10)',
 
     mutedBg: 'rgba(0, 0, 0, 0.05)',
+    surfaceHover: 'rgba(24, 12, 8, 0.06)',
+    surfaceSunken: 'rgba(0, 0, 0, 0.06)',
 
     target: '#881840',
     targetBg: 'rgba(136, 24, 64, 0.06)',

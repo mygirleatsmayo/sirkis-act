@@ -13,6 +13,7 @@ export interface ThemeColors {
   // Borders
   borderDefault: string;      // input borders, dividers
   borderSubtle: string;       // card borders, faint separators
+  borderMuted: string;        // medium-emphasis separators and rings
 
   // Text
   textPrimary: string;        // headings, primary content
@@ -36,6 +37,8 @@ export interface ThemeColors {
 
   // Muted surfaces
   mutedBg: string;            // subcards, table container, delayed start-age row
+  surfaceHover: string;       // hover/focus overlays on interactive surfaces
+  surfaceSunken: string;      // inset control and header surfaces
 
   // Projection-specific (decoupled from brand)
   target: string;             // Target projection badge/card color

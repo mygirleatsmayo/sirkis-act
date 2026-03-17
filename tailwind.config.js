@@ -11,6 +11,7 @@ export default {
       borderColor: {
         theme: 'rgb(var(--color-border-default) / <alpha-value>)',
         subtle: 'var(--color-border-subtle)',
+        muted: 'var(--color-border-muted)',
       },
       colors: {
         surface: {
@@ -19,6 +20,8 @@ export default {
           input: 'rgb(var(--color-bg-input) / <alpha-value>)',
           overlay: 'var(--color-bg-overlay)',
           muted: 'var(--color-muted-bg)',
+          hover: 'var(--color-surface-hover)',
+          sunken: 'var(--color-surface-sunken)',
         },
         content: {
           primary: 'rgb(var(--color-text-primary) / <alpha-value>)',

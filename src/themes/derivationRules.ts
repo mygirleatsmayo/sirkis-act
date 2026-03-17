@@ -89,6 +89,8 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
 
     // muted surface (darker than parent glass cards)
     mutedBg: mode === 'dark' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+    surfaceHover: hexToRgba(p.textPrimary, 0.06),
+    surfaceSunken: mode === 'dark' ? 'rgba(0, 0, 0, 0.20)' : 'rgba(0, 0, 0, 0.06)',
 
     // text on brand (standalone — OKLCH derivation deferred)
     textOnBrand: p.textOnBrand,
@@ -124,6 +126,7 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     // bg-derived UI tokens
     bgOverlay: hexToRgba(shiftOklchLightness(p.bg, -0.30), 0.4),
     borderSubtle: hexToRgba(p.textPrimary, 0.06),
+    borderMuted: hexToRgba(p.textPrimary, 0.10),
     toggleOff: (() => {
       const [, bgC, bgH] = hexToOklch(p.bg);
       const targetL = mode === 'dark' ? 0.75 : 0.65;

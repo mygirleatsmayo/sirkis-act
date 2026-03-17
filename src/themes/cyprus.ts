@@ -12,6 +12,7 @@ export const cyprusTheme: ThemeConfig = {
 
     borderDefault: '#006560',
     borderSubtle: 'rgba(255, 255, 255, 0.06)',
+    borderMuted: 'rgba(255, 255, 255, 0.10)',
 
     textPrimary: '#ffffff',
     textSecondary: '#e2e8f0',
@@ -32,6 +33,8 @@ export const cyprusTheme: ThemeConfig = {
     neutralBg: 'rgba(226, 232, 240, 0.10)',
 
     mutedBg: 'rgba(0, 0, 0, 0.08)',
+    surfaceHover: 'rgba(255, 255, 255, 0.06)',
+    surfaceSunken: 'rgba(0, 0, 0, 0.20)',
 
     target: '#00A499',
     targetBg: 'rgba(0, 164, 153, 0.06)',
