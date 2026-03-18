@@ -43,7 +43,7 @@ const RootContent = () => {
           type="button"
           onClick={openLab}
           aria-label="Open Theme Lab"
-          className="fixed bottom-24 lg:bottom-6 right-4 z-[9998] p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white/60 hover:text-white hover:bg-black/80 shadow-lg transition-all hover:scale-110"
+          className="fixed bottom-24 lg:bottom-6 right-4 z-[9998] p-3 rounded-full bg-black/60 backdrop-blur-md border border-muted text-content-subtle hover:text-content-primary hover:bg-black/80 shadow-lg transition-all hover:scale-110"
         >
           <Palette size={18} />
         </button>

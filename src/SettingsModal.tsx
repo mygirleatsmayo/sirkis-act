@@ -229,7 +229,7 @@ const FoldedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
               className="w-[12px] h-[12px] rounded-full mx-auto"
               style={{
                 backgroundColor: t.colors[key],
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
+                boxShadow: `0 0 0 1px ${t.colors.borderMuted}`,
               }}
             />
           ))}
@@ -261,7 +261,7 @@ const ExpandedCardContent = ({ theme: t }: { theme: CarouselTheme }) => {
                 className="w-[16px] h-[16px] rounded-full"
                 style={{
                   backgroundColor: t.colors[key],
-                  boxShadow: '0 0 0 1px rgba(255,255,255,0.15)',
+                  boxShadow: `0 0 0 1px ${t.colors.borderMuted}`,
                 }}
               />
             ))}
@@ -340,8 +340,8 @@ const ArrowButton = ({
     aria-label={direction === 'left' ? 'Previous theme' : 'Next theme'}
     className={`shrink-0 flex items-center justify-center rounded-lg border transition-colors ${
       disabled
-        ? 'border-white/5 opacity-30 cursor-default'
-        : 'border-white/10 hover:border-white/25 hover:bg-white/5'
+        ? 'border-subtle opacity-30 cursor-default'
+        : 'border-muted hover:border-theme hover:bg-surface-hover'
     }`}
     style={{ width: 28, height: CARD_HEIGHT }}
   >
@@ -556,7 +556,7 @@ const ThemeSwitcherSection = ({
                   style={{
                     boxShadow: isActive
                       ? `inset 0 0 0 2px ${activeTheme.colors.brand}`
-                      : 'inset 0 0 0 1px rgba(255,255,255,0.1)',
+                      : `inset 0 0 0 1px ${activeTheme.colors.borderSubtle}`,
                   }}
                 />
               </motion.div>
@@ -706,17 +706,17 @@ export const SettingsModal = ({
       <div
         ref={modalRef}
         tabIndex={-1}
-        className="relative z-10 w-full max-w-lg mx-4 max-h-[85vh] flex flex-col bg-surface-glass border border-white/10 rounded-2xl shadow-2xl outline-none
+        className="relative z-10 w-full max-w-lg mx-4 max-h-[85vh] flex flex-col bg-surface-glass border border-muted rounded-2xl shadow-2xl outline-none
           max-sm:fixed max-sm:inset-0 max-sm:max-w-none max-sm:mx-0 max-sm:max-h-none max-sm:rounded-none"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 flex-shrink-0">
+      {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-muted flex-shrink-0">
           <h2 className="text-lg font-display font-bold text-content-primary">Settings</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close settings"
-            className="p-1.5 rounded-lg text-content-subtle hover:text-content-primary hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-content-subtle hover:text-content-primary hover:bg-surface-hover transition-colors"
           >
             <X size={18} />
           </button>
@@ -766,7 +766,7 @@ export const SettingsModal = ({
                   disabled={isThemeLabLocked}
                   className="sr-only peer"
                 />
-                <div className={`w-9 h-5 rounded-full transition-colors ${isThemeLabLocked ? 'bg-white/10' : 'bg-white/15 peer-checked:bg-accent-brand'}`} />
+                <div className={`w-9 h-5 rounded-full transition-colors ${isThemeLabLocked ? 'bg-surface-hover' : 'bg-surface-sunken peer-checked:bg-accent-brand'}`} />
                 <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform peer-checked:translate-x-4 ${isThemeLabLocked ? 'bg-white/70' : 'bg-white'}`} />
               </div>
               <div>
@@ -791,7 +791,7 @@ export const SettingsModal = ({
             <button
               type="button"
               disabled
-              className="px-4 py-2 rounded-xl text-sm font-bold text-content-subtle/50 bg-white/5 border border-white/5 cursor-not-allowed"
+              className="px-4 py-2 rounded-xl text-sm font-bold text-content-subtle/50 bg-surface-hover border border-subtle cursor-not-allowed"
             >
               Replay Tour
             </button>
