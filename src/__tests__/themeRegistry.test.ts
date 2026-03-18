@@ -28,6 +28,13 @@ describe('theme registry compatibility', () => {
     const resolved = resolveTheme(themes['cyprusLocked']);
     expect(resolved.editor.kind).toBe('locked');
   });
+
+  it('preserves deboss effect in Cyprus-derived clones', () => {
+    const cyprusDeboss = themes.cyprus.effects.deboss;
+    expect(cyprusDeboss).toBeDefined();
+    expect(themes.playground.effects.deboss).toEqual(cyprusDeboss);
+    expect(themes.cyprusLocked.effects.deboss).toEqual(cyprusDeboss);
+  });
 });
 
 describe('getSelectableThemes', () => {
