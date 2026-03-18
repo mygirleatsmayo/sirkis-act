@@ -135,7 +135,7 @@ const MetricCard = memo(({ badgeLabel, badgeColor, value, label, isHero = false,
             twoColumnDelayedContent
           ) : comparisonValue != null ? (
             <>
-              <div className="w-full h-px bg-white/15 mt-2 mb-1" />
+              <div className="w-full h-px bg-surface-hover mt-2 mb-1" />
               <div className="text-[clamp(0.9rem,4vw,1.15rem)] font-black font-mono tracking-tight" style={{ color: theme.colors.startNow }}>
                 {comparisonValue}
               </div>
@@ -202,7 +202,7 @@ const TooltipIcon = ({ content, className = "", align = 'center', placement = 't
       >
         <Info size={12} />
         <span className="sr-only">Info</span>
-        <span className={`pointer-events-none absolute ${width} max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-white/15 bg-surface-glass px-3 py-2 text-[11px] font-medium text-content-secondary text-left shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
+        <span className={`pointer-events-none absolute ${width} max-w-[70vw] ${alignClass} ${placementClass} rounded-lg border border-muted bg-surface-glass px-3 py-2 text-[11px] font-medium text-content-secondary text-left shadow-lg transition-opacity duration-200 z-50 ${visibilityClass}`}>
           {content}
         </span>
       </button>
@@ -246,7 +246,7 @@ const InputField = ({ label, value, onChange, min, max, step = 1, icon: Icon, un
           }}
           disabled={disabled}
           aria-label={`${label} slider`}
-          className={`flex-grow h-1.5 bg-white/15 rounded-lg appearance-none transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer accent-interactive-slider hover:accent-interactive-slider-hover'}`}
+          className={`flex-grow h-1.5 bg-surface-hover rounded-lg appearance-none transition-all ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer accent-interactive-slider hover:accent-interactive-slider-hover'}`}
         />
         <div className="relative flex items-center group-focus-within:scale-105 transition-transform flex-shrink-0 shadow-sm rounded-xl">
           {unit === "$" && (
@@ -363,7 +363,7 @@ const SettingsPanel = ({
                   type="button"
                   onClick={(e) => { (e.currentTarget as HTMLButtonElement).blur(); onOpenSettings(); }}
                   aria-label="Open settings"
-                  className="p-2 rounded-xl text-content-subtle hover:text-content-primary hover:bg-white/10 transition-colors"
+                  className="p-2 rounded-xl text-content-subtle hover:text-content-primary hover:bg-surface-hover transition-colors"
                 >
                   <SettingsIcon size={18} />
                 </button>
@@ -461,13 +461,13 @@ const SettingsPanel = ({
               <label className="text-sm font-semibold text-content-secondary flex items-center gap-2 transition-colors group-hover:text-accent-brand"><Calendar size={16} className="text-content-subtle group-hover:text-accent-brand transition-colors" />Contribution Timing</label>
               <TooltipIcon placement="top" content="When contributions hit the account. Start of year assumes earlier compounding; mid-year is more conservative." />
             </div>
-            <div className="flex bg-black/20 rounded-xl p-1 shadow-inner border border-subtle">
+            <div className="flex bg-surface-sunken rounded-xl p-1 shadow-inner border border-subtle">
               {['start', 'mid'].map((option) => (
                 <button
                   key={option}
                   onClick={() => handleInputChange('contributionTiming', option)}
                   aria-pressed={inputs.contributionTiming === option}
-                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'text-content-primary shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10'}`} style={inputs.contributionTiming === option ? { background: theme.colors.brand } : undefined}
+                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${inputs.contributionTiming === option ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-surface-hover'}`} style={inputs.contributionTiming === option ? { background: theme.colors.brand, color: theme.colors.textOnBrand } : undefined}
                 >
                   {option === 'start' ? 'Start of Year' : 'Mid Year'}
                 </button>
@@ -895,7 +895,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
         ))}
       </div>
       {/* DESKTOP SIDEBAR (GLASS PANEL) */}
-      <div role="complementary" aria-label="Settings" className="hidden lg:flex flex-col w-[420px] bg-surface-glass border-r border-black/30 z-20 relative shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
+      <div role="complementary" aria-label="Settings" className="hidden lg:flex flex-col w-[420px] bg-surface-glass border-r border-theme z-20 relative">
         <div className="flex-1 overflow-hidden p-8 hover:overflow-y-auto custom-scrollbar">
           <SettingsPanel
             inputs={inputs}
@@ -911,7 +911,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
       {/* MAIN CONTENT AREA */}
       <div role="main" id="main-content" className="min-w-0 flex flex-col relative z-10 lg:flex-1 lg:min-h-0">
         {/* MOBILE HEADER */}
-        <div role="banner" className={`lg:hidden flex justify-between items-center px-4 bg-surface border-b border-white/10 sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
+        <div role="banner" className={`lg:hidden flex justify-between items-center px-4 bg-surface border-b border-muted sticky top-0 z-30 shadow-sm will-change-transform transition-[padding] duration-300 ease-in-out ${isScrolled ? 'py-1.5' : 'py-3'}`}>
           <div className={`flex gap-2 ${isScrolled ? 'items-center' : 'items-start'}`}>
             {heroVisibility.showLogo && (
               <div style={capabilities.logoColorMode === 'themed' ? { color: theme.branding.logoColor } : undefined}>
@@ -950,12 +950,12 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                 {heroVisibility.showHeroTitle && (
                   <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl font-display font-black tracking-tight leading-[0.92]">
                     {showHeroLine1Text && (
-                      <span style={{ color: theme.branding.heroLine1Color, textShadow: '0px 1px 0px rgba(255,255,255,0.12), 0px -1px 0px rgba(0,0,0,0.7)' }}>{heroLine1}</span>
+                      <span style={{ color: theme.branding.heroLine1Color, textShadow: '0px 1px 0px var(--deboss-highlight, transparent), 0px -1px 0px var(--deboss-shadow, transparent)' }}>{heroLine1}</span>
                     )}
                     {capabilities.showHeroLine2 && heroLine2 && (
                       <>
                         {showHeroLine1Text && <br />}
-                        <span style={{ color: theme.branding.heroLine2Color, textShadow: '0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px rgba(0,0,0,0.8)' }}>{heroLine2}</span>
+                        <span style={{ color: theme.branding.heroLine2Color, textShadow: '0px 1px 0px var(--deboss-highlight, transparent), 0px -1px 0px var(--deboss-shadow, transparent)' }}>{heroLine2}</span>
                       </>
                     )}
                   </h1>
@@ -1020,7 +1020,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       </div>
                     </div>
                     <p className="font-display italic font-semibold leading-snug mt-3 text-center tracking-wide"
-                      style={{ fontSize: 'clamp(0.7rem, 3.75vw, 1rem)', color: theme.colors.loss, textShadow: '0px 1px 0.7px rgba(255,255,255,0.04), 0px -1px 0.7px rgba(0,0,0,0.25)' }}>
+                      style={{ fontSize: 'clamp(0.7rem, 3.75vw, 1rem)', color: theme.colors.loss, textShadow: '0px 1px 0px var(--deboss-highlight, transparent), 0px -1px 0px var(--deboss-shadow, transparent)' }}>
                       {missedContributions > 0
                         ? `The cost of waiting ${delayYears} ${lossYearLabel} isn't ${formatCurrency(missedContributions)}…`
                         : `The cost of waiting ${delayYears} ${lossYearLabel}…`
@@ -1058,7 +1058,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                 </div>
                 <div className="col-span-2 flex items-center justify-center">
                   <p className="font-display italic font-semibold leading-snug text-center tracking-wide"
-                    style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.15rem)', color: theme.colors.loss, textShadow: '0px 1px 0.7px rgba(255,255,255,0.04), 0px -1px 0.7px rgba(0,0,0,0.25)' }}>
+                    style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.15rem)', color: theme.colors.loss, textShadow: '0px 1px 0px var(--deboss-highlight, transparent), 0px -1px 0px var(--deboss-shadow, transparent)' }}>
                     {missedContributions > 0
                       ? `The cost of waiting ${delayYears} ${lossYearLabel} isn't ${formatCurrency(missedContributions)}…`
                       : `The cost of waiting ${delayYears} ${lossYearLabel}…`
@@ -1081,13 +1081,13 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       {showImmediateLine ? 'Remove Start-Now' : 'Add Start-Now'}
                     </button>
                   )}
-                  <div role="tablist" aria-label="View toggle" className="bg-black/20 p-1 rounded-xl flex text-xs font-bold shadow-inner border border-subtle">
+                  <div role="tablist" aria-label="View toggle" className="bg-surface-sunken p-1 rounded-xl flex text-xs font-bold shadow-inner border border-subtle">
                     <button
                       role="tab"
                       aria-selected={activeTab === 'chart'}
                       aria-controls="projection-tabpanel"
                       onClick={() => setActiveTab('chart')}
-                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'chart' ? { background: theme.colors.brand } : undefined}
+                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'chart' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-surface-hover shadow-none'}`} style={activeTab === 'chart' ? { background: theme.colors.brand, color: theme.colors.textOnBrand } : undefined}
                     >
                       Chart
                     </button>
@@ -1096,7 +1096,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       aria-selected={activeTab === 'table'}
                       aria-controls="projection-tabpanel"
                       onClick={() => setActiveTab('table')}
-                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-white/10 shadow-none'}`} style={activeTab === 'table' ? { background: theme.colors.brand } : undefined}
+                      className={`px-3.5 py-1.5 rounded-lg transition-all shadow-sm ${activeTab === 'table' ? 'shadow-sm' : 'text-content-subtle hover:text-content-primary hover:bg-surface-hover shadow-none'}`} style={activeTab === 'table' ? { background: theme.colors.brand, color: theme.colors.textOnBrand } : undefined}
                     >
                       Table
                     </button>
@@ -1205,12 +1205,12 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
                       )}
                     </AreaChart>
                   ) : (
-                    <div className="h-full w-full rounded-xl bg-white/5" />
+                    <div className="h-full w-full rounded-xl bg-surface-hover" />
                   )
                 ) : (
                   <div className="h-full overflow-y-auto overflow-x-auto custom-scrollbar border border-subtle rounded-xl" style={{ background: theme.colors.mutedBg }}>
                     <table className="w-full text-left text-[11px] sm:text-sm" aria-label="Projection data">
-                      <thead className="sticky top-0 font-bold text-content-subtle backdrop-blur z-10 bg-black/20">
+                      <thead className="sticky top-0 font-bold text-content-subtle backdrop-blur z-10 bg-surface-sunken">
                         <tr className="text-[12px] text-center">
                           <th className="p-2 align-middle text-center" rowSpan={2}>Age</th>
                           <th className="p-2 text-center" colSpan={3}>Contributions</th>
@@ -1362,10 +1362,10 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
               onPointerUp={() => { peekDragStartY.current = 0; }}
               onPointerCancel={() => { peekDragStartY.current = 0; }}
             >
-              <div className="pulse-glow bg-surface border-t border-white/10 shadow-2xl rounded-t-3xl px-4 pt-2 pb-2">
+              <div className="pulse-glow bg-surface border-t border-muted shadow-2xl rounded-t-3xl px-4 pt-2 pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-content-subtle">
-                    <span className="h-1 w-6 rounded-full bg-white/25" />
+                    <span className="h-1 w-6 rounded-full bg-surface-hover" />
                     Inputs
                   </div>
                   <ChevronUp size={18} className="text-accent-brand" />
@@ -1385,7 +1385,7 @@ const App = ({ onOpenSettings }: { onOpenSettings?: () => void }) => {
               <Drawer.Overlay className="fixed inset-0 bg-surface-overlay backdrop-blur-sm z-40" />
               <Drawer.Content
                 id="settings-drawer"
-                className="bg-surface-glass rounded-t-3xl border-t border-white/10 shadow-2xl fixed inset-x-0 bottom-0 z-50 flex flex-col outline-none"
+                className="bg-surface-glass rounded-t-3xl border-t border-muted shadow-2xl fixed inset-x-0 bottom-0 z-50 flex flex-col outline-none"
                 style={{ height: '85dvh' }}
               >
                 <Drawer.Title className="sr-only">Settings</Drawer.Title>

@@ -3,6 +3,13 @@
 
 ## [Unreleased]
 
+- **Brand-Surface Text Token:** New `textOnBrand` color token for text on brand-colored surfaces (buttons, segmented controls, badges) with explicit per-theme authoring and WCAG contrast utilities.
+- **Theme Lab: Source-of-Truth Fix:** Theme Lab now loads raw theme file values at open and reset instead of re-deriving, preserving authored colors exactly as the theme file specifies.
+- **Theme Lab: Mode Toggle Removed:** Dark/Light/Auto mode toggle removed; mode is always auto, derived from background luminance. Mode-dependent tokens still update correctly when bg changes.
+- **Theme Lab: Theme Switch Re-Init:** Switching themes in Settings while Theme Lab is open now re-initializes Theme Lab with the new theme's values.
+- **New Theme Added (WIP):** Introduced `Overheated Rhizome` light theme to the runtime registry for iterative design and compatibility testing.
+- **Theme Switch Reliability:** Selecting a theme now clears transient Theme Lab override state, preventing stale lab previews from masking explicit theme changes.
+- **Theme Lab Stability:** Locked-token re-derivation now runs only while Theme Lab is open, reducing hidden background churn when users are not actively editing.
 - **Starting Balances**: Added inputs to seamlessly seed existing account balances for 401(k), Roth IRA, and HSA projections compounding from year one.
 - **Dynamic Y-Axis Scaling**: Enhanced chart scale logic to calculate perfect visual intervals (supporting decimals like $3.375M) and removed premature curve compression on hidden start-now overlays.
 - **Theme Switcher Carousel**: Accordion-style theme preview carousel in Settings with expanded/folded cards, arrow navigation, responsive layout, and motion animations.

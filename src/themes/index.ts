@@ -2,9 +2,11 @@ import type { ThemeConfig } from './types';
 import { cyprusTheme } from './cyprus';
 import { playgroundTheme } from './playground';
 import { cyprusLockedTheme } from './cyprusLocked';
+import { overheatedRhizomeLightTheme } from './overheatedRhizomeLight';
 
 export const themes: Record<string, ThemeConfig> = {
   cyprus: cyprusTheme,
+  'overheated-rhizome-light': overheatedRhizomeLightTheme,
   playground: playgroundTheme,
   cyprusLocked: cyprusLockedTheme,
 };

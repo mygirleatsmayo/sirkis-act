@@ -3,6 +3,14 @@ import { themes, getSelectableThemes } from '../themes';
 import { resolveTheme } from '../themes/resolveTheme';
 
 describe('theme registry compatibility', () => {
+  it('includes new semantic surface and border tokens on all themes', () => {
+    Object.values(themes).forEach((theme) => {
+      expect(theme.colors.surfaceHover).toBeTypeOf('string');
+      expect(theme.colors.surfaceSunken).toBeTypeOf('string');
+      expect(theme.colors.borderMuted).toBeTypeOf('string');
+    });
+  });
+
   it('resolves all registered themes with capability and editor metadata', () => {
     Object.values(themes).forEach((theme) => {
       const resolved = resolveTheme(theme);
@@ -19,6 +27,13 @@ describe('theme registry compatibility', () => {
     expect(themes['cyprusLocked']).toBeDefined();
     const resolved = resolveTheme(themes['cyprusLocked']);
     expect(resolved.editor.kind).toBe('locked');
+  });
+
+  it('preserves deboss effect in Cyprus-derived clones', () => {
+    const cyprusDeboss = themes.cyprus.effects.deboss;
+    expect(cyprusDeboss).toBeDefined();
+    expect(themes.playground.effects.deboss).toEqual(cyprusDeboss);
+    expect(themes.cyprusLocked.effects.deboss).toEqual(cyprusDeboss);
   });
 });
 

@@ -13,6 +13,7 @@ const PRIMARY_KEYS = new Set<keyof ThemeColors>([
   'startNow',
   'opm',
   'textNeutral',
+  'textOnBrand',
   'textPrimary',
   'textSecondary',
   'textSubtle',

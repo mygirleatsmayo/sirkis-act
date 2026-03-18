@@ -13,6 +13,7 @@ export const cyprusLockedTheme: ThemeConfig = {
   effects: {
     blobs: cyprusTheme.effects.blobs.map((b) => ({ ...b })),
     glowColor: cyprusTheme.effects.glowColor,
+    deboss: cyprusTheme.effects.deboss ? { ...cyprusTheme.effects.deboss } : undefined,
   },
   capabilities: {
     ...cyprusTheme.capabilities,

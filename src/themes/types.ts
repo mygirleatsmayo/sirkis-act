@@ -13,12 +13,14 @@ export interface ThemeColors {
   // Borders
   borderDefault: string;      // input borders, dividers
   borderSubtle: string;       // card borders, faint separators
+  borderMuted: string;        // medium-emphasis separators and rings
 
   // Text
   textPrimary: string;        // headings, primary content
   textSecondary: string;      // secondary labels, values
   textNeutral: string;        // neutral/real-value text (neither growth nor loss)
   textSubtle: string;         // helper text, timestamps, faint labels
+  textOnBrand: string;        // text on brand-colored surfaces (buttons, segmented controls, badges)
 
   // Semantic accents
   brand: string;              // primary brand color (UI chrome, toggles, sliders)
@@ -35,6 +37,8 @@ export interface ThemeColors {
 
   // Muted surfaces
   mutedBg: string;            // subcards, table container, delayed start-age row
+  surfaceHover: string;       // hover/focus overlays on interactive surfaces
+  surfaceSunken: string;      // inset control and header surfaces
 
   // Projection-specific (decoupled from brand)
   target: string;             // Target projection badge/card color
@@ -82,6 +86,10 @@ export interface ThemeEffects {
     opacity: number;
   }[];
   glowColor: string;             // single rgba string for pulse-glow animation (CSS layers the box-shadow)
+  deboss?: {
+    highlight: string;
+    shadow: string;
+  };
 }
 
 export interface ThemeCapabilities {

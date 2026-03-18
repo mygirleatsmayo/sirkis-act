@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { applyDerivations, extractPrimaries, getModeStatics } from '../themes/derivationRules';
 import type { Primaries } from '../themes/derivationRules';
 import { cyprusTheme } from '../themes/cyprus';
-import { hexToRgb, hexToHsl, relativeLuminance } from '../utils/colorMath';
+import { hexToRgba, hexToRgb, hexToOklch, shiftOklchLightness } from '../utils/colorMath';
 
 const cyprusPrimaries: Primaries = {
   bg: '#003D3A',
@@ -16,12 +16,13 @@ const cyprusPrimaries: Primaries = {
   textPrimary: '#ffffff',
   textSecondary: '#e2e8f0',
   textSubtle: '#8ba3c3',
+  textOnBrand: '#ffffff',
   textNeutral: '#e2e8f0',
   target: '#00A499',
   selfFunded: '#00A499',
 };
 
-/** Check that two hex colors are within ±1 per RGB channel (HSL rounding tolerance) */
+/** Check that two hex colors are within ±1 per RGB channel */
 const hexCloseTo = (actual: string, expected: string) => {
   const [r1, g1, b1] = hexToRgb(actual.toLowerCase());
   const [r2, g2, b2] = hexToRgb(expected.toLowerCase());
@@ -48,14 +49,14 @@ describe('applyDerivations', () => {
   const derived = applyDerivations(cyprusPrimaries, 'dark');
 
   // ── bg derivations ──
-  it('derives bgGlass as bg +2% lightness', () => {
-    hexCloseTo(derived.colors.bgGlass, cyprusTheme.colors.bgGlass);
+  it('derives bgGlass via OKLCH +0.02 lightness', () => {
+    hexCloseTo(derived.colors.bgGlass, shiftOklchLightness(cyprusPrimaries.bg, 0.02));
   });
-  it('derives bgInput as bg -3% lightness', () => {
-    hexCloseTo(derived.colors.bgInput, cyprusTheme.colors.bgInput);
+  it('derives bgInput via OKLCH -0.03 lightness', () => {
+    hexCloseTo(derived.colors.bgInput, shiftOklchLightness(cyprusPrimaries.bg, -0.03));
   });
-  it('derives borderDefault as bg +8% lightness', () => {
-    hexCloseTo(derived.colors.borderDefault, cyprusTheme.colors.borderDefault);
+  it('derives borderDefault via OKLCH +0.08 lightness', () => {
+    hexCloseTo(derived.colors.borderDefault, shiftOklchLightness(cyprusPrimaries.bg, 0.08));
   });
 
   // ── brand derivations ──
@@ -68,18 +69,23 @@ describe('applyDerivations', () => {
   it('derives sliderAccent as copy of brand', () => {
     expect(derived.colors.sliderAccent).toBe(cyprusPrimaries.brand);
   });
-  it('derives sliderAccentHover as brand -5% lightness', () => {
-    // Derivation is a lightness shift; verify it's darker than brand
-    const [, , brandL] = hexToHsl(cyprusPrimaries.brand);
-    const [, , hoverL] = hexToHsl(derived.colors.sliderAccentHover);
-    expect(hoverL).toBeLessThan(brandL);
-    expect(brandL - hoverL).toBeCloseTo(5, 0);
+  it('derives sliderAccentHover via OKLCH -0.05 lightness', () => {
+    expect(derived.colors.sliderAccentHover).toBe(shiftOklchLightness(cyprusPrimaries.brand, -0.05));
   });
   it('derives heroLine1Color as copy of brand', () => {
     expect(derived.heroLine1Color).toBe(cyprusPrimaries.brand);
   });
   it('derives logoColor as copy of brand', () => {
     expect(derived.logoColor).toBe(cyprusPrimaries.brand);
+  });
+
+  // ── textOnBrand (standalone primary) ──
+  it('textOnBrand passes through as primary', () => {
+    expect(derived.colors.textOnBrand).toBe(cyprusPrimaries.textOnBrand);
+  });
+  it('textOnBrand is customizable per theme', () => {
+    const custom = applyDerivations({ ...cyprusPrimaries, textOnBrand: '#112233' }, 'dark');
+    expect(custom.colors.textOnBrand).toBe('#112233');
   });
 
   // ── returns derivations ──
@@ -126,6 +132,14 @@ describe('applyDerivations', () => {
   it('derives mutedBg as subtle darkening overlay in light mode', () => {
     const light = applyDerivations(cyprusPrimaries, 'light');
     expect(light.colors.mutedBg).toBe('rgba(0, 0, 0, 0.04)');
+  });
+  it('derives surfaceHover from textPrimary at alpha 0.06', () => {
+    expect(derived.colors.surfaceHover).toBe(hexToRgba(cyprusPrimaries.textPrimary, 0.06));
+  });
+  it('derives surfaceSunken with mode-aware black overlay', () => {
+    expect(derived.colors.surfaceSunken).toBe('rgba(0, 0, 0, 0.20)');
+    const light = applyDerivations(cyprusPrimaries, 'light');
+    expect(light.colors.surfaceSunken).toBe('rgba(0, 0, 0, 0.06)');
   });
 
   // ── text primaries (standalone) ──
@@ -174,6 +188,7 @@ describe('applyDerivations', () => {
     expect(derived.colors.textPrimary).toBe(cyprusPrimaries.textPrimary);
     expect(derived.colors.textSecondary).toBe(cyprusPrimaries.textSecondary);
     expect(derived.colors.textSubtle).toBe(cyprusPrimaries.textSubtle);
+    expect(derived.colors.textOnBrand).toBe(cyprusPrimaries.textOnBrand);
     expect(derived.colors.textNeutral).toBe(cyprusPrimaries.textNeutral);
     expect(derived.colors.target).toBe(cyprusPrimaries.target);
     expect(derived.colors.selfFunded).toBe(cyprusPrimaries.selfFunded);
@@ -204,32 +219,47 @@ describe('getModeStatics', () => {
 
 describe('bg-derived UI tokens', () => {
   const derived = applyDerivations(cyprusPrimaries, 'dark');
+  const hueDistance = (a: number, b: number) => {
+    const delta = Math.abs(a - b);
+    return Math.min(delta, 360 - delta);
+  };
 
-  it('derives borderSubtle based on bg luminance (dark bg → white overlay)', () => {
-    expect(relativeLuminance(cyprusPrimaries.bg)).toBeLessThan(0.5);
-    expect(derived.colors.borderSubtle).toBe('rgba(255, 255, 255, 0.06)');
+  it('derives borderSubtle from textPrimary at alpha 0.06', () => {
+    expect(derived.colors.borderSubtle).toBe(hexToRgba(cyprusPrimaries.textPrimary, 0.06));
   });
-  it('derives borderSubtle as black overlay for light bg', () => {
-    const light = applyDerivations({ ...cyprusPrimaries, bg: '#f0f0f0' }, 'light');
-    expect(light.colors.borderSubtle).toBe('rgba(0, 0, 0, 0.06)');
+  it('derives borderMuted from textPrimary at alpha 0.10', () => {
+    expect(derived.colors.borderMuted).toBe(hexToRgba(cyprusPrimaries.textPrimary, 0.10));
+  });
+  it('borderSubtle and borderMuted follow custom textPrimary', () => {
+    const custom = applyDerivations({ ...cyprusPrimaries, textPrimary: '#112233' }, 'light');
+    expect(custom.colors.borderSubtle).toBe('rgba(17, 34, 51, 0.06)');
+    expect(custom.colors.borderMuted).toBe('rgba(17, 34, 51, 0.1)');
   });
   it('derives bgOverlay from bg (darkened + alpha)', () => {
-    expect(derived.colors.bgOverlay).toMatch(/^rgba\(/);
+    expect(derived.colors.bgOverlay).toBe(
+      hexToRgba(shiftOklchLightness(cyprusPrimaries.bg, -0.30), 0.4),
+    );
   });
-  it('derives toggleOff with bg hue tint (dark mode: high lightness)', () => {
-    const [, , toggleL] = hexToHsl(derived.colors.toggleOff);
-    expect(toggleL).toBeGreaterThan(70);
-    expect(toggleL).toBeLessThan(95);
+  it('derives toggleOff with dark-mode target lightness and low chroma', () => {
+    const [toggleL, toggleC] = hexToOklch(derived.colors.toggleOff);
+    expect(toggleL).toBeCloseTo(0.75, 1);
+    expect(toggleC).toBeLessThanOrEqual(0.04);
   });
-  it('derives toggleOff with bg hue tint (light mode: medium lightness)', () => {
+  it('derives toggleOff with light-mode target lightness and low chroma', () => {
     const light = applyDerivations(cyprusPrimaries, 'light');
-    const [, , toggleL] = hexToHsl(light.colors.toggleOff);
-    expect(toggleL).toBeGreaterThan(50);
-    expect(toggleL).toBeLessThan(75);
+    const [toggleL, toggleC] = hexToOklch(light.colors.toggleOff);
+    expect(toggleL).toBeCloseTo(0.65, 1);
+    expect(toggleC).toBeLessThanOrEqual(0.04);
   });
   it('toggleOff preserves bg hue', () => {
-    const [bgH] = hexToHsl(cyprusPrimaries.bg);
-    const [toggleH] = hexToHsl(derived.colors.toggleOff);
-    expect(Math.abs(bgH - toggleH)).toBeLessThan(5);
+    const [, , bgH] = hexToOklch(cyprusPrimaries.bg);
+    const [, , toggleH] = hexToOklch(derived.colors.toggleOff);
+    expect(hueDistance(bgH, toggleH)).toBeLessThanOrEqual(5);
   });
 });
+
+// Future opt-in coverage when text derivation is activated:
+// describe('textSecondary/textSubtle OKLCH derivation', () => {
+//   it('derives textSecondary from bg at mode-specific target L', () => {});
+//   it('derives textSubtle from bg at mode-specific target L', () => {});
+// });

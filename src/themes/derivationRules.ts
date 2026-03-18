@@ -1,8 +1,8 @@
 // src/themes/derivationRules.ts
 import type { ThemeColors } from './types';
-import { shiftLightness, hexToRgba, hexToHsl, hslToHex, relativeLuminance } from '../utils/colorMath';
-// TODO: Revisit OKLCH-based derivation for textSubtle from textSecondary (perceptually uniform)
-// HSL derivation produced inconsistent results across hues; both are standalone primaries for now.
+import { shiftOklchLightness, hexToOklch, oklchToHex, hexToRgba } from '../utils/colorMath';
+// TODO: Text secondary/subtle defaults remain pass-through primaries.
+// Future opt-in OKLCH formulas are documented inline next to textSecondary/textSubtle.
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -18,6 +18,7 @@ export interface Primaries {
   textSecondary: string;
   textSubtle: string;
   textNeutral: string;
+  textOnBrand: string;
   target: string;
   selfFunded: string;
 }
@@ -44,6 +45,7 @@ export const extractPrimaries = (colors: ThemeColors): Primaries => ({
   textSecondary: colors.textSecondary,
   textSubtle: colors.textSubtle,
   textNeutral: colors.textNeutral,
+  textOnBrand: colors.textOnBrand,
   target: colors.target,
   selfFunded: colors.selfFunded,
 });
@@ -81,18 +83,23 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     textNeutral: p.textNeutral,
 
     // bg derivations
-    bgGlass: shiftLightness(p.bg, 2 * dir),
-    bgInput: shiftLightness(p.bg, -3 * dir),
-    borderDefault: shiftLightness(p.bg, 8 * dir),
+    bgGlass: shiftOklchLightness(p.bg, 0.02 * dir),
+    bgInput: shiftOklchLightness(p.bg, -0.03 * dir),
+    borderDefault: shiftOklchLightness(p.bg, 0.08 * dir),
 
     // muted surface (darker than parent glass cards)
     mutedBg: mode === 'dark' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+    surfaceHover: hexToRgba(p.textPrimary, 0.06),
+    surfaceSunken: mode === 'dark' ? 'rgba(0, 0, 0, 0.20)' : 'rgba(0, 0, 0, 0.06)',
+
+    // text on brand (standalone — OKLCH derivation deferred)
+    textOnBrand: p.textOnBrand,
 
     // brand derivations
     brandBg: hexToRgba(p.brand, 0.06),
     focusRing: p.brand,
     sliderAccent: p.brand,
-    sliderAccentHover: shiftLightness(p.brand, -5 * dir),
+    sliderAccentHover: shiftOklchLightness(p.brand, -0.05 * dir),
 
     // projection primaries + derivations
     target: p.target,
@@ -109,19 +116,21 @@ export const applyDerivations = (p: Primaries, mode: ThemeMode): DerivedColors =
     // loss derivation
     lossBg: hexToRgba(p.loss, 0.07),
 
-    // text primaries (standalone — OKLCH derivation deferred)
+    // Future OKLCH derivation (activate when themes opt in):
+    // textSecondary: deriveTextFromBg(p.bg, mode === 'dark' ? 0.82 : 0.30, 0.03),
+    // textSubtle: deriveTextFromBg(p.bg, mode === 'dark' ? 0.55 : 0.50, 0.02),
     textSecondary: p.textSecondary,
     textSubtle: p.textSubtle,
     neutralBg: hexToRgba(p.textNeutral, 0.10),
 
     // bg-derived UI tokens
-    bgOverlay: hexToRgba(shiftLightness(p.bg, -30), 0.4),
-    borderSubtle: relativeLuminance(p.bg) < 0.5
-      ? 'rgba(255, 255, 255, 0.06)'
-      : 'rgba(0, 0, 0, 0.06)',
+    bgOverlay: hexToRgba(shiftOklchLightness(p.bg, -0.30), 0.4),
+    borderSubtle: hexToRgba(p.textPrimary, 0.06),
+    borderMuted: hexToRgba(p.textPrimary, 0.10),
     toggleOff: (() => {
-      const [bgH, bgS] = hexToHsl(p.bg);
-      return hslToHex(bgH, Math.min(bgS * 0.2, 25), 73 + 10 * dir);
+      const [, bgC, bgH] = hexToOklch(p.bg);
+      const targetL = mode === 'dark' ? 0.75 : 0.65;
+      return oklchToHex(targetL, Math.min(bgC * 0.15, 0.03), bgH);
     })(),
 
     // scrollbar statics
