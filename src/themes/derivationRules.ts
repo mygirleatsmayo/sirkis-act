@@ -1,8 +1,8 @@
 // src/themes/derivationRules.ts
 import type { ThemeColors } from './types';
 import { shiftOklchLightness, hexToOklch, oklchToHex, hexToRgba } from '../utils/colorMath';
-// TODO: Revisit OKLCH-based derivation for textSubtle from textSecondary (perceptually uniform)
-// HSL derivation produced inconsistent results across hues; both are standalone primaries for now.
+// TODO: Text secondary/subtle defaults remain pass-through primaries.
+// Future opt-in OKLCH formulas are documented inline next to textSecondary/textSubtle.
 
 export type ThemeMode = 'dark' | 'light';
 

@@ -24,7 +24,7 @@ interface CarouselTheme {
   nameLine1: string;
   nameLine2: string;
   isMock: boolean;
-  colors: Pick<ThemeColors, 'bg' | 'bgGlass' | 'brand' | 'returns' | 'loss' | 'opm' | 'textNeutral' | 'textPrimary' | 'textSecondary'>;
+  colors: Pick<ThemeColors, 'bg' | 'bgGlass' | 'brand' | 'returns' | 'loss' | 'opm' | 'textNeutral' | 'textPrimary' | 'textSecondary' | 'borderMuted'>;
   branding: {
     logo: LogoComponent;
     logoColor: string;
@@ -55,6 +55,7 @@ const toCarouselTheme = (t: ThemeConfig): CarouselTheme => ({
     textNeutral: t.colors.textNeutral,
     textPrimary: t.colors.textPrimary,
     textSecondary: t.colors.textSecondary,
+    borderMuted: t.colors.borderMuted,
   },
   branding: {
     logo: t.branding.logo,
@@ -110,6 +111,7 @@ const MOCK_THEMES: CarouselTheme[] = [
       textNeutral: '#BAC2DE',
       textPrimary: '#CDD6F4',
       textSecondary: '#A6ADC8',
+      borderMuted: 'rgba(255, 255, 255, 0.15)',
     },
     branding: {
       logo: PlaceholderCatLogo,
@@ -135,6 +137,7 @@ const MOCK_THEMES: CarouselTheme[] = [
       textNeutral: '#C8A878',
       textPrimary: '#E8D4B0',
       textSecondary: '#A89070',
+      borderMuted: 'rgba(255, 255, 255, 0.15)',
     },
     branding: {
       logo: PlaceholderRootLogo,
@@ -160,6 +163,7 @@ const MOCK_THEMES: CarouselTheme[] = [
       textNeutral: '#94A3B8',
       textPrimary: '#E2E8F0',
       textSecondary: '#94A3B8',
+      borderMuted: 'rgba(255, 255, 255, 0.15)',
     },
     branding: {
       logo: PlaceholderEinsteinLogo,
