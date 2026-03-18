@@ -6,11 +6,11 @@ export const cyprusTheme: ThemeConfig = {
   name: 'Sirkis Cyprus',
   colors: {
     bg: '#003D3A',
-    bgGlass: '#004745',
-    bgInput: '#002E2B',
-    bgOverlay: 'rgba(15, 23, 42, 0.4)',
+    bgGlass: '#07423F',
+    bgInput: '#003532',
+    bgOverlay: 'rgba(0, 0, 0, 0.4)',
 
-    borderDefault: '#006560',
+    borderDefault: '#1D534F',
     borderSubtle: 'rgba(255, 255, 255, 0.06)',
     borderMuted: 'rgba(255, 255, 255, 0.10)',
 
@@ -43,8 +43,8 @@ export const cyprusTheme: ThemeConfig = {
 
     focusRing: '#00A499',
     sliderAccent: '#00A499',
-    sliderAccentHover: '#008b81',
-    toggleOff: '#cbd5e1',
+    sliderAccentHover: '#00948A',
+    toggleOff: '#A8B0AF',
     scrollbarThumb: 'rgba(148, 163, 184, 0.3)',
     scrollbarThumbHover: 'rgba(148, 163, 184, 0.5)',
   },
@@ -76,6 +76,10 @@ export const cyprusTheme: ThemeConfig = {
       { color: 'rgba(230, 195, 0, 0.05)', position: 'bottom-right', opacity: 1 },
     ],
     glowColor: 'rgba(230, 195, 0, 0.50)',
+    deboss: {
+      highlight: 'rgba(255, 255, 255, 0.12)',
+      shadow: 'rgba(0, 0, 0, 0.7)',
+    },
   },
   capabilities: {
     showLogo: true,

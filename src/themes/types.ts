@@ -86,6 +86,10 @@ export interface ThemeEffects {
     opacity: number;
   }[];
   glowColor: string;             // single rgba string for pulse-glow animation (CSS layers the box-shadow)
+  deboss?: {
+    highlight: string;
+    shadow: string;
+  };
 }
 
 export interface ThemeCapabilities {

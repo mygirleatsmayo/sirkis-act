@@ -60,6 +60,7 @@ const cloneTheme = (t: ThemeConfig): ThemeConfig => ({
     ...t.effects,
     blobs: t.effects.blobs.map(b => ({ ...b })),
     glowColor: t.effects.glowColor,
+    deboss: t.effects.deboss ? { ...t.effects.deboss } : undefined,
   },
 });
 

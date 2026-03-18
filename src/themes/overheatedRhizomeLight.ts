@@ -6,11 +6,11 @@ export const overheatedRhizomeLightTheme: ThemeConfig = {
   name: 'Overheated Rhizome',
   colors: {
     bg: '#FAF0E8',
-    bgGlass: '#F0E0CC',
-    bgInput: '#EDD8BE',
-    bgOverlay: 'rgba(24, 12, 8, 0.4)',
+    bgGlass: '#F3E9E1',
+    bgInput: '#FFFAF2',
+    bgOverlay: 'rgba(154, 145, 137, 0.4)',
 
-    borderDefault: '#D0B090',
+    borderDefault: '#DFD6CE',
     borderSubtle: 'rgba(24, 12, 8, 0.06)',
     borderMuted: 'rgba(24, 12, 8, 0.10)',
 
@@ -30,9 +30,9 @@ export const overheatedRhizomeLightTheme: ThemeConfig = {
     startNow: '#7038A8',
     loss: '#C02020',
     lossBg: 'rgba(192, 32, 32, 0.07)',
-    neutralBg: 'rgba(24, 12, 8, 0.10)',
+    neutralBg: 'rgba(96, 72, 56, 0.10)',
 
-    mutedBg: 'rgba(0, 0, 0, 0.05)',
+    mutedBg: 'rgba(0, 0, 0, 0.04)',
     surfaceHover: 'rgba(24, 12, 8, 0.06)',
     surfaceSunken: 'rgba(0, 0, 0, 0.06)',
 
@@ -43,8 +43,8 @@ export const overheatedRhizomeLightTheme: ThemeConfig = {
 
     focusRing: '#881840',
     sliderAccent: '#881840',
-    sliderAccentHover: '#6A1030',
-    toggleOff: '#B8A898',
+    sliderAccentHover: '#992A4D',
+    toggleOff: '#908F8E',
     scrollbarThumb: 'rgba(136, 24, 64, 0.30)',
     scrollbarThumbHover: 'rgba(136, 24, 64, 0.50)',
   },
@@ -75,6 +75,10 @@ export const overheatedRhizomeLightTheme: ThemeConfig = {
       { color: 'rgba(112, 64, 40, 0.05)', position: 'bottom-right', opacity: 1 },
     ],
     glowColor: 'rgba(136, 24, 64, 0.35)',
+    deboss: {
+      highlight: 'rgba(255, 255, 255, 0.25)',
+      shadow: 'rgba(0, 0, 0, 0.15)',
+    },
   },
   capabilities: {
     showLogo: true,
